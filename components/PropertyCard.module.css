@@ -1,0 +1,175 @@
+/* Exact values from the real theme's .property-card4 hover-reveal card */
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.overlayLink {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
+
+.thumb {
+  position: relative;
+  aspect-ratio: 500 / 550;
+  overflow: hidden;
+  padding: 5px;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 24px;
+}
+
+.badge {
+  position: absolute;
+  left: 16px;
+  top: 16px;
+  z-index: 1;
+  background: #1c1c1cbd;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 9px 16px;
+  border-radius: 8px;
+}
+
+/* Default corner button — visible until hover */
+.cornerBtn {
+  position: absolute;
+  right: 24px;
+  bottom: 24px;
+  z-index: 1;
+  width: 55px;
+  height: 55px;
+  border-radius: 16px;
+  background: #fff;
+  color: #1c1c1c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.4s ease, transform 0.4s ease, visibility 0.4s ease;
+}
+
+.card:hover .cornerBtn {
+  opacity: 0;
+  transform: translateY(-100%);
+  visibility: hidden;
+}
+
+/* Hover-reveal panel — slid out of view by default, glides up on hover */
+.hoverWrap {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 5px;
+  z-index: 1;
+  background: #fff;
+  border-radius: 16px 16px 0 0;
+  transform: translate(0, calc(100% + 40px));
+  transition: transform 0.4s ease, background-color 0.4s ease;
+}
+
+.card:hover .hoverWrap {
+  transform: translate(0, 0);
+  background: #1c1c1cbd;
+}
+
+.hoverBtn {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 55px;
+  height: 55px;
+  border-radius: 16px;
+  background: #1c1c1c;
+  border: 2px solid #fff;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+
+.card:hover .hoverBtn {
+  opacity: 1;
+  visibility: visible;
+}
+
+.logo {
+  padding: 5px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  justify-content: center;
+}
+
+.logo img {
+  max-width: 60px;
+  background: #d9d9d9;
+  border-radius: 10px;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  padding: 10px 20px;
+  gap: 15px;
+}
+
+.meta span p {
+  margin: -0.3em 0 0;
+  font-size: 16px;
+  font-weight: 400;
+  color: #fff;
+}
+
+.meta span strong {
+  display: block;
+  margin: 0 0 -0.3em;
+  font-size: 16px;
+  font-weight: 200;
+  color: #fff;
+}
+
+.details {
+  padding: 20px 0 0;
+}
+
+.location {
+  margin: 0 0 15px;
+  font-size: 16px;
+  color: #1c1c1c;
+}
+
+.dark .location {
+  color: #fff;
+}
+
+.title {
+  margin: 0 0 -0.1em;
+  font-size: 24px;
+  font-weight: 600;
+  color: #1c1c1c;
+}
+
+.dark .title {
+  color: #fff;
+}
+
+.title a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.title a:hover {
+  color: #fff;
+}

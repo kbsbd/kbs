@@ -1,0 +1,27 @@
+# KBS
+
+> KBS is a real estate developer building functional, design-forward homes
+> in Dhaka and Chattogram, Bangladesh.
+
+KBS designs, constructs, and hands over residential apartment buildings
+across Dhaka (Bashundhara, Gulshan, Dhanmondi, Mirpur, Uttara, Moghbazar,
+Aftabnagar, Adabor, ECB Circle) and Chattogram (North Khulshi, Lalkhanbazar).
+
+## Key pages
+
+- [Homepage](/): hero, current special offers, featured properties, company
+  overview video, customer testimonials, affiliated business units.
+- [Properties](/properties): full listing of every active property, filterable
+  by status and location.
+- Individual property pages live at /property/{slug} (e.g. /property/dew-drops)
+  and include specifications, floor plans, photo gallery, and location.
+
+## Notes for AI agents / crawlers
+
+- All property and site content is server-rendered - no JavaScript execution
+  is required to read the full page content.
+- Property data (price, size, bedrooms, bathrooms, land area, location,
+  launch/completion dates) is available in the structured JSON-LD on each
+  property page.
+- The /admin section is a private content-management area and is not part of
+  the public site; it is disallowed in robots.txt.

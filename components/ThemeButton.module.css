@@ -1,0 +1,114 @@
+/* Ported 1:1 from the real theme's .th-btn system (base + modifiers), the
+   single button style reused across the entire real site. */
+.btn {
+  position: relative;
+  z-index: 2;
+  overflow: hidden;
+  vertical-align: middle;
+  display: inline-flex;
+  border: none;
+  text-align: center;
+  background-color: #1c1c1c;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1;
+  padding: 18.5px 24px;
+  min-width: 125px;
+  border-radius: 50px;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.btn:hover,
+.btn:focus {
+  color: #fff;
+}
+
+/* The real "shine" sweep: a soft diagonal highlight that runs across the
+   button on hover. */
+.btn::before {
+  content: "";
+  position: absolute;
+  width: 100px;
+  height: 100%;
+  background-image: linear-gradient(
+    120deg,
+    rgba(255, 255, 255, 0) 30%,
+    rgba(255, 255, 255, 0.8),
+    rgba(255, 255, 255, 0) 70%
+  );
+  top: 0;
+  left: -100px;
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.btn:hover::before,
+.btn:focus::before {
+  animation: btnShine 1.5s ease-out infinite;
+}
+
+@keyframes btnShine {
+  0% {
+    left: -100px;
+  }
+  60% {
+    left: 100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+.icon {
+  position: relative;
+  width: 16px;
+  height: 14px;
+  flex: 0 0 auto;
+  transition: 0.4s all;
+}
+
+/* .th-btn.style4.th-btn-icon:after uses a 23x23 icon */
+.iconLarge {
+  width: 23px;
+  height: 20px;
+}
+
+/* Modifiers */
+.white {
+  background: #fff;
+  color: #1c1c1c;
+}
+.white:hover {
+  background: #d9d9d9;
+  color: #1c1c1c;
+}
+
+.light {
+  background: #d9d9d9;
+  color: #0d0d0c;
+  padding: 20px 32px;
+}
+.light:hover {
+  color: #1c1c1c;
+}
+
+.outline {
+  border: 1px solid #fff;
+  background: transparent;
+  color: #fff;
+}
+
+.small {
+  padding: 12px 24px;
+  min-width: 0;
+}
+
+.full {
+  width: 100%;
+}

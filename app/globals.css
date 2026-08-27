@@ -1,0 +1,349 @@
+@import "./theme.css";
+@import "./property.css";
+
+/* ---------------------------------------------------------------------
+   Design tokens — copied verbatim from the original theme's :root block
+   (wp-content/.../assets/css/style.css). No values invented or renamed.
+   --------------------------------------------------------------------- */
+:root {
+  --theme-color: #1C1C1C;
+  --theme-color2: #d9d9d9;
+  --theme-color3: #423A2F;
+  --title-color: #0D0D0C;
+  --title-dark: #364440;
+  --body-color: #6E7070;
+  --smoke-color: #C0CDD1;
+  --smoke-color2: #666666;
+  --smoke-color3: #C2D6C2;
+  --smoke-color4: #F5F7F9;
+  --black-color: #000000;
+  --black-color2: #1B1B1B;
+  --black-color3: #1A1A1A;
+  --black-color4: #23343E;
+  --gray-color: #DDE8DD;
+  --gray-color2: #E5E4E9;
+  --gray-color3: #F3F5F6;
+  --gray-color4: #EEF4EE;
+  --gray-color5: #E4DFD8;
+  --gray-color6: #968D81;
+  --gray-color7: #ECE5DB;
+  --white-color: #ffffff;
+  --light-color: #d9d9d9;
+  --light-color2: #FBF5EC;
+  --yellow-color: #E2B93B;
+  --success-color: #27AE60;
+  --error-color: #EB5757;
+  --th-border-color: #CDCDCD;
+  --th-border-color2: #E6E6E6;
+  --title-font: var(--font-outfit), "Outfit", sans-serif;
+  --body-font: var(--font-outfit), "Outfit", sans-serif;
+  --icon-font: "FontAwesome";
+  --main-container: 1296px;
+  --container-gutters: 24px;
+  --section-space: 50px;
+  --section-space-mobile: 40px;
+  --section-title-space: 30px;
+  --ripple-ani-duration: 5s;
+  --th-body-background: #ffffff;
+  --nm-black-one: #1C1C1C;
+  --nm-black-two: #262626;
+  --nm-black-glass-one: #1c1c1cbd;
+  --nm-text-light: #eaeaea;
+  --nm-text-dark: #30302F;
+}
+
+@media (max-width: 1399px) {
+  :root {
+    --main-container: 1250px;
+  }
+}
+
+/* ---------------------------------------------------------------------
+   Icon font. The original loads Font Awesome 6.5.1 (all.min.css ~104 KB
+   + ~400 KB of webfonts) purely for a handful of glyphs. These are the
+   same Font Awesome 6.5.1 outlines, subset to only the codepoints this
+   site references — 4.6 KB across three files, so it costs the page
+   nothing measurable. Glyph shapes are byte-identical to the original's.
+
+   THREE faces, not one, under Font Awesome's real family names. A single
+   merged face cannot serve both `fas` and `far`: they are different
+   outlines at the SAME codepoint, so whichever one got subset would win
+   for both. That is a visible bug, not a rounding error — the newsletter
+   button's `far fa-paper-plane` is 16px wide in the original and was
+   rendering as the 12px solid glyph, shifting the whole row.
+
+   Using the real family names also means computed `font-family` now
+   matches the original exactly, instead of reading "FontAwesome".
+   --------------------------------------------------------------------- */
+@font-face {
+  font-family: "Font Awesome 6 Free";
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url("/fonts/fa-solid-subset.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Font Awesome 6 Free";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/fa-regular-subset.woff2") format("woff2");
+}
+
+/* FA 6.5.1's v4-compatibility alias. The theme's :root sets
+   --icon-font:"FontAwesome" and uses it on pseudo-elements (the drawer and
+   sidemenu link chevrons, content:"\\f105"). Font Awesome's own all.min.css
+   declares four @font-face blocks under that legacy family name; the first —
+   the unrestricted one — maps it to fa-solid-900, so \\f105 resolves to the
+   SOLID angle-right. Without this block the family does not exist, the
+   pseudo-elements fall back to a text font, and every menu link renders a
+   tofu box instead of a chevron.
+
+   Only the solid alias is ported: \\f105 is the sole codepoint this site
+   reaches through --icon-font, and the other three aliases are scoped by
+   unicode-range to codepoints nothing here uses. */
+@font-face {
+  font-family: "FontAwesome";
+  font-style: normal;
+  font-weight: normal;
+  font-display: swap;
+  src: url("/fonts/fa-solid-subset.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Font Awesome 6 Brands";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/fa-brands-subset.woff2") format("woff2");
+}
+
+.fa,
+.fas,
+.fa-solid,
+.far,
+.fa-regular,
+.fab,
+.fa-brands {
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  display: var(--fa-display, inline-block);
+  font-style: normal;
+  font-variant: normal;
+  line-height: 1;
+  text-rendering: auto;
+}
+
+/* FA6 picks the face by family + weight, exactly as upstream does. */
+.fa, .fas, .fa-solid { font-family: "Font Awesome 6 Free"; font-weight: 900; }
+.far, .fa-regular { font-family: "Font Awesome 6 Free"; font-weight: 400; }
+.fab, .fa-brands { font-family: "Font Awesome 6 Brands"; font-weight: 400; }
+
+.fa-angle-right::before { content: "\f105"; }
+.fa-angle-down::before { content: "\f107"; }
+.fa-chevron-down::before { content: "\f078"; }
+.fa-times::before,
+.fa-xmark::before { content: "\f00d"; }
+.fa-arrow-up-right-from-square::before { content: "\f08e"; }
+.fa-cart-shopping::before { content: "\f07a"; }
+.fa-comment-dots::before { content: "\f4ad"; }
+.fa-copyright::before { content: "\f1f9"; }
+.fa-microphone::before { content: "\f130"; }
+.fa-paper-plane::before { content: "\f1d8"; }
+.fa-phone::before { content: "\f095"; }
+.fa-play::before { content: "\f04b"; }
+.fa-star::before { content: "\f005"; }
+.fa-user::before { content: "\f007"; }
+.fa-arrow-right-long::before { content: "\f178"; }
+.fa-search::before,
+.fa-magnifying-glass::before { content: "\f002"; }
+.fa-facebook-f::before { content: "\f39e"; }
+.fa-instagram::before { content: "\f16d"; }
+.fa-linkedin-in::before { content: "\f0e1"; }
+.fa-whatsapp::before { content: "\f232"; }
+.fa-youtube::before { content: "\f167"; }
+.fa-plus::before { content: "\2b"; }
+.fa-map-marker-alt::before,
+.fa-location-dot::before { content: "\f3c5"; }
+.fa-pencil-ruler::before { content: "\f5ae"; }
+.fa-building::before { content: "\f1ad"; }
+.fa-th::before { content: "\f00a"; }
+.fa-ruler-combined::before { content: "\f546"; }
+.fa-bed::before { content: "\f236"; }
+.fa-bath::before { content: "\f2cd"; }
+.fa-calendar-check::before { content: "\f274"; }
+.fa-calendar::before { content: "\f133"; }
+.fa-download::before { content: "\f019"; }
+
+/* Bootstrap 5.0.0-beta1 utility the original markup uses inside menu links */
+.ms-2 {
+  margin-left: 0.5rem !important;
+}
+
+/* ---------------------------------------------------------------------
+   Base. Mirrors the original theme's html/body rules exactly:
+   body{font-family:var(--body-font);font-size:16px;font-weight:300;
+        color:var(--body-color);line-height:26px;overflow-x:hidden;
+        background:var(--th-body-background)}
+   --------------------------------------------------------------------- */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  scroll-behavior: auto !important;
+}
+
+body {
+  font-family: var(--body-font);
+  font-size: 16px;
+  font-weight: 300;
+  color: var(--body-color);
+  line-height: 26px;
+  overflow-x: hidden;
+  background: var(--th-body-background);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------------------------------------------------------------------
+   Reboot. The original page loads Bootstrap 5.0.0-beta1 before the theme;
+   these are the only global rules from that pair the header depends on.
+   bootstrap: *,::after,::before{box-sizing:border-box}
+              button,input,optgroup,select,textarea{margin:0;font-family:inherit;
+                 font-size:inherit;line-height:inherit}
+              button,select{text-transform:none}
+              button:not(:disabled){cursor:pointer}
+   theme:     a{color:var(--theme-color);text-decoration:none;outline:0;transition:all ease .4s}
+              a:hover{color:var(--title-color)}
+              button{transition:all ease .4s}
+              ul{list-style-type:disc}
+   --------------------------------------------------------------------- */
+*,
+*::after,
+*::before {
+  box-sizing: border-box;
+}
+
+/* bootstrap reboot, in the original's order. Without the margin reset a <ul>
+   keeps the UA's 1em margin-top, which collapses with the preceding heading's
+   margin and silently adds 8px — it showed up as the About page's mission
+   column being 8px tall everywhere below it. */
+ul {
+  padding-left: 2rem;
+}
+
+ol,
+ul,
+dl {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+ol ol,
+ul ul,
+ol ul,
+ul ol {
+  margin-bottom: 0;
+}
+
+ul {
+  list-style-type: disc;
+}
+
+a {
+  color: var(--theme-color);
+  text-decoration: none;
+  outline: 0;
+  transition: all ease 0.4s;
+  cursor: pointer;
+}
+
+a:hover {
+  color: var(--title-color);
+}
+
+button,
+input,
+optgroup,
+select,
+textarea {
+  margin: 0;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+button,
+select {
+  text-transform: none;
+}
+
+[type="button"],
+[type="reset"],
+[type="submit"],
+button {
+  -webkit-appearance: button;
+}
+
+[type="button"]:not(:disabled),
+[type="reset"]:not(:disabled),
+[type="submit"]:not(:disabled),
+button:not(:disabled) {
+  cursor: pointer;
+}
+
+button {
+  transition: all ease 0.4s;
+}
+
+/* bootstrap reboot: img,svg{vertical-align:middle}
+   theme:  img:not([draggable]),embed,object,video{max-width:100%;height:auto}
+           img{border:none;max-width:100%}
+   The vertical-align is load-bearing: without it every inline <img> adds a
+   baseline descender gap and cards grow a few px taller than the original. */
+img,
+svg {
+  vertical-align: middle;
+}
+
+img:not([draggable]),
+embed,
+object,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+img {
+  border: none;
+  max-width: 100%;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 1rem;
+  z-index: 10000;
+  background: #fff;
+  color: #111;
+  padding: 0.75rem 1.25rem;
+  border-radius: 6px;
+  font-weight: 600;
+  transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+  top: 1rem;
+}

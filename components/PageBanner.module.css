@@ -1,0 +1,107 @@
+/* Exact values from the real (unscoped) .breadcumb-wrapper + About page's
+   .bti-about-breadcrumb / .bti-about-title-override overrides */
+.banner {
+  position: relative;
+  padding: 100px clamp(1.25rem, 5vw, 4rem);
+  background-color: #dde8dd;
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+@media (max-width: 767px) {
+  .banner {
+    min-height: 450px;
+    padding-top: 130px;
+  }
+}
+
+@media (max-width: 575px) {
+  .banner {
+    min-height: 200px;
+  }
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(28, 28, 28, 0.7);
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+  max-width: 900px;
+}
+
+.content h1 {
+  color: #fff;
+  font-size: 48px;
+  font-weight: 200;
+  line-height: 1.12;
+  margin: -0.2em 0 -0.18em;
+}
+
+@media (max-width: 575px) {
+  .content h1 {
+    font-size: 30px;
+  }
+}
+
+.content p {
+  color: rgba(255, 255, 255, 0.75);
+  margin: 1.5rem 0 0;
+  font-size: 1.05rem;
+}
+
+/* Exact values from .bti-nrb-page/.bti-landowner-page .breadcumb-wrapper */
+.banner.dark {
+  padding: 0;
+  min-height: 620px;
+  align-items: center;
+  background-position: center bottom;
+}
+
+.banner.dark .overlay {
+  background: linear-gradient(
+    90deg,
+    rgba(28, 28, 28, 0.94),
+    rgba(28, 28, 28, 0.72),
+    rgba(28, 28, 28, 0.25)
+  );
+}
+
+.banner.dark .content {
+  max-width: 780px;
+  text-align: left;
+}
+
+.banner.dark .content h1 {
+  font-size: clamp(42px, 6vw, 82px);
+  font-weight: 200;
+  line-height: 1.12;
+  margin: 0 0 20px;
+}
+
+.banner.dark .content p {
+  color: hsla(0, 0%, 100%, 0.84);
+  font-size: 18px;
+  line-height: 1.75;
+  max-width: 690px;
+}
+
+@media (max-width: 991px) {
+  .banner.dark {
+    min-height: 560px;
+  }
+}
+
+@media (max-width: 575px) {
+  .banner.dark {
+    padding-top: 60px;
+  }
+}

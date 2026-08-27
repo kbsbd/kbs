@@ -1,0 +1,97 @@
+/* Real theme: .project-area-1 has its own data-bg-src image
+   (business-logo-bg.webp) with a [data-overlay=title] dark (--title-color)
+   overlay - this section stays dark even though the rest of the homepage
+   sections around it are light. */
+.section {
+  position: relative;
+  background-image: url("/wp-content/themes/bti-new-properties-special/assets/img/demo/business-logo-bg.webp");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+.section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: #0d0d0c;
+  opacity: 0.5;
+}
+
+.section > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Exact values from the real .nm-business-container .shadow-title */
+.eyebrowWrap {
+  text-align: right;
+}
+
+.eyebrow {
+  display: block;
+  font-size: clamp(40px, 6vw, 85px);
+  font-weight: 500;
+  line-height: 1;
+  text-transform: uppercase;
+  margin: -0.67em 0 -0.48em;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 1px hsla(0, 0%, 100%, 0.2);
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: #161616;
+  border-radius: 16px;
+  padding: 1.25rem;
+  height: 100%;
+}
+
+.imageWrap {
+  position: relative;
+  flex: 1;
+  aspect-ratio: 1 / 1;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #000;
+}
+
+.image {
+  object-fit: cover;
+  opacity: 0.55;
+}
+
+.description {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  color: #fff;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  opacity: 0;
+  background: rgba(0, 0, 0, 0.55);
+  transition: opacity 0.25s ease;
+}
+
+.imageWrap:hover .description {
+  opacity: 1;
+}
+
+.link {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #fff;
+  color: #111;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

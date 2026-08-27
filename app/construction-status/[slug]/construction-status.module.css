@@ -1,0 +1,249 @@
+/* Exact values ported from .bti-construction-single-page in the real theme CSS */
+
+.main {
+  background: #1c1c1c;
+  min-height: 100dvh;
+}
+
+.container {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 clamp(1rem, 4vw, 2rem);
+}
+
+.hero {
+  position: relative;
+  padding: 90px 0 56px;
+  background:
+    radial-gradient(circle at top right, rgba(238, 210, 110, 0.17), transparent 36%),
+    linear-gradient(180deg, #1c1c1c 0%, #202020 100%);
+  overflow: hidden;
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.028) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: linear-gradient(180deg, #000, transparent 85%);
+  pointer-events: none;
+}
+
+.hero .container {
+  position: relative;
+  z-index: 2;
+}
+
+@media (max-width: 575px) {
+  .hero {
+    padding: 120px 0 42px;
+  }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 420px;
+  gap: 44px;
+  align-items: center;
+}
+
+@media (max-width: 991px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.hero h1 {
+  color: #fff;
+  font-size: clamp(38px, 4vw, 68px);
+  font-weight: 200;
+  line-height: 1.12;
+  margin: 0;
+  word-break: break-word;
+}
+
+.location {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: hsla(0, 0%, 100%, 0.82);
+  margin: 18px 0 0;
+  font-style: italic;
+}
+
+.location svg {
+  color: #eed26e;
+}
+
+.metaRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 34px;
+  max-width: 640px;
+}
+
+@media (max-width: 575px) {
+  .metaRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+.metaCard {
+  background: #242424;
+  border: 1px solid hsla(0, 0%, 100%, 0.1);
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 20px 52px rgba(0, 0, 0, 0.22);
+}
+
+.metaCard span {
+  display: block;
+  color: hsla(0, 0%, 100%, 0.58);
+  font-size: 14px;
+  margin-bottom: 7px;
+}
+
+.metaCard strong {
+  display: block;
+  color: #fff;
+  font-size: 21px;
+  line-height: 1.2;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 30px;
+  color: #eed26e;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.visual {
+  border-radius: 30px;
+  overflow: hidden;
+  border: 1px solid hsla(0, 0%, 100%, 0.1);
+  background: #242424;
+  box-shadow: 0 34px 80px rgba(0, 0, 0, 0.34);
+}
+
+.visual img {
+  width: 100%;
+  display: block;
+}
+
+@media (max-width: 991px) {
+  .visual img {
+    height: 460px;
+    object-fit: cover;
+  }
+}
+
+@media (max-width: 575px) {
+  .visual img {
+    height: 390px;
+  }
+}
+
+.content {
+  padding: 66px 0 50px;
+  background: #1c1c1c;
+}
+
+@media (max-width: 575px) {
+  .content {
+    padding: 20px 0 50px;
+  }
+}
+
+.contentShell {
+  background: #242424;
+  border: 1px solid hsla(0, 0%, 100%, 0.1);
+  border-radius: 30px;
+  padding: 34px;
+  box-shadow: 0 26px 72px rgba(0, 0, 0, 0.22);
+}
+
+@media (max-width: 575px) {
+  .contentShell {
+    padding: 22px;
+    border-radius: 22px;
+  }
+}
+
+.contentHead {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid hsla(0, 0%, 100%, 0.1);
+}
+
+@media (max-width: 575px) {
+  .contentHead {
+    display: block;
+  }
+}
+
+.contentHead h2 {
+  color: #fff;
+  font-size: 26px;
+  font-weight: 200;
+  margin: 0;
+}
+
+.contentHead p {
+  margin: 7px 0 0;
+  color: hsla(0, 0%, 100%, 0.58);
+}
+
+.progress {
+  overflow-x: auto;
+  color: hsla(0, 0%, 100%, 0.82);
+  white-space: pre-wrap;
+  line-height: 1.8;
+  font-size: 0.95rem;
+}
+
+.empty {
+  color: hsla(0, 0%, 100%, 0.58);
+}
+
+.progress :global(table) {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: collapse;
+  overflow: hidden;
+  border-radius: 20px;
+  color: hsla(0, 0%, 100%, 0.82);
+  background: #1f1f1f;
+}
+
+.progress :global(th),
+.progress :global(td) {
+  padding: 15px 18px;
+  border: 1px solid hsla(0, 0%, 100%, 0.08);
+  vertical-align: middle;
+  color: hsla(0, 0%, 100%, 0.82);
+}
+
+.progress :global(th),
+.progress :global(tr:first-child td) {
+  background: rgba(238, 210, 110, 0.14);
+  color: #fff;
+  font-weight: 800;
+}
+
+.progress :global(tr:nth-child(even) td) {
+  background: hsla(0, 0%, 100%, 0.035);
+}
+
+.progress :global(tr:hover td) {
+  background: rgba(238, 210, 110, 0.08);
+}

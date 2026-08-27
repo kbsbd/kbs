@@ -1,0 +1,724 @@
+/* =====================================================================
+   Header — ported 1:1 from the WordPress original.
+   Source rules (wp-content/.../assets/css/style.css) are quoted above
+   each block so every value here is traceable. Nothing added.
+   ===================================================================== */
+
+/* .th-header{position:relative;z-index:41}
+   .header-layout1{position:relative;left:0;right:0;top:0;background:var(--theme-color)}
+   .nm-menu-bar-home{position:fixed;background:rgba(0,0,0,0)}
+   -> nm-menu-bar-home is declared later with equal specificity, so the
+      header is FIXED and fully TRANSPARENT (never a gradient, never solid). */
+.header {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 41;
+  background: rgba(0, 0, 0, 0);
+}
+
+/* @media(min-width:1600px){.header-layout1{--main-container:1604px}}
+   The global .container in theme.css reads this. */
+@media (min-width: 1600px) {
+  .header {
+    --main-container: 1604px;
+  }
+}
+
+/* .sticky-wrapper{transition:.4s ease-in-out} */
+.stickyWrapper {
+  transition: 0.4s ease-in-out;
+}
+
+/* .sticky-wrapper.sticky{position:fixed;top:0;right:0;left:0;
+      background-color:var(--theme-color);filter:drop-shadow(0 0 10px rgba(0,0,0,.07));
+      animation:stickyAni .4s ease-in-out}
+   .header-layout1 .sticky-wrapper.sticky{background:var(--nm-black-glass-one)}  <- wins */
+.sticky {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  background: var(--nm-black-glass-one);
+  filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.07));
+  animation: stickyAni 0.4s ease-in-out;
+}
+
+@keyframes stickyAni {
+  0% {
+    transform: translate3d(0, -40px, 0) scaleY(0.8);
+    opacity: 0.7;
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scaleY(1);
+    opacity: 1;
+  }
+}
+
+/* .th-header .menu-area{position:relative;z-index:2} */
+.menuArea {
+  position: relative;
+  z-index: 2;
+}
+
+/* Late overrides at the end of the theme sheet win over the earlier
+   15px/60px rules:
+     .header-logo img{height:80px!important;max-height:80px!important;width:auto!important}
+     .header-logo{padding-top:5px!important;padding-bottom:5px!important}
+     .sticky .header-logo img{height:45px!important} */
+.headerLogo {
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+/* The original slot is an 80px-tall logo image that snaps to 45px once the
+   header goes sticky, so the bar is 90px tall and collapses to 55px.
+   The KBS wordmark occupies exactly that box and scales by the same ratio. */
+.headerLogo a {
+  display: flex;
+  align-items: center;
+  height: 80px;
+  font-weight: 700;
+  font-size: 32px;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  color: var(--white-color);
+  text-decoration: none;
+}
+
+.sticky .headerLogo a {
+  height: 45px;
+  font-size: 18px;
+}
+
+/* .col-auto.d-none.d-xl-block */
+.navCol {
+  display: none;
+}
+
+@media (min-width: 1200px) {
+  .navCol {
+    display: block;
+  }
+}
+
+/* nav.main-menu.d-lg-inline-block.mr-20 */
+.mainMenu {
+  display: block;
+  margin-right: 20px;
+}
+
+@media (min-width: 992px) {
+  .mainMenu {
+    display: inline-block;
+  }
+}
+
+/* .main-menu ul{margin:0;padding:0}
+   .main-menu ul li{list-style-type:none;display:inline-block;position:relative}
+   .main-menu>ul>li{margin:0 22px}  @media(max-width:1500px){margin:0 13px}
+   .main-menu ul li:last-child{margin-right:0!important}
+   .main-menu ul li:first-child{margin-left:0!important} */
+.mainMenu ul {
+  margin: 0;
+  padding: 0;
+}
+
+.mainMenu ul li {
+  list-style-type: none;
+  display: inline-block;
+  position: relative;
+  margin: 0 22px;
+}
+
+@media (max-width: 1500px) {
+  .mainMenu > ul > li {
+    margin: 0 13px;
+  }
+}
+
+.mainMenu ul li:last-child {
+  margin-right: 0 !important;
+}
+
+.mainMenu ul li:first-child {
+  margin-left: 0 !important;
+}
+
+/* .main-menu a{display:block;position:relative;font-weight:400;font-size:16px;
+      font-family:var(--body-font);color:var(--white-color)}
+   .main-menu>ul>li>a{padding:15px 0}
+   .main-menu a:hover{color:var(--theme-color2)} */
+.mainMenu a {
+  display: block;
+  position: relative;
+  font-weight: 400;
+  font-size: 16px;
+  font-family: var(--body-font);
+  color: var(--white-color);
+  padding: 15px 0;
+  text-decoration: none;
+}
+
+.mainMenu a:hover {
+  color: var(--theme-color2);
+}
+
+/* div.header-button.d-lg-inline-block
+   .header-button{height:100%;display:flex;align-items:center;gap:24px}
+   .d-lg-inline-block{display:inline-block!important}  <- wins >=992 */
+.headerButtonInline {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+@media (max-width: 991px) {
+  .headerButtonInline {
+    margin: 22px 0;
+  }
+}
+
+@media (min-width: 992px) {
+  .headerButtonInline {
+    display: inline-block;
+  }
+}
+
+/* button.simple-icon.sideMenuInfo.sidebar-btn
+   .simple-icon{border:none;background-color:rgba(0,0,0,0);padding:0;font-size:24px;position:relative}
+   .header-layout1 .simple-icon{margin-left:35px}
+   @media(max-width:1299px){.header-layout1 .simple-icon{margin-left:0}} */
+.simpleIcon {
+  border: none;
+  background-color: rgba(0, 0, 0, 0);
+  padding: 0;
+  font-size: 24px;
+  position: relative;
+  margin-left: 35px;
+  cursor: pointer;
+}
+
+@media (max-width: 1299px) {
+  .simpleIcon {
+    margin-left: 0;
+  }
+}
+
+/* div.header-button.d-flex.d-lg-none — mobile toggle column
+   @media(max-width:991px){.header-button{margin:22px 0}} */
+.headerButtonMobile {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  gap: 24px;
+}
+
+@media (max-width: 991px) {
+  .headerButtonMobile {
+    margin: 22px 0;
+  }
+}
+
+@media (min-width: 992px) {
+  .headerButtonMobile {
+    display: none !important;
+  }
+}
+
+/* .th-menu-toggle{width:56px;height:56px;padding:0;font-size:20px;border:none;
+      background-color:rgba(0,0,0,0);color:var(--white-color);display:inline-block;border-radius:5px}
+   .th-menu-toggle.sidebar-btn{width:auto}
+   .th-menu-toggle.sidebar-btn:hover{background:rgba(0,0,0,0)} */
+.thMenuToggleBar {
+  width: auto;
+  height: 56px;
+  padding: 0;
+  font-size: 20px;
+  border: none;
+  background-color: rgba(0, 0, 0, 0);
+  color: var(--white-color);
+  display: inline-block;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.thMenuToggleBar:hover {
+  background: rgba(0, 0, 0, 0);
+}
+
+/* .sidebar-btn .line{display:block;height:1px;width:32px;background:var(--white-color);
+      margin:auto;transition:.4s}
+   .sidebar-btn .line:not(:last-child){margin-bottom:9px}
+   .sidebar-btn .line:nth-child(2){width:20px}
+   .sidebar-btn:hover .line:nth-child(2){width:32px} */
+.line {
+  display: block;
+  height: 1px;
+  width: 32px;
+  background: var(--white-color);
+  margin: auto;
+  transition: 0.4s;
+}
+
+.line:not(:last-child) {
+  margin-bottom: 9px;
+}
+
+.line:nth-child(2) {
+  width: 20px;
+}
+
+.simpleIcon:hover .line:nth-child(2),
+.thMenuToggleBar:hover .line:nth-child(2) {
+  width: 32px;
+}
+
+/* =====================================================================
+   Mobile menu — div.th-menu-wrapper.onepage-nav
+   ===================================================================== */
+
+/* .th-menu-wrapper{position:fixed;top:0;left:0;bottom:0;background-color:rgba(0,0,0,.6);
+      z-index:999999;width:100%;height:100%;transition:all ease .8s;opacity:0;visibility:hidden} */
+.thMenuWrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 999999;
+  width: 100%;
+  height: 100%;
+  transition: all ease 0.8s;
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* .th-menu-wrapper.th-body-visible{opacity:1;visibility:visible} */
+.thBodyVisible {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* .th-menu-wrapper .th-menu-area{width:100%;max-width:310px;background-color:var(--theme-color);
+      border-right:3px solid var(--theme-color);height:100%;position:relative;left:-110%;
+      opacity:0;visibility:hidden;transition:all ease 1s;z-index:1}
+   + .text-center */
+.thMenuArea {
+  width: 100%;
+  max-width: 310px;
+  background-color: var(--theme-color);
+  border-right: 3px solid var(--theme-color);
+  height: 100%;
+  position: relative;
+  left: -110%;
+  opacity: 0;
+  visibility: hidden;
+  transition: all ease 1s;
+  z-index: 1;
+  text-align: center;
+  /* 15px + the 33px close button + 15px, so the menu clears it. See
+     .thMenuClose below. */
+  padding-top: 63px;
+}
+
+.thBodyVisible .thMenuArea {
+  left: 0;
+  opacity: 1;
+  visibility: visible;
+}
+
+@media (max-width: 400px) {
+  .thMenuArea {
+    width: 100%;
+    max-width: 270px;
+  }
+}
+
+/* .th-menu-wrapper .th-menu-toggle{border:none;font-size:18px;position:absolute;right:-16.5px;
+      top:25px;padding:0;line-height:35px;width:33px;height:33px;z-index:1;
+      color:var(--white-color);background-color:var(--theme-color);border-radius:50%}
+   :hover{background-color:var(--white-color);color:var(--theme-color)} */
+/* DEVIATION (requested): the original hangs this circle half off the panel
+   (right:-16.5px), where it lands on the scroll track and over the first
+   link. Moved fully inside the top-right corner instead; .thMenuArea gains a
+   matching padding-top so the link list starts below it. Size, colour and
+   hover are untouched. */
+.thMenuClose {
+  border: none;
+  font-size: 18px;
+  position: absolute;
+  right: 15px;
+  top: 15px;
+  padding: 0;
+  line-height: 35px;
+  width: 33px;
+  height: 33px;
+  z-index: 1;
+  color: var(--white-color);
+  background-color: var(--theme-color);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.thMenuClose:hover {
+  background-color: var(--white-color);
+  color: var(--theme-color);
+}
+
+/* .th-mobile-menu{overflow-y:scroll;max-height:calc(100vh - 200px);padding-bottom:40px;text-align:left}
+   theme style.css: @media(max-width:575px){.th-mobile-menu{max-height:calc(100vh)}} */
+.thMobileMenu {
+  overflow-y: scroll;
+  max-height: calc(100vh - 200px);
+  padding-bottom: 40px;
+  text-align: left;
+}
+
+@media (max-width: 575px) {
+  .thMobileMenu {
+    max-height: calc(100vh);
+  }
+}
+
+/* .th-mobile-menu ul{margin:0;padding:0;margin-top:20px}
+   .th-mobile-menu>ul{padding:0 30px}
+   @media(max-width:400px){.th-mobile-menu>ul{padding:0 20px}} */
+.thMobileMenu ul {
+  margin: 0;
+  margin-top: 20px;
+  padding: 0 30px;
+}
+
+@media (max-width: 400px) {
+  .thMobileMenu ul {
+    padding: 0 20px;
+  }
+}
+
+/* .th-mobile-menu ul li{border-bottom:1px solid var(--th-border-color);list-style-type:none}
+   .th-mobile-menu>ul>li:last-child{border-bottom:none} */
+.thMobileMenu ul li {
+  border-bottom: 1px solid var(--th-border-color);
+  list-style-type: none;
+}
+
+.thMobileMenu > ul > li:last-child {
+  border-bottom: none;
+}
+
+/* .th-mobile-menu ul li a{display:block;position:relative;padding:12px 0;line-height:1.4;
+      font-size:16px;text-transform:capitalize;color:var(--theme-color2);padding-left:18px}
+   .th-mobile-menu ul li a:before{content:"\f105";font-family:var(--icon-font);
+      position:absolute;left:0;top:12px;margin-right:10px;display:inline-block} */
+.thMobileMenu ul li a {
+  display: block;
+  position: relative;
+  padding: 12px 0;
+  padding-left: 18px;
+  line-height: 1.4;
+  font-size: 16px;
+  text-transform: capitalize;
+  color: var(--theme-color2);
+  text-decoration: none;
+}
+
+.thMobileMenu ul li a::before {
+  content: "\f105";
+  font-family: var(--icon-font);
+  position: absolute;
+  left: 0;
+  top: 12px;
+  margin-right: 10px;
+  display: inline-block;
+}
+
+/* The original markup carries a trailing, empty
+   div.header-button.d-flex.d-lg-none > button.th-menu-toggle.sidebar-btn
+   inside .th-mobile-menu. `.th-menu-wrapper .th-menu-toggle` pulls it OUT
+   of flow (position:absolute, 33px tall) and `.th-menu-toggle.sidebar-btn`
+   (declared later) collapses it to width:auto -> 0, so it paints nothing
+   and contributes nothing but its wrapper's 22px margins. */
+.thMobileMenuFoot {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  gap: 24px;
+}
+
+@media (max-width: 991px) {
+  .thMobileMenuFoot {
+    margin: 22px 0;
+  }
+}
+
+@media (min-width: 992px) {
+  .thMobileMenuFoot {
+    display: none !important;
+  }
+}
+
+.thMobileMenuFootBtn {
+  border: none;
+  font-size: 18px;
+  position: absolute;
+  right: -16.5px;
+  top: 25px;
+  padding: 0;
+  line-height: 35px;
+  width: auto;
+  height: 33px;
+  z-index: 1;
+  color: var(--white-color);
+  background-color: var(--theme-color);
+  border-radius: 50%;
+}
+
+/* =====================================================================
+   Sidemenu — div.sidemenu-wrapper.sidemenu-info.d-none.d-lg-block
+   ===================================================================== */
+
+/* .sidemenu-wrapper{position:fixed;z-index:99999;right:0;top:0;height:100%;width:0;
+      background-color:rgba(0,0,0,.75);opacity:0;visibility:hidden;transition:all ease .8s} */
+.sidemenuWrapper {
+  position: fixed;
+  z-index: 99999;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 0;
+  background-color: rgba(0, 0, 0, 0.75);
+  opacity: 0;
+  visibility: hidden;
+  transition: all ease 0.8s;
+  display: none;
+}
+
+@media (min-width: 992px) {
+  .sidemenuWrapper {
+    display: block;
+  }
+}
+
+/* .sidemenu-wrapper.show{opacity:1;visibility:visible;width:100%;transition:all ease .8s} */
+.sidemenuShow {
+  opacity: 1;
+  visibility: visible;
+  width: 100%;
+  transition: all ease 0.8s;
+}
+
+/* .sidemenu-wrapper .sidemenu-content{background-color:var(--theme-color);width:350px;
+      margin-left:auto;padding:80px 30px;height:110vh;overflow:scroll;position:relative;
+      right:-500px;cursor:auto;transition-delay:1s;transition:right ease 1s;background-size:contain}
+   NOTE: the `transition` shorthand comes AFTER `transition-delay`, so it
+   resets the delay to 0s. The panel slides immediately — no 1s pause. */
+.sidemenuContent {
+  background-color: var(--theme-color);
+  background-size: contain;
+  width: 350px;
+  margin-left: auto;
+  padding: 80px 30px;
+  height: 110vh;
+  overflow: scroll;
+  position: relative;
+  right: -500px;
+  cursor: auto;
+  transition: right ease 1s;
+}
+
+.sidemenuShow .sidemenuContent {
+  right: 0;
+  opacity: 1;
+  visibility: visible;
+}
+
+.sidemenuContent::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 1px rgba(0, 0, 0, 0.1);
+  background-color: #f5f5f5;
+}
+
+.sidemenuContent::-webkit-scrollbar {
+  width: 2px;
+  background-color: #f5f5f5;
+}
+
+/* @media(max-width:575px){.sidemenu-wrapper{background:rgba(0,0,0,0)}
+      .sidemenu-wrapper .sidemenu-content{width:100%}} */
+@media (max-width: 575px) {
+  .sidemenuWrapper {
+    background: rgba(0, 0, 0, 0);
+  }
+
+  .sidemenuContent {
+    width: 100%;
+  }
+}
+
+/* .sidemenu-wrapper .closeButton{display:inline-block;width:50px;height:50px;line-height:48px;
+      font-size:24px;padding:0;position:absolute;top:20px;right:20px;
+      background-color:var(--theme-color);border:3px solid var(--white-color);
+      color:var(--white-color);border-radius:50%;transform:rotate(0);transition:all ease .4s}
+   :hover{transform:rotate(90deg)} */
+.closeButton {
+  display: inline-block;
+  width: 50px;
+  height: 50px;
+  line-height: 48px;
+  font-size: 24px;
+  padding: 0;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background-color: var(--theme-color);
+  border: 3px solid var(--white-color);
+  color: var(--white-color);
+  border-radius: 50%;
+  transform: rotate(0);
+  transition: all ease 0.4s;
+  cursor: pointer;
+}
+
+.closeButton:hover {
+  transform: rotate(90deg);
+}
+
+/* .sidemenu-wrapper .widget{padding:0;border:none;background-color:rgba(0,0,0,0);
+      display:flex;align-items:center;height:100%} */
+/* base .widget{margin-bottom:24px;position:relative;border-radius:8px;border:0}
+   is NOT reset by the sidemenu rule, only its padding/background are. */
+.widget {
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  position: relative;
+  background-color: rgba(0, 0, 0, 0);
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+/* .footer-widget{margin-bottom:50px}
+   .footer-widget,.footer-widget .widget{padding:0;border:none;padding-bottom:0;
+      background-color:rgba(0,0,0,0);box-shadow:none}
+   This 50px is what shifts the vertically-centred block up by 25px. */
+.footerWidget {
+  margin-bottom: 50px;
+  padding: 0;
+  padding-bottom: 0;
+  border: none;
+  background-color: rgba(0, 0, 0, 0);
+  box-shadow: none;
+}
+
+/* h3.widget_title.text-light inside .footer-widget:
+   .footer-widget .widget_title{max-width:270px;font-weight:600;font-size:24px;
+      font-family:var(--body-font);text-transform:capitalize;margin:-.12em 0 30px 0;padding:0}
+   .footer-widget .widget_title:after,:before{display:none}
+   .text-light{color:var(--light-color)!important}  <- theme overrides bootstrap */
+.widgetTitle {
+  position: relative;
+  max-width: 270px;
+  color: var(--light-color);
+  font-weight: 600;
+  font-size: 24px;
+  font-family: var(--body-font);
+  line-height: 1em;
+  text-transform: none; /* late override: .widget_title{text-transform:none!important} */
+  margin: -0.12em 0 30px 0;
+  padding: 0;
+}
+
+/* @media(max-width:767px){.footer-widget .widget_title{margin-bottom:35px}} */
+@media (max-width: 767px) {
+  .widgetTitle {
+    margin-bottom: 35px;
+  }
+}
+
+/* .widget_nav_menu ul{list-style:none;padding:0;margin:0}
+   .footer-widget.widget_nav_menu .menu{margin-top:-4px;margin-bottom:-4px} */
+.menu {
+  list-style: none;
+  padding: 0;
+  margin: -4px 0;
+}
+
+/* .widget_nav_menu li{display:block;position:relative} */
+.menu li {
+  display: block;
+  position: relative;
+}
+
+/* .widget_nav_menu a{display:block;background-color:rgba(0,0,0,0);margin:0;
+      font-size:16px;line-height:1.313;border-radius:0;transition:.4s ease-in-out}
+   .footer-widget.widget_nav_menu a{font-size:16px;font-weight:400;padding:0 0 0 22px;
+      margin-bottom:21px;font-family:var(--body-font);display:block;max-width:100%;
+      width:max-content;padding-right:0;background-color:rgba(0,0,0,0);
+      border-bottom:none;position:relative}
+   .sidemenu-wrapper .menu li>a{color:var(--theme-color2)}  <- wins
+   .sidemenu-wrapper .menu li>a:hover{color:var(--white-color)}
+   .footer-widget...li:last-child a{margin-bottom:0} */
+.menu li > a {
+  display: block;
+  position: relative;
+  background-color: rgba(0, 0, 0, 0);
+  margin: 0 0 21px 0;
+  padding: 0 0 0 22px;
+  font-size: 16px;
+  font-weight: 400;
+  font-family: var(--body-font);
+  line-height: 1.313;
+  max-width: 100%;
+  width: max-content;
+  border-bottom: none;
+  border-radius: 0;
+  color: var(--theme-color2);
+  text-decoration: none;
+  transition: 0.4s ease-in-out;
+}
+
+/* @media(max-width:1199px){.footer-widget.widget_nav_menu a{margin-bottom:16px}} */
+@media (max-width: 1199px) {
+  .menu li > a {
+    margin-bottom: 16px;
+  }
+}
+
+.menu li:last-child > a {
+  margin-bottom: 0;
+}
+
+.menu li > a:hover {
+  color: var(--white-color);
+}
+
+/* .widget_nav_menu a::before{content:"\f105";position:absolute;left:0;top:21px;
+      font-family:var(--icon-font);font-weight:300;transition:.4s ease-in-out}
+   .footer-widget.widget_nav_menu a:before{font-weight:400;left:0;top:0;opacity:1;
+      transform:translateY(0);font-size:16px;border:none}
+   .sidemenu-wrapper .menu li>a::before{color:var(--theme-color2)}  <- wins
+   .footer-widget.widget_nav_menu a:hover:before{color:var(--theme-color2);left:5px} */
+.menu li > a::before {
+  content: "\f105";
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-family: var(--icon-font);
+  font-weight: 400;
+  font-size: 16px;
+  opacity: 1;
+  transform: translateY(0);
+  border: none;
+  background-color: rgba(0, 0, 0, 0);
+  color: var(--theme-color2);
+  transition: 0.4s ease-in-out;
+}
+
+.menu li > a:hover::before {
+  color: var(--theme-color2);
+  left: 5px;
+}

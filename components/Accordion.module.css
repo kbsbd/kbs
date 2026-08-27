@@ -1,0 +1,45 @@
+.accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.item {
+  background: #161616;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.header {
+  margin: 0;
+}
+
+.trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: transparent;
+  border: 0;
+  padding: 1.1rem 1.35rem;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.icon {
+  flex: 0 0 auto;
+  font-size: 1.3rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1;
+}
+
+.body {
+  padding: 0 1.35rem 1.25rem;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.6;
+  font-size: 0.92rem;
+}

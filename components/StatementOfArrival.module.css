@@ -1,0 +1,60 @@
+.section {
+  background: #1c1c1c;
+  padding: clamp(2rem, 5vw, 4rem) 0;
+}
+
+.wrap {
+  position: relative;
+  max-width: 1600px;
+  margin: 0 auto;
+  aspect-ratio: 16 / 8;
+  overflow: hidden;
+}
+
+.trigger {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  background: #000;
+}
+
+.thumb {
+  object-fit: cover;
+}
+
+.playBtn {
+  position: absolute;
+  top: 50%;
+  left: clamp(1.5rem, 6vw, 5rem);
+  transform: translateY(-50%);
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #fff;
+  color: #111;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.heading {
+  position: absolute;
+  left: clamp(1.5rem, 6vw, 5rem);
+  bottom: 1.5rem;
+  margin: 0;
+  color: #fff;
+  font-size: clamp(1.5rem, 3.5vw, 2.5rem);
+  font-weight: 500;
+  pointer-events: none;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+}

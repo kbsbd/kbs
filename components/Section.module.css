@@ -1,0 +1,36 @@
+/* Real theme: these sections carry no explicit bg-* class in the source
+   markup, so they inherit the light --th-body-background (#fff) with dark
+   heading/title text (--title-color: #0D0D0C) - not a dark section. */
+.section {
+  padding: clamp(3rem, 6vw, 6rem) 0;
+  color: #6e7070;
+  background: #fff;
+}
+
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 clamp(1rem, 4vw, 2rem);
+}
+
+.headingRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.title {
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  font-weight: 300;
+  margin: 0 0 0.5rem;
+  color: #0d0d0c;
+}
+
+.subtitle {
+  margin: 0;
+  color: #6e7070;
+  font-size: 18px;
+}

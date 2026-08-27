@@ -1,0 +1,183 @@
+.main {
+  background: #1c1c1c;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 clamp(1rem, 4vw, 2rem);
+}
+
+.introSection {
+  padding: 8rem 0 3rem;
+}
+
+.pageTitle {
+  color: #fff;
+  text-align: center;
+  font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+  font-weight: 500;
+  margin: 0 0 2.5rem;
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Exact values from the real .about-contact-grid.style2 */
+.infoCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  background: #1c1c1c;
+  border-radius: 8px;
+  padding: 1.75rem;
+  transition: box-shadow 0.3s ease;
+}
+
+.infoCard:hover {
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+}
+
+.infoIcon {
+  flex: 0 0 auto;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1px solid hsla(0, 0%, 100%, 0.2);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.infoCard h6 {
+  margin: 0 0 8px;
+  color: #fff;
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.infoCard p {
+  margin: 0 0 0.25rem;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.9rem;
+}
+
+.infoCard a {
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+}
+
+.infoCard a:hover {
+  text-decoration: underline;
+}
+
+.formSection {
+  position: relative;
+  padding: 4rem 0 6rem;
+  background-size: cover;
+  background-position: center;
+}
+
+.formOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.formCard {
+  position: relative;
+  z-index: 1;
+  background: #fff;
+  border-radius: 16px;
+  padding: 2.5rem;
+  max-width: 560px;
+}
+
+.formCard h2 {
+  margin: 0 0 1.5rem;
+  color: #111;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form input,
+.form textarea {
+  background: #f5f5f5;
+  border: 1px solid #e2e2e2;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  color: #111;
+  font-size: 0.95rem;
+  font-family: inherit;
+}
+
+.form input:focus,
+.form textarea:focus {
+  outline: 2px solid #111;
+  outline-offset: 1px;
+}
+
+
+.mapCard {
+  position: relative;
+  z-index: 1;
+  max-width: 1200px;
+  margin: 3rem clamp(1rem, 4vw, 2rem) 0;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  background: #161616;
+  border-radius: 16px;
+  padding: 1.5rem clamp(1rem, 4vw, 2rem);
+}
+
+@media (min-width: 1264px) {
+  .mapCard {
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+.mapThumb {
+  flex: 0 0 auto;
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #000;
+}
+
+.mapThumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.mapCard h4 {
+  margin: 0 0 0.35rem;
+  color: #fff;
+  font-size: 1rem;
+}
+
+.mapCard p {
+  margin: 0 0 0.5rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+}
+
+.mapCard a {
+  color: #fff;
+  font-weight: 600;
+  text-decoration: underline;
+}

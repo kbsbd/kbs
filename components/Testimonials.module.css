@@ -1,0 +1,65 @@
+/* Real theme: the homepage's testimonial heading carries an explicit
+   "text-white" class in the source markup (unlike Special Offer/Featured
+   Properties, which don't) - confirming this section is dark, unlike its
+   neighbors. No explicit background rule was found for the section itself,
+   so it uses the confirmed --theme-color (#1C1C1C) used elsewhere in the
+   theme for dark sections. */
+.section {
+  background: #1c1c1c;
+}
+
+.title {
+  color: #fff !important;
+}
+
+/* .testi-card.style7.nm-testi-card-home - a subtle translucent white
+   border/padding frame around each review image, 10px radius. */
+.card {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border: 1px solid hsla(0, 0%, 100%, 0.2);
+  padding: 15px;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  background: transparent;
+}
+
+.image {
+  object-fit: cover;
+}
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.lightboxClose {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.5rem;
+  background: transparent;
+  border: 0;
+  color: #fff;
+  font-size: 2.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.lightboxImageWrap {
+  position: relative;
+  width: min(90vw, 900px);
+  height: min(80vh, 700px);
+}
+
+.lightboxImage {
+  object-fit: contain;
+}

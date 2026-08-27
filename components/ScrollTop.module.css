@@ -1,0 +1,50 @@
+/* Exact values from the real .scroll-top */
+
+.scrollTop {
+  position: fixed;
+  right: 30px;
+  bottom: 30px;
+  height: 50px;
+  width: 50px;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50px;
+  border: 0;
+  background: transparent;
+  z-index: 10000;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(45px);
+  transition: all 300ms linear;
+}
+
+.scrollTop.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.progressCircle {
+  position: absolute;
+  inset: 0;
+  color: #1c1c1c;
+  border-radius: 50%;
+  background: #d9d9d9;
+  transform: rotate(-90deg);
+}
+
+.progressCircle path {
+  fill: none;
+  stroke: #1c1c1c;
+  stroke-width: 20px;
+  transition: stroke-dashoffset 300ms linear;
+}
+
+.arrow {
+  position: relative;
+  z-index: 1;
+  color: #1c1c1c;
+}

@@ -1,0 +1,62 @@
+/* Exact values from the real .nm-fixed-actions (with its live overrides applied) */
+
+/* .nm-fixed-actions{position:fixed;right:0;top:50%;transform:translateY(-50%);
+      z-index:999;display:flex;flex-direction:column;gap:5px}
+   .nm-fixed-actions{top:40%!important}   <- later rule, wins over the 50%
+
+   The translateY(-50%) was missing here, which parked the stack half its own
+   height too low at every width. Restored.
+
+   DEVIATION (requested): the original also carries
+     @media(max-width:767px){.nm-fixed-actions{top:auto!important;right:auto!important;
+        left:10px!important;bottom:30px!important;transform:none!important}}
+   which drops the stack into the bottom-left corner on phones, where it
+   collided with the search bar. That override is deliberately NOT ported, so
+   mobile keeps the desktop position: pinned right, vertically centred. */
+.wrap {
+  position: fixed;
+  right: 0;
+  top: 40%;
+  transform: translateY(-50%);
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.action {
+  width: 65px;
+  height: 55px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(6px);
+  border-radius: 10px;
+  border: 1px solid hsla(0, 0%, 100%, 0.25);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.action svg {
+  margin-bottom: 0;
+}
+
+.action:hover {
+  background: rgba(0, 0, 0, 0.5);
+  transform: translateX(-3px);
+  color: #fff;
+}
+
+.action:nth-child(3):hover {
+  background: rgba(37, 211, 102, 0.9);
+}
+
+/* The original hides the third button on small phones:
+     @media(max-width:575px){.nm-fixed-actions .nm-action:last-child{display:none}}
+   Deliberately NOT ported — all three stay visible at every width, as
+   requested. */

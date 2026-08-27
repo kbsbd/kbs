@@ -1,0 +1,321 @@
+/* Exact values ported from .bti-landowner-page in the real theme CSS */
+
+.section {
+  background: #1c1c1c;
+  padding: 50px 0;
+}
+
+.dark {
+  background: #242424;
+}
+
+@media (max-width: 991px) {
+  .section {
+    padding: 70px 0;
+  }
+}
+
+.container {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 clamp(1rem, 4vw, 2rem);
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: center;
+}
+
+.reverse {
+  direction: rtl;
+}
+
+.reverse > * {
+  direction: ltr;
+}
+
+@media (max-width: 860px) {
+  .infoGrid,
+  .contactGrid {
+    grid-template-columns: 1fr;
+  }
+  .reverse {
+    direction: ltr;
+  }
+}
+
+.infoImage {
+  width: 100%;
+  min-height: 520px;
+  object-fit: cover;
+  border-radius: 28px;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.35);
+  display: block;
+}
+
+@media (max-width: 575px) {
+  .infoImage {
+    min-height: auto;
+    object-fit: contain;
+  }
+}
+
+.videoThumb {
+  position: relative;
+  display: block;
+  border-radius: 28px;
+  overflow: hidden;
+  background: #111;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.35);
+}
+
+/* .bti-landowner-page .landowner-process-video img{width:100%;display:block} */
+.videoThumb img {
+  width: 100%;
+  display: block;
+}
+
+/* @media(max-width:767px){.bti-landowner-page .landowner-process-video img{
+      min-height:310px!important}}
+   Verbatim: no object-fit, so the thumbnail does stretch on narrow phones —
+   that is what the original does. */
+@media (max-width: 767px) {
+  .videoThumb img {
+    min-height: 310px;
+  }
+}
+
+/* .bti-landowner-page .landowner-video-play{position:absolute;left:50%;top:50%;
+      transform:translate(-50%,-50%);width:82px;height:82px;border-radius:50%;
+      display:inline-flex;align-items:center;justify-content:center;
+      background:var(--theme-color2);color:var(--theme-color);font-size:28px;
+      box-shadow:0 18px 42px rgba(0,0,0,.32)}
+
+   TRAP: `var(--theme-color2)` does NOT resolve to the site-wide #d9d9d9 here.
+   The landowner page re-declares a whole token set on `.bti-landowner-page`:
+     .bti-landowner-page{--theme-color:#1C1C1C;--theme-color2:#EED26E;
+        --title-color:#FFFFFF;--body-color:rgba(255,255,255,.72);
+        --smoke-color4:#1C1C1C;--dark-surface:#242424;--dark-surface2:#2A2A2A;
+        --dark-border:rgba(255,255,255,.10)}
+   so the play circle is GOLD, not grey. Verified against the original's
+   computed style: rgb(238,210,110). The clone has no `.bti-landowner-page`
+   token block yet, so the literal is used here — replace it with
+   var(--theme-color2) once the rest of this page is ported and the block
+   exists.
+
+   The icon was an 18px inline SVG; the original is a 28px `fa-solid fa-play`.
+   This is NOT the homepage's .play-btn.style4 (a translucent dark circle with
+   white icon and two ripples) — the two play buttons differ by design; only
+   the click behaviour is shared. */
+.videoThumb span {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 82px;
+  height: 82px;
+  border-radius: 50%;
+  background: #eed26e;
+  color: var(--theme-color);
+  font-size: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.32);
+}
+
+.heading {
+  color: #fff;
+  font-size: clamp(1.6rem, 4vw, 3rem);
+  font-weight: 200;
+  line-height: 1.12;
+  margin: 0 0 1rem;
+}
+
+.headingCenter {
+  composes: heading;
+  text-align: center;
+  margin: 0 auto 2.5rem;
+  max-width: 700px;
+}
+
+.text {
+  color: rgba(255, 255, 255, 0.72);
+  line-height: 1.75;
+  margin: 0 0 1rem;
+}
+
+.reviewCard {
+  position: relative;
+  background: #1f1f1f;
+  border: 1px solid hsla(0, 0%, 100%, 0.1);
+  border-radius: 24px;
+  padding: 2rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.18);
+}
+
+.reviewCard p {
+  color: #fff;
+  font-size: 16px;
+  line-height: 1.75;
+  font-weight: 300;
+  margin: 0;
+  flex: 1;
+}
+
+.stars {
+  color: #eed26e;
+  letter-spacing: 2px;
+  font-size: 0.9rem;
+}
+
+.reviewProfile {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: auto;
+}
+
+.reviewProfile div {
+  display: flex;
+  flex-direction: column;
+}
+
+.reviewProfile strong {
+  color: #fff;
+  font-size: 1.05rem;
+}
+
+.reviewProfile span {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.85rem;
+}
+
+.avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #1c1c1c;
+  color: #eed26e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  flex: 0 0 auto;
+}
+
+.faqWrap {
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+.contactGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: start;
+}
+
+.contactCards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.contactCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  color: #fff;
+  margin-bottom: 18px;
+}
+
+.contactIcon {
+  color: #eed26e;
+  margin-top: 4px;
+  flex: 0 0 auto;
+}
+
+.contactCard > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.contactCard strong {
+  color: #fff;
+  font-size: 1.05rem;
+}
+
+.contactCard span {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.85rem;
+}
+
+.formCard {
+  position: relative;
+  background: #1f1f1f;
+  border: 1px solid hsla(0, 0%, 100%, 0.1);
+  border-radius: 30px;
+  padding: 2.5rem;
+  overflow: hidden;
+}
+
+.formCard::before {
+  content: "";
+  position: absolute;
+  width: 360px;
+  height: 360px;
+  background: rgba(238, 210, 110, 0.14);
+  border-radius: 50%;
+  right: -120px;
+  top: -120px;
+}
+
+.form {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 480px) {
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form input,
+.form textarea {
+  background: #1c1c1c;
+  border: 1px solid hsla(0, 0%, 100%, 0.1);
+  border-radius: 14px;
+  padding: 14px 18px;
+  min-height: 56px;
+  color: #fff;
+  font-size: 0.95rem;
+  font-family: inherit;
+  width: 100%;
+}
+
+.form input::placeholder,
+.form textarea::placeholder {
+  color: hsla(0, 0%, 100%, 0.52);
+}
+
+.form textarea {
+  min-height: 130px;
+}

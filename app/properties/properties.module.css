@@ -1,0 +1,75 @@
+/* Exact values from the real theme's .property-card2 (used on the
+   properties archive/listing page). The whole page is dark (body.bg-theme),
+   and cards share the exact same --theme-color shade as the page - they're
+   separated visually by the photo + badge, not a background contrast. */
+.grid {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 3rem clamp(1rem, 4vw, 2rem) 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.75rem;
+}
+
+.empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: #d9d9d9;
+  padding: 3rem 0;
+}
+
+.card {
+  border-radius: 14px;
+  overflow: hidden;
+  background: #1c1c1c;
+}
+
+.thumb {
+  position: relative;
+  aspect-ratio: 500 / 550;
+  overflow: hidden;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.card:hover .image {
+  transform: scale(1.05);
+}
+
+.badge {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: rgba(28, 28, 28, 0.74);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 9px 16px;
+  border-radius: 8px;
+}
+
+.body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 20px 10px;
+}
+
+.body h3 {
+  margin: 0 0 13px;
+  color: #d9d9d9;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.body p {
+  margin: 0;
+  color: #d9d9d9;
+  font-size: 16px;
+}

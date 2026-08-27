@@ -1,0 +1,106 @@
+/* Ported 1:1 from the real theme's .nm-project-search styling. */
+.form {
+  position: relative;
+  z-index: 3;
+  width: fit-content;
+  margin: 0 auto;
+  padding: 10px 30px;
+  background: #fff;
+  border: 1px solid #d1d1d1;
+  border-radius: 5px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: nowrap;
+}
+
+.field {
+  min-width: 140px;
+}
+
+.selectWrap {
+  position: relative;
+}
+
+.selectWrap select {
+  width: 100%;
+  padding: 10px 32px 10px 12px;
+  color: #1c1c1c;
+  font-size: 14px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+}
+
+.caret {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  z-index: 2;
+  color: #1c1c1c;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+/* Exact values: the real button is .th-btn (border-radius:50px pill) with
+   .nm-search-form-sbt-btn overriding only padding/margin. */
+.submit {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 50px;
+  background: #1c1c1c;
+  color: #fff;
+  padding: 12px 24px;
+  margin-left: 20px;
+  font-weight: 500;
+  font-size: 16px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.3s ease;
+}
+
+.submit:hover {
+  background: #000;
+}
+
+/* Real theme: on mobile the bar loses its border/float and becomes a plain
+   inline strip with the two dropdowns and the button on a single row via
+   CSS grid, not stacked. */
+@media (max-width: 767px) {
+  .form {
+    width: 95%;
+    padding: 20px 10px;
+    border: 0;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: nowrap;
+  }
+
+  .field {
+    min-width: 0;
+  }
+
+  .submit {
+    min-width: 54px;
+    margin-left: 0;
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .submit span {
+    display: none;
+  }
+}

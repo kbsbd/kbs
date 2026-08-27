@@ -1,0 +1,61 @@
+.section {
+  background: #1c1c1c;
+  padding: clamp(3rem, 6vw, 5rem) 0;
+}
+
+/* Real theme: #mission-vision-sec has its own explicit "bg-light" class
+   (--light-color: #d9d9d9) - a light island inside the otherwise dark
+   (body.bg-theme) About page. */
+.sectionLight {
+  background: #d9d9d9;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 clamp(1rem, 4vw, 2rem);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: center;
+}
+
+@media (max-width: 860px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.heading {
+  color: #fff;
+  font-size: 1.6rem;
+  font-weight: 500;
+  margin: 1.5rem 0 0.75rem;
+}
+
+.heading:first-child {
+  margin-top: 0;
+}
+
+.text {
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.7;
+  margin: 0 0 1rem;
+}
+
+.headingDark {
+  color: #1c1c1c;
+}
+
+.textDark {
+  color: #1c1c1c;
+}
+
+.imageOnly img {
+  width: 100%;
+  border-radius: 16px;
+  display: block;
+}

@@ -1,0 +1,79 @@
+/* Real theme: this section is wrapped in .bti-landowner-page on the About
+   page too (a reusable dark/gold "themed container" class, not literally
+   the landowner page), which redefines --theme-color/--title-color dark
+   with a gold (#EED26E) accent - so this stays dark even though the
+   sections around it on the homepage are light. */
+.section {
+  background: #1c1c1c;
+  padding: clamp(3rem, 6vw, 6rem) 0;
+}
+
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 clamp(1rem, 4vw, 2rem);
+}
+
+.heading {
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  font-weight: 300;
+  margin: 0 auto 2rem;
+  color: #fff;
+  text-align: center;
+  max-width: 700px;
+}
+
+.card {
+  background: #161616;
+  border-radius: 16px;
+  padding: 1.5rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.stars {
+  color: #eed26e;
+  letter-spacing: 0.15em;
+  font-size: 0.9rem;
+}
+
+.text {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.6;
+  flex: 1;
+}
+
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  flex: 0 0 auto;
+}
+
+.name {
+  margin: 0;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.role {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.8rem;
+}
