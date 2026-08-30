@@ -44,7 +44,10 @@ const FIELDS = [
 ];
 
 export default async function AdminTestimonialsPage() {
-  const testimonials = await getTestimonials({ includeInactive: true });
+  const testimonials = (await getTestimonials({ includeInactive: true })).map((row) => ({
+    ...row,
+    _meta: row.width && row.height ? `${row.width}×${row.height}` : null,
+  }));
 
   return (
     <>
@@ -75,7 +78,6 @@ export default async function AdminTestimonialsPage() {
           confirmLabel="Remove this review from the slider?"
           primaryKey="alt_text"
           secondaryKey="image_url"
-          renderMeta={(row) => (row.width && row.height ? `${row.width}×${row.height}` : null)}
         />
       </div>
     </>

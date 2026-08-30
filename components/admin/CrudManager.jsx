@@ -225,7 +225,6 @@ export default function CrudManager({
   primaryKey = "label",
   secondaryKey = "href",
   confirmLabel = "Delete this permanently?",
-  renderMeta,
 }) {
   const [editingId, setEditingId] = useState(null);
 
@@ -247,7 +246,9 @@ export default function CrudManager({
                     {inactive && <span className={styles.badge}>hidden</span>}
                   </strong>
                   <span className={styles.itemSub}>{row[secondaryKey]}</span>
-                  {renderMeta && <span className={styles.itemMeta}>{renderMeta(row)}</span>}
+                  {row._meta != null && row._meta !== "" && (
+                    <span className={styles.itemMeta}>{row._meta}</span>
+                  )}
                 </div>
 
                 <div className={styles.itemActions}>

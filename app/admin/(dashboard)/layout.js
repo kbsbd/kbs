@@ -6,6 +6,10 @@ import styles from "../admin.module.css";
 
 export const metadata = { robots: { index: false, follow: false } };
 
+// The dashboard is auth-gated and per-user: it must run on every request, never
+// be prerendered at build time.
+export const dynamic = "force-dynamic";
+
 export default async function DashboardLayout({ children }) {
   const supabase = await createClient();
 

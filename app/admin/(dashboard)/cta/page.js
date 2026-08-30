@@ -43,7 +43,10 @@ const FIELDS = [
 ];
 
 export default async function AdminCtaPage() {
-  const buttons = await getCtaButtons({ includeInactive: true });
+  const buttons = (await getCtaButtons({ includeInactive: true })).map((row) => ({
+    ...row,
+    _meta: CTA_ICON_LABELS[row.icon] || row.icon,
+  }));
 
   return (
     <>
@@ -72,7 +75,6 @@ export default async function AdminCtaPage() {
           addLabel="Add button"
           emptyLabel="No CTA buttons yet."
           confirmLabel="Delete this button?"
-          renderMeta={(row) => CTA_ICON_LABELS[row.icon] || row.icon}
         />
       </div>
     </>

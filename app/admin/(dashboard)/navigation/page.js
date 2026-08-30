@@ -48,7 +48,10 @@ const PLACEMENT_LABELS = {
 };
 
 export default async function AdminNavigationPage() {
-  const links = await getNavLinks();
+  const links = (await getNavLinks()).map((row) => ({
+    ...row,
+    _meta: PLACEMENT_LABELS[row.placement] || row.placement,
+  }));
 
   return (
     <>
@@ -70,7 +73,6 @@ export default async function AdminNavigationPage() {
           addLabel="Add link"
           emptyLabel="No navigation links yet."
           confirmLabel="Remove this link from the menu?"
-          renderMeta={(row) => PLACEMENT_LABELS[row.placement] || row.placement}
         />
       </div>
     </>
