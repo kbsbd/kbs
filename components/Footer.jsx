@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Newsletter from "./Newsletter";
+import { getSiteSettings } from "@/lib/data/site";
 
 /*
  * footer.footer-wrapper.footer-layout5.footer-default — mirrors the
@@ -26,9 +27,10 @@ import Newsletter from "./Newsletter";
  * .row.nm-footer-wrapper (which supplies `row-gap:10px`), not separate
  * columns. Each carries `text-center` itself.
  *
- * The brand name in the address and copyright follows this project's KBS
- * rebrand (the same decision as the header wordmark); the original reads
- * "bti" in both places.
+ * The address, the copyright line, the newsletter heading and the brand name
+ * are no longer literals here — they come from site_settings so the admin can
+ * change them. The fallbacks in lib/data/site.js reproduce exactly what this
+ * file used to hardcode.
  */
 
 const SOCIAL_ICONS = {
@@ -36,22 +38,41 @@ const SOCIAL_ICONS = {
   linkedin: "fab fa-linkedin-in",
   instagram: "fab fa-instagram",
   youtube: "fab fa-youtube",
+  twitter: "fab fa-x-twitter",
+  x: "fab fa-x-twitter",
+  tiktok: "fab fa-tiktok",
+  whatsapp: "fab fa-whatsapp",
+  pinterest: "fab fa-pinterest-p",
+  threads: "fab fa-threads",
 };
 
-export default function Footer({ footerLinks, socialLinks }) {
+export default async function Footer({ footerLinks, socialLinks }) {
+  const settings = await getSiteSettings();
   const year = new Date().getFullYear();
+
+  const siteName = settings.site_name || "KBS";
+  const address = settings.footer_address || settings.contact_address;
+
+  const links = (footerLinks || []).filter((l) => l.is_active !== false);
+  const socials = (socialLinks || []).filter((s) => s.is_active !== false);
+
+  /* An admin-set copyright line replaces the whole sentence; {year} in it is
+     substituted so "© {year} KBS" stays correct next January. */
+  const customCopyright = settings.footer_copyright
+    ? settings.footer_copyright.replace(/\{year\}/g, String(year))
+    : null;
 
   return (
     <footer className="footer-wrapper footer-layout5 footer-default">
       <div className="container">
         <div className="footer-wrap space pb-0">
-          <Newsletter />
+          <Newsletter heading={settings.newsletter_heading} />
 
           <div className="widget-area">
             <div className="row justify-content-center nm-footer-wrapper">
               <div className="footer-links text-center">
                 <ul className="">
-                  {footerLinks.map((link) => {
+                  {links.map((link) => {
                     const isExternal = /^https?:\/\//.test(link.href);
                     /* the original writes `Video <i …>` — that literal space
                        is ~4.4px of real width, so it must be explicit here */
@@ -64,7 +85,7 @@ export default function Footer({ footerLinks, socialLinks }) {
                       link.label
                     );
                     return (
-                      <li key={link.label}>
+                      <li key={link.id || link.label}>
                         {isExternal ? (
                           <a
                             href={link.href}
@@ -82,30 +103,34 @@ export default function Footer({ footerLinks, socialLinks }) {
                 </ul>
               </div>
 
-              <div className="details text-center">
-                <small className="text-light mb-0">
-                  KBS Celebration Point, Plot: 3 &amp; 5, Road: 113/A, Gulshan-2, Dhaka-1212
-                </small>
-              </div>
+              {address && (
+                <div className="details text-center">
+                  <small className="text-light mb-0">{address}</small>
+                </div>
+              )}
 
               <div className="th-social style5 text-center">
-                {socialLinks.map((social) => (
+                {socials.map((social) => (
                   <a
-                    key={social.platform}
+                    key={social.id || social.platform}
                     href={social.url}
                     target="_blank"
                     rel="noopener"
-                    aria-label={social.platform}
+                    aria-label={social.label || social.platform}
                   >
-                    <i className={SOCIAL_ICONS[social.platform] || ""} />
+                    <i className={SOCIAL_ICONS[social.platform] || "fa-solid fa-link"} />
                   </a>
                 ))}
               </div>
 
               <div className="copyright-wrap bg-theme">
                 <p className="copyright-text text-center">
-                  Copyright <i className="fa-solid fa-copyright" /> {year}{" "}
-                  <Link href="/">KBS</Link>, all rights reserved.
+                  {customCopyright || (
+                    <>
+                      Copyright <i className="fa-solid fa-copyright" /> {year}{" "}
+                      <Link href="/">{siteName}</Link>, all rights reserved.
+                    </>
+                  )}
                 </p>
               </div>
             </div>

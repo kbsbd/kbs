@@ -1,24 +1,35 @@
-/* Exact values from the real .nm-fixed-actions (with its live overrides applied) */
+/* The floating CTA stack.
+   ==========================================================================
+   Desktop values come from the real .nm-fixed-actions (with its live
+   overrides applied):
 
-/* .nm-fixed-actions{position:fixed;right:0;top:50%;transform:translateY(-50%);
-      z-index:999;display:flex;flex-direction:column;gap:5px}
-   .nm-fixed-actions{top:40%!important}   <- later rule, wins over the 50%
+     .nm-fixed-actions{position:fixed;right:0;top:50%;transform:translateY(-50%);
+        z-index:999;display:flex;flex-direction:column;gap:5px}
+     .nm-fixed-actions{top:40%!important}   <- later rule, wins over the 50%
 
-   The translateY(-50%) was missing here, which parked the stack half its own
-   height too low at every width. Restored.
+   Below 1024px the stack collapses behind a dot trigger (see the media query
+   at the bottom). That is a deliberate change from the original, which just
+   parked all three buttons in the bottom-left corner on phones where they
+   collided with the search bar.
 
-   DEVIATION (requested): the original also carries
-     @media(max-width:767px){.nm-fixed-actions{top:auto!important;right:auto!important;
-        left:10px!important;bottom:30px!important;transform:none!important}}
-   which drops the stack into the bottom-left corner on phones, where it
-   collided with the search bar. That override is deliberately NOT ported, so
-   mobile keeps the desktop position: pinned right, vertically centred. */
+   The collapse is driven entirely from this media query rather than from a JS
+   width check, so the very first paint on a phone is already collapsed — no
+   flash of an open panel before hydration.
+   ========================================================================== */
+
 .wrap {
   position: fixed;
   right: 0;
   top: 40%;
   transform: translateY(-50%);
   z-index: 999;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+}
+
+.panel {
   display: flex;
   flex-direction: column;
   gap: 5px;
@@ -46,17 +57,170 @@
   margin-bottom: 0;
 }
 
+/* --cta-accent is the row's accent_color (e.g. WhatsApp green), set inline in
+   FixedActions.jsx. Empty column => the plain dark hover. */
 .action:hover {
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--cta-accent, rgba(0, 0, 0, 0.5));
   transform: translateX(-3px);
   color: #fff;
 }
 
-.action:nth-child(3):hover {
-  background: rgba(37, 211, 102, 0.9);
+/* The dot only exists in collapsed mode. display:none also removes it from the
+   tab order, so desktop keyboard users never land on a control that does
+   nothing. */
+.dot {
+  display: none;
 }
 
-/* The original hides the third button on small phones:
-     @media(max-width:575px){.nm-fixed-actions .nm-action:last-child{display:none}}
-   Deliberately NOT ported — all three stay visible at every width, as
-   requested. */
+/* ==========================================================================
+   Tablet + mobile: collapse to a single dot indicator
+   ========================================================================== */
+@media (max-width: 1024px) {
+  .wrap {
+    right: 12px;
+    top: auto;
+    bottom: max(20px, env(safe-area-inset-bottom, 0px));
+    transform: none;
+    gap: 10px;
+  }
+
+  /* Collapsed is the DEFAULT here — no attribute selector — so it holds on the
+     server-rendered markup too. visibility:hidden (not opacity alone) is what
+     takes the links out of the tab order and the a11y tree while closed. */
+  .panel {
+    gap: 8px;
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.8) translateY(12px);
+    transform-origin: bottom right;
+    pointer-events: none;
+    transition: opacity 0.22s ease, transform 0.22s ease, visibility 0.22s;
+  }
+
+  .wrap[data-open="true"] .panel {
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1) translateY(0);
+    pointer-events: auto;
+  }
+
+  /* Pop-open: each button springs up from the dot, trailing the one below it.
+     --cta-index is set per button in FixedActions.jsx (0 = nearest the dot). */
+  .action {
+    width: 76px;
+    height: 60px;
+    font-size: 11px;
+    gap: 3px;
+    background: rgba(0, 0, 0, 0.55);
+    transform-origin: bottom right;
+    opacity: 0;
+    transform: scale(0.5) translateY(20px);
+    transition: opacity 0.22s ease, transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .wrap[data-open="true"] .action {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    transition-delay: calc(var(--cta-index, 0) * 45ms);
+  }
+
+  /* The translateX nudge is a pointer affordance; on touch it just looks like
+     the button drifted. */
+  .action:hover {
+    transform: scale(1) translateY(0);
+  }
+
+  .dot {
+    display: grid;
+    place-items: center;
+    position: relative;
+    width: 52px;
+    height: 52px;
+    padding: 0;
+    border-radius: 50%;
+    border: 1px solid hsla(0, 0%, 100%, 0.28);
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(6px);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+      background-color 0.2s ease;
+  }
+
+  .dot:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 3px;
+  }
+
+  .dotCore {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform 0.25s ease;
+  }
+
+  /* A slow halo, so the dot reads as "there is something here" rather than as
+     a decorative bullet. */
+  .dotPulse {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 1px solid hsla(0, 0%, 100%, 0.5);
+    animation: ctaPulse 2.4s ease-out infinite;
+  }
+
+  .wrap[data-open="true"] .dot {
+    background: rgba(0, 0, 0, 0.8);
+    transform: rotate(45deg);
+  }
+
+  .wrap[data-open="true"] .dotCore {
+    transform: scale(0.7);
+  }
+
+  .wrap[data-open="true"] .dotPulse {
+    animation: none;
+    opacity: 0;
+  }
+}
+
+@keyframes ctaPulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  70%,
+  100% {
+    transform: scale(1.45);
+    opacity: 0;
+  }
+}
+
+/* Respect a reduced-motion preference: the panel still opens and closes, it
+   just does so without the springy scale or the pulsing halo. */
+@media (prefers-reduced-motion: reduce) {
+  .panel,
+  .action,
+  .dot,
+  .dotCore {
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+
+  .dotPulse {
+    animation: none;
+  }
+
+  @media (max-width: 1024px) {
+    .panel,
+    .action {
+      transform: none;
+    }
+
+    .wrap[data-open="true"] .panel,
+    .wrap[data-open="true"] .action {
+      transform: none;
+    }
+  }
+}

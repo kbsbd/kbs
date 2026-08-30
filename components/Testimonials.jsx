@@ -45,21 +45,7 @@ import Fancybox from "./Fancybox";
  * ~4.5px narrower than the original.
  */
 
-const BASE =
-  "/wp-content/themes/bti-new-properties-special/assets/img/customer/customer-review%20";
 const ICON = "/wp-content/themes/bti-new-properties-special/assets/img/icon";
-
-/* number + intrinsic width/height, exactly as the original markup declares */
-const REVIEWS = [
-  { n: 1, w: 1386, h: 1080 },
-  { n: 4, w: 800, h: 624 },
-  { n: 6, w: 1386, h: 1080 },
-  { n: 7, w: 800, h: 623 },
-  { n: 8, w: 800, h: 623 },
-  { n: 9, w: 1000, h: 1000 },
-  { n: 10, w: 1000, h: 1000 },
-  { n: 11, w: 1000, h: 1000 },
-];
 
 /* verbatim from data-slider-options on #testiSlider9 */
 const SLIDER_OPTIONS = {
@@ -75,8 +61,17 @@ const SLIDER_OPTIONS = {
   },
 };
 
-export default function Testimonials() {
+/* The review images and the heading are admin-managed (testimonials table +
+   site_settings.testimonials_heading, migration 0006). They used to be a
+   const array of theme asset paths right here.
+
+   Each row carries its own intrinsic width/height: the images have differing
+   ratios and the card does not constrain them, so declaring the real size is
+   what keeps the slider from reflowing as they load. */
+export default function Testimonials({ items = [], heading = "What do our customers say?" }) {
   const slider = useRef(null);
+
+  if (items.length === 0) return null;
 
   return (
     <section className="space overflow-hidden nm-front-testimonial">
@@ -88,7 +83,7 @@ export default function Testimonials() {
             <div className="row justify-content-md-between align-items-center">
               <div className="col-xxl-6 col-lg-7">
                 <div className="title-area">
-                  <h2 className="sec-title text-white">What do our customers say?</h2>
+                  <h2 className="sec-title text-white">{heading}</h2>
                 </div>
               </div>
               <div className="col-auto">
@@ -123,18 +118,23 @@ export default function Testimonials() {
               className="th-slider testi-slider9"
               wrapperClassName="nm-popup-parent-container"
             >
-              {REVIEWS.map(({ n, w, h }) => {
-                const src = `${BASE}(${n}).webp`;
+              {items.map((item, index) => {
+                const src = item.image_url;
                 return (
-                  <div className="swiper-slide" key={n}>
+                  <div className="swiper-slide" key={item.id || `${src}-${index}`}>
                     <div className="testi-card style7 nm-testi-card-home">
                       <a
                         className="popup-image"
                         href={src}
                         data-fancybox="front-testimonials"
-                        data-caption="Customer review"
+                        data-caption={item.caption || "Customer review"}
                       >
-                        <img width={w} height={h} src={src} alt="Customer review" />
+                        <img
+                          width={item.width || undefined}
+                          height={item.height || undefined}
+                          src={src}
+                          alt={item.alt_text || "Customer review"}
+                        />
                       </a>
                     </div>
                   </div>

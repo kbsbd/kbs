@@ -722,3 +722,21 @@
   color: var(--theme-color2);
   left: 5px;
 }
+
+/* Logo image, used when site_settings.logo_url is set. Without a logo the
+   header falls back to the site-name wordmark, which .headerLogo already
+   styles, so this rule only has to size the <img>. */
+.headerLogoImg {
+  display: block;
+  height: 38px;
+  width: auto;
+  max-width: 200px;
+  object-fit: contain;
+}
+
+@media (max-width: 767px) {
+  .headerLogoImg {
+    height: 30px;
+    max-width: 150px;
+  }
+}

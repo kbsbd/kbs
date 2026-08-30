@@ -285,3 +285,105 @@
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 1rem;
 }
+
+/* ---------------------------------------------------------------------------
+   Added in the CMS foundation pass: section headings inside cards, inline
+   field hints, callout notices, and the grouped sidebar.
+   --------------------------------------------------------------------------- */
+
+.cardTitle {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 0 0 1.25rem;
+  color: #fff;
+}
+
+/* Hints sit inside a <label>, which is a flex column, so they line up under
+   the input rather than beside it. */
+.fieldHint {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.fieldHint code {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.05rem 0.3rem;
+  border-radius: 4px;
+}
+
+.notice {
+  border: 1px solid rgba(110, 168, 255, 0.35);
+  background: rgba(110, 168, 255, 0.07);
+  border-radius: 10px;
+  padding: 0.9rem 1.1rem;
+  margin-bottom: 1.5rem;
+}
+
+.notice[data-tone="warn"] {
+  border-color: rgba(255, 190, 92, 0.4);
+  background: rgba(255, 190, 92, 0.08);
+}
+
+.notice strong {
+  display: block;
+  color: #fff;
+  font-size: 0.9rem;
+  margin-bottom: 0.35rem;
+}
+
+.notice p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.notice code {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.05rem 0.3rem;
+  border-radius: 4px;
+  font-size: 0.8em;
+}
+
+.sidebarGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin-bottom: 0.9rem;
+}
+
+.sidebarGroupTitle {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: rgba(255, 255, 255, 0.35);
+  margin: 0.5rem 0 0.25rem;
+  padding: 0 0.75rem;
+}
+
+@media (max-width: 640px) {
+  .sidebarNav {
+    flex-direction: row;
+    gap: 0.75rem;
+  }
+  .sidebarGroup {
+    flex-direction: row;
+    margin-bottom: 0;
+    flex-shrink: 0;
+  }
+  /* The group headings would double the sidebar's height on a phone, where it
+     is a single horizontal scroller. */
+  .sidebarGroupTitle {
+    display: none;
+  }
+}
+
+/* Separates two independent forms sharing one card (e.g. contact details vs.
+   contact page artwork), so they don't read as one long form. */
+.divider {
+  border: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin: 1.75rem 0;
+}

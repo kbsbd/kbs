@@ -25,9 +25,17 @@ const SLIDER_OPTIONS = {
   },
 };
 
-const VIEW_ALL_HREF = "/properties?category=special";
-
-export default function SpecialOfferSection({ properties }) {
+/* Heading, blurb and the "view all" button are admin-managed (site_settings,
+   migration 0006). The defaults below are what this component used to
+   hardcode, so an un-migrated database renders the same band. */
+export default function SpecialOfferSection({
+  properties,
+  heading = "Special offer",
+  text = "Explore our ongoing projects across Dhaka and Chattogram.",
+  ctaLabel = "View all properties",
+  ctaHref = "/properties?category=special",
+}) {
+  const VIEW_ALL_HREF = ctaHref;
   const slider = useRef(null);
 
   return (
@@ -39,16 +47,14 @@ export default function SpecialOfferSection({ properties }) {
         <div className="row justify-content-between align-items-center nm-featured-property-heading-row">
           <div className="col-lg-8 nm-featured-property-heading-copy">
             <div className="title-area">
-              <h2 className="sec-title">Special offer</h2>
-              <p className="sec-text">
-                Explore our ongoing projects across Dhaka and Chattogram.
-              </p>
+              <h2 className="sec-title">{heading}</h2>
+              {text && <p className="sec-text">{text}</p>}
             </div>
           </div>
           <div className="col-auto nm-featured-property-desktop-btn">
             <div className="sec-btn">
               <Link href={VIEW_ALL_HREF} className="th-btn style4 th-btn-icon">
-                View all properties
+                {ctaLabel}
               </Link>
             </div>
           </div>
@@ -95,7 +101,7 @@ export default function SpecialOfferSection({ properties }) {
 
               <div className="nm-featured-property-mobile-btn">
                 <Link href={VIEW_ALL_HREF} className="th-btn style4 th-btn-icon">
-                  View all properties
+                  {ctaLabel}
                 </Link>
               </div>
             </>

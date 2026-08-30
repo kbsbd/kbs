@@ -9,12 +9,10 @@ export default async function AdminHeroPage() {
 
   return (
     <>
-      <h1 className={styles.pageTitle}>Hero & Video</h1>
+      <h1 className={styles.pageTitle}>Hero &amp; Video</h1>
       <p className={styles.pageDescription}>
-        Paste a Cloudinary-hosted video URL to replace the homepage hero video. The poster
-        image shows while the video loads and if playback fails. Keep the file under a few
-        MB (Cloudinary can transform on the fly, e.g. add <code>q_auto,w_1920</code> to the
-        URL) so the hero doesn&apos;t slow down the page.
+        The full-height video at the top of the homepage. Uploaded files are compressed and served
+        from Cloudinary&apos;s CDN; you can also paste a URL from anywhere else.
       </p>
 
       <div className={styles.card}>

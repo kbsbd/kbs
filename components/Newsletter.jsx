@@ -37,7 +37,9 @@ import { subscribeToNewsletter } from "@/lib/actions/leads";
 
 const initialState = { ok: false, message: "" };
 
-export default function Newsletter() {
+/* `heading` comes from site_settings.newsletter_heading so the strip is
+   editable from the dashboard; the default reproduces the original copy. */
+export default function Newsletter({ heading }) {
   const [state, formAction, pending] = useActionState(subscribeToNewsletter, initialState);
   const [sent, setSent] = useState(false);
   const wasPending = useRef(false);
@@ -56,7 +58,7 @@ export default function Newsletter() {
 
   return (
     <div className="newsletter-wrap style5">
-      <h5 className="newsletter-title text-light">Never miss an update</h5>
+      <h5 className="newsletter-title text-light">{heading || "Never miss an update"}</h5>
       <form
         action={formAction}
         className="newsletter-form"

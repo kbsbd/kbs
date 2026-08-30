@@ -4,8 +4,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
-const VIEW_ALL_HREF = "/properties?category=featured";
-
 /*
  * section#featured-property-sec — .nm-featured-property-grid-section plus
  * .nm-featured-no-badge. Markup mirrors the WordPress output: the heading row
@@ -21,7 +19,17 @@ const VIEW_ALL_HREF = "/properties?category=featured";
  *                        height, written to --nm-featured-mobile-fold-height
  * recomputed on load, on resize and when the (max-width:767px) query changes.
  */
-export default function FeaturedPropertiesSection({ properties }) {
+/* Heading, optional blurb and the "view all" button are admin-managed
+   (site_settings, migration 0006). Defaults reproduce what this component
+   used to hardcode. */
+export default function FeaturedPropertiesSection({
+  properties,
+  heading = "Featured properties",
+  text = null,
+  ctaLabel = "View all properties",
+  ctaHref = "/properties?category=featured",
+}) {
+  const VIEW_ALL_HREF = ctaHref;
   const wrapRef = useRef(null);
   const toggleRef = useRef(null);
   const [open, setOpen] = useState(false);
@@ -82,13 +90,14 @@ export default function FeaturedPropertiesSection({ properties }) {
           <div className="col-auto nm-featured-property-desktop-btn">
             <div className="sec-btn">
               <Link href={VIEW_ALL_HREF} className="th-btn style4 th-btn-icon">
-                View all properties
+                {ctaLabel}
               </Link>
             </div>
           </div>
           <div className="col-lg-8 nm-featured-property-heading-copy">
             <div className="title-area">
-              <h2 className="sec-title">Featured properties</h2>
+              <h2 className="sec-title">{heading}</h2>
+              {text && <p className="sec-text">{text}</p>}
             </div>
           </div>
         </div>
@@ -160,7 +169,7 @@ export default function FeaturedPropertiesSection({ properties }) {
 
         <div className="nm-featured-property-mobile-btn">
           <Link href={VIEW_ALL_HREF} className="th-btn style4 th-btn-icon">
-            View all properties
+            {ctaLabel}
           </Link>
         </div>
       </div>

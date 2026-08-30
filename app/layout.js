@@ -1,5 +1,7 @@
 import { Outfit } from "next/font/google";
 import "./globals.css";
+import { getSiteSettings, resolveMetaTitle } from "@/lib/data/site";
+import { getSocialLinks } from "@/lib/data/footer";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -9,64 +11,93 @@ const outfit = Outfit({
 });
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-const SITE_NAME = "KBS";
-const SITE_DESCRIPTION =
-  "KBS is a leading real estate developer building functional, design-forward homes in Dhaka and Chattogram.";
 
-export const metadata = {
-  metadataBase: new URL(SITE_URL),
-  title: {
-    default: `${SITE_NAME} – A Leading Real Estate Developer in Bangladesh`,
-    template: `%s | ${SITE_NAME}`,
-  },
-  description: SITE_DESCRIPTION,
-  openGraph: {
-    type: "website",
-    siteName: SITE_NAME,
-    title: `${SITE_NAME} – A Leading Real Estate Developer in Bangladesh`,
-    description: SITE_DESCRIPTION,
-    url: "/",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: `${SITE_NAME} – A Leading Real Estate Developer in Bangladesh`,
-    description: SITE_DESCRIPTION,
-  },
-  icons: {
-    icon: "/wp-content/uploads/2021/05/cropped-site-icon-788309-102463-32x32.png",
-    apple: "/wp-content/uploads/2021/05/cropped-site-icon-788309-102463-180x180.png",
-  },
-};
+/*
+ * Everything below used to be module-level constants. It now comes from the
+ * site_settings row, so the admin controls the browser tab icon, the wordmark,
+ * the default <title>/description, and the OG image without a deploy.
+ *
+ * generateMetadata runs per request on the server; getSiteSettings falls back
+ * to the bundled defaults when Supabase is unreachable, so a database outage
+ * degrades to the previous hardcoded values rather than an empty <head>.
+ */
+export async function generateMetadata() {
+  const settings = await getSiteSettings();
 
-const organizationJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "RealEstateAgent",
-  name: SITE_NAME,
-  url: SITE_URL,
-  description: SITE_DESCRIPTION,
-  address: {
-    "@type": "PostalAddress",
-    streetAddress: "Celebration Point, Plot: 3 & 5, Road: 113/A, Gulshan-2",
-    addressLocality: "Dhaka",
-    postalCode: "1212",
-    addressCountry: "BD",
-  },
-  sameAs: [
-    "https://www.facebook.com/btibd/",
-    "https://www.linkedin.com/company/btibd",
-    "https://www.instagram.com/btibd",
-    "https://www.youtube.com/c/btibuildingtechnologyideasltd",
-  ],
-};
+  const siteName = settings.site_name || "KBS";
+  const title = resolveMetaTitle(settings);
+  const description = settings.meta_description || "";
+  const ogImages = settings.og_image_url ? [{ url: settings.og_image_url }] : undefined;
 
-const websiteJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  name: SITE_NAME,
-  url: SITE_URL,
-};
+  return {
+    metadataBase: new URL(SITE_URL),
+    title: {
+      default: title,
+      template: `%s | ${siteName}`,
+    },
+    description,
+    openGraph: {
+      type: "website",
+      siteName,
+      title,
+      description,
+      url: "/",
+      images: ogImages,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: ogImages,
+    },
+    icons: {
+      icon: settings.favicon_url || "/favicon.ico",
+      apple: settings.apple_icon_url || settings.favicon_url || "/favicon.ico",
+    },
+  };
+}
 
-export default function RootLayout({ children }) {
+function buildJsonLd(settings, socialLinks) {
+  const siteName = settings.site_name || "KBS";
+  const description = settings.meta_description || "";
+
+  const organization = {
+    "@context": "https://schema.org",
+    "@type": "RealEstateAgent",
+    name: siteName,
+    url: SITE_URL,
+    description,
+    ...(settings.logo_url ? { logo: settings.logo_url } : {}),
+    ...(settings.contact_phone ? { telephone: settings.contact_phone } : {}),
+    ...(settings.contact_email ? { email: settings.contact_email } : {}),
+    ...(settings.contact_address
+      ? {
+          address: {
+            "@type": "PostalAddress",
+            // The admin edits one free-text address line, so emit it as the
+            // street address rather than inventing a parse of it.
+            streetAddress: settings.contact_address,
+            addressCountry: "BD",
+          },
+        }
+      : {}),
+    sameAs: (socialLinks || []).map((s) => s.url).filter(Boolean),
+  };
+
+  const website = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: siteName,
+    url: SITE_URL,
+  };
+
+  return [organization, website];
+}
+
+export default async function RootLayout({ children }) {
+  const [settings, socialLinks] = await Promise.all([getSiteSettings(), getSocialLinks()]);
+  const [organizationJsonLd, websiteJsonLd] = buildJsonLd(settings, socialLinks);
+
   return (
     <html lang="en" className={outfit.variable}>
       {/* WordPress renders body_class('bg-theme'), so the page canvas is

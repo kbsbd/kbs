@@ -2,7 +2,6 @@
 "use client";
 
 import { useRef } from "react";
-import { SBU_UNITS } from "@/lib/data/sbu";
 import NativeSlider from "./NativeSlider";
 
 /*
@@ -45,7 +44,7 @@ import NativeSlider from "./NativeSlider";
  */
 
 const THEME = "/wp-content/themes/bti-new-properties-special/assets/img";
-const BG_SRC = `${THEME}/demo/business-logo-bg.webp`;
+const DEFAULT_BG_SRC = `${THEME}/demo/business-logo-bg.webp`;
 const MASK_SRC = `${THEME}/shape/project-card1-img-mask.png`;
 const ARROW_RIGHT = `${THEME}/icon/arrow-right.svg`;
 
@@ -62,8 +61,20 @@ const SLIDER_OPTIONS = {
   autoplay: { delay: 6000, disableOnInteraction: false },
 };
 
-export default function SbuSection() {
+/* The units, the heading and the background photo are admin-managed
+   (sbu_units table + site_settings, migration 0006). `units` used to be the
+   SBU_UNITS const imported from lib/data/sbu.js, which is now a server-side
+   fetch — hence the prop. */
+export default function SbuSection({
+  units = [],
+  heading = "SBU",
+  subheading = "Other Initiatives",
+  bgUrl,
+}) {
   const slider = useRef(null);
+  const background = bgUrl || DEFAULT_BG_SRC;
+
+  if (units.length === 0) return null;
 
   return (
     <>
@@ -71,8 +82,8 @@ export default function SbuSection() {
         <div className="row g-0">
           <div className="col-12">
             <div className="nm-business-container">
-              <span className="shadow-title" data-fill-text="Other Initiatives">
-                SBU
+              <span className="shadow-title" data-fill-text={subheading}>
+                {heading}
               </span>
             </div>
           </div>
@@ -81,7 +92,7 @@ export default function SbuSection() {
 
       <section
         className="project-area-1 overflow-hidden background-image"
-        style={{ backgroundImage: `url(${BG_SRC})` }}
+        style={{ backgroundImage: `url(${background})` }}
         data-opacity="5"
         data-overlay="title"
       >
@@ -98,8 +109,8 @@ export default function SbuSection() {
                     className="th-slider project-slider1"
                     wrapperClassName="pb-2"
                   >
-                    {SBU_UNITS.map((unit) => (
-                      <div className="swiper-slide" key={unit.name}>
+                    {units.map((unit) => (
+                      <div className="swiper-slide" key={unit.id || unit.name}>
                         <div className="portfolio-card">
                           <div
                             className="portfolio-img img-shine bg-mask"
@@ -113,15 +124,15 @@ export default function SbuSection() {
                             <img
                               width="500"
                               height="500"
-                              src={unit.logo}
-                              alt="project image"
+                              src={unit.logo_url}
+                              alt={unit.name}
                             />
                             <div className="portfolio-card-shape">
                               <p>{unit.description}</p>
                             </div>
                           </div>
                           <div className="portfolio-content">
-                            <a href={unit.url} className="icon-btn">
+                            <a href={unit.url || "#"} className="icon-btn">
                               <img width="16" height="14" src={ARROW_RIGHT} alt="img" />
                             </a>
                           </div>

@@ -34,10 +34,12 @@ import Fancybox from "./Fancybox";
  *    either, so only `fa-solid fa-play` actually renders. Kept for parity.
  */
 
-const THUMB_SRC =
+const DEFAULT_THUMB_SRC =
   "/wp-content/themes/bti-new-properties-special/assets/img/demo/home-video-thumb.webp";
 
-export default function StatementOfArrival({ youtubeId, heading }) {
+/* The poster frame is admin-managed (site_settings.arrival_thumb_url,
+   migration 0006); it used to be the const above. */
+export default function StatementOfArrival({ youtubeId, heading, thumbUrl }) {
   const headingRef = useRef(null);
 
   /*
@@ -91,7 +93,12 @@ export default function StatementOfArrival({ youtubeId, heading }) {
         <div className="row align-items-center">
           <div className="col-lg-12">
             <div className="video-wrap6">
-              <img width="1920" height="800" src={THUMB_SRC} alt="img" />
+              <img
+                width="1920"
+                height="800"
+                src={thumbUrl || DEFAULT_THUMB_SRC}
+                alt=""
+              />
               <a
                 href={`https://www.youtube.com/watch?v=${youtubeId}`}
                 className="video-btn popup-video justify-content-lg-start justify-content-center"
