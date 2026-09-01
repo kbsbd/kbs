@@ -23,13 +23,18 @@ import styles from "./MediaPicker.module.css";
  * elsewhere (the existing /wp-content/... theme assets, YouTube posters, etc).
  */
 
-/* Above this, images get resized before upload. 2000px covers a full-bleed
-   hero on a 2x display; anything larger is wasted bytes on every page view. */
+/* Default cap for free-form images (heroes, galleries). 2000px covers a
+   full-bleed hero on a 2x display; anything larger is wasted bytes on every
+   page view. Logos and icons pass a much tighter `resize` prop so the file we
+   store is close to what devices actually paint, at up to ~3x pixel density —
+   not a 2000px master shrunk by the browser on every visit. */
 const MAX_DIMENSION = 2000;
 /* Files under this are already small enough that re-encoding would more often
-   make them bigger (and would flatten PNG transparency for no gain). */
+   make them bigger (and would flatten PNG transparency for no gain). Skipped
+   when an explicit `resize` cap is in play — then the dimensions matter, not
+   the byte size. */
 const COMPRESS_THRESHOLD_BYTES = 300 * 1024;
-const JPEG_QUALITY = 0.82;
+const ENCODE_QUALITY = 0.85;
 
 function formatBytes(bytes) {
   if (!bytes) return "";
@@ -39,24 +44,42 @@ function formatBytes(bytes) {
 }
 
 /**
- * Downscale + re-encode an image in a canvas before it leaves the browser.
+ * Downscale + re-encode an image in a canvas before it leaves the browser, so
+ * the file that lands in Cloudinary is already the right size for the slot it
+ * fills and the URL that comes back points straight at it.
  *
- * Returns the ORIGINAL file whenever compression wouldn't help: SVGs and GIFs
- * (canvas would destroy vectors and animation), small files, and any case where
- * the re-encoded result came out larger than what we started with.
+ * `resize` (optional) `{ maxWidth, maxHeight }` tightens the target for logos
+ * and icons. When that cap actually shrinks the image the resized copy is
+ * always used; the aspect ratio is kept and the image is never scaled up.
+ *
+ * Returns the ORIGINAL file whenever re-encoding wouldn't help: SVGs and GIFs
+ * (canvas would destroy vectors and animation — an SVG logo already adapts to
+ * every screen), and, when no `resize` cap applies, small files or a re-encode
+ * that came out larger than the original.
  */
-async function compressImage(file) {
+async function prepareImage(file, resize) {
   const untouchable = ["image/svg+xml", "image/gif"];
   if (untouchable.includes(file.type)) return file;
   if (!file.type.startsWith("image/")) return file;
-  if (file.size <= COMPRESS_THRESHOLD_BYTES) return file;
+
+  const maxW = resize?.maxWidth ?? MAX_DIMENSION;
+  const maxH = resize?.maxHeight ?? MAX_DIMENSION;
 
   const bitmap = await createImageBitmap(file).catch(() => null);
   if (!bitmap) return file;
 
-  const scale = Math.min(1, MAX_DIMENSION / Math.max(bitmap.width, bitmap.height));
-  const width = Math.round(bitmap.width * scale);
-  const height = Math.round(bitmap.height * scale);
+  const scale = Math.min(1, maxW / bitmap.width, maxH / bitmap.height);
+  const willShrink = scale < 1;
+
+  // Nothing to do: image is already within the cap, no explicit resize was
+  // asked for, and the file is small enough that re-encoding tends to backfire.
+  if (!willShrink && !resize && file.size <= COMPRESS_THRESHOLD_BYTES) {
+    bitmap.close?.();
+    return file;
+  }
+
+  const width = Math.max(1, Math.round(bitmap.width * scale));
+  const height = Math.max(1, Math.round(bitmap.height * scale));
 
   const canvas = document.createElement("canvas");
   canvas.width = width;
@@ -67,16 +90,21 @@ async function compressImage(file) {
   ctx.drawImage(bitmap, 0, 0, width, height);
   bitmap.close?.();
 
-  // PNGs with transparency must not become JPEG — flattening would paint the
-  // transparent areas black. Keep them as PNG (still resized, which is where
-  // most of the saving comes from for oversized PNGs).
+  // PNG/WebP can carry transparency — a logo almost always does — so those must
+  // not be flattened to JPEG (transparent areas would turn black). Re-encode
+  // them as WebP, which keeps the alpha channel and is far smaller than PNG.
   const keepsAlpha = file.type === "image/png" || file.type === "image/webp";
   const mime = keepsAlpha ? "image/webp" : "image/jpeg";
 
   const blob = await new Promise((resolve) =>
-    canvas.toBlob(resolve, mime, JPEG_QUALITY)
+    canvas.toBlob(resolve, mime, ENCODE_QUALITY)
   );
-  if (!blob || blob.size >= file.size) return file;
+  if (!blob) return file;
+
+  // If the dimensions didn't change and the re-encode grew the file, there was
+  // nothing to gain. When we actually shrank the image the smaller dimensions
+  // are the whole point, so keep it even in the rare case bytes tick up.
+  if (!willShrink && blob.size >= file.size) return file;
 
   const newName = file.name.replace(/\.[^.]+$/, "") + (keepsAlpha ? ".webp" : ".jpg");
   return new File([blob], newName, { type: mime });
@@ -178,6 +206,7 @@ export default function MediaPicker({
   folder = "kbs",
   hint,
   required = false,
+  resize = null,
 }) {
   const [value, setValue] = useState(defaultValue || "");
   const [status, setStatus] = useState("");
@@ -198,11 +227,11 @@ export default function MediaPicker({
       setStatus("Preparing…");
 
       try {
-        const prepared = isVideo ? file : await compressImage(file);
+        const prepared = isVideo ? file : await prepareImage(file, resize);
 
         if (prepared !== file) {
           setStatus(
-            `Compressed ${formatBytes(file.size)} → ${formatBytes(prepared.size)}. Uploading…`
+            `Resized ${formatBytes(file.size)} → ${formatBytes(prepared.size)}. Uploading…`
           );
         } else {
           setStatus(`Uploading ${formatBytes(file.size)}…`);
@@ -262,7 +291,7 @@ export default function MediaPicker({
         if (fileRef.current) fileRef.current.value = "";
       }
     },
-    [folder, isVideo]
+    [folder, isVideo, resize]
   );
 
   return (

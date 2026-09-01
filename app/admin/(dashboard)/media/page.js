@@ -3,7 +3,7 @@ import { isCloudinaryConfigured } from "@/lib/cloudinary";
 import MediaLibrary from "./MediaLibrary";
 import styles from "../../admin.module.css";
 
-export const metadata = { title: "Media" };
+export const metadata = { title: "Media library" };
 
 export default async function AdminMediaPage() {
   const assets = await getMediaAssets({ limit: 300 });
@@ -12,7 +12,7 @@ export default async function AdminMediaPage() {
 
   return (
     <>
-      <h1 className={styles.pageTitle}>Media</h1>
+      <h1 className={styles.pageTitle}>Media library</h1>
       <p className={styles.pageDescription}>
         Every image and video uploaded through the dashboard. Files are compressed in your browser,
         stored on Cloudinary, and served from its CDN.

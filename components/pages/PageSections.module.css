@@ -1,0 +1,257 @@
+/* Content blocks for admin-built pages.
+   ==========================================================================
+   Colour values are taken from the existing theme rather than invented:
+     --title-color   #0D0D0C   headings on light
+     --body-color    #6E7070   body text on light
+     --theme-color   #1C1C1C   the dark canvas (body.bg-theme)
+   A section is either "light" (white ground, dark text) or "dark" (the theme
+   canvas, light text), matching how the hand-built pages alternate.
+   ========================================================================== */
+
+.section {
+  padding: clamp(3rem, 6vw, 6rem) 0;
+}
+
+.section[data-tone="light"] {
+  background: #fff;
+  color: #6e7070;
+}
+
+.section[data-tone="dark"] {
+  background: #1c1c1c;
+  color: hsla(0, 0%, 100%, 0.72);
+}
+
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 clamp(1rem, 4vw, 2rem);
+}
+
+/* The `text` template reads as an article, so it gets a measure rather than
+   the full grid width. */
+.containerNarrow {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 0 clamp(1rem, 4vw, 2rem);
+}
+
+/* ---------- headings ---------- */
+
+.head {
+  margin-bottom: 2rem;
+  max-width: 46rem;
+}
+
+.title {
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  font-weight: 300;
+  line-height: 1.2;
+  margin: 0 0 0.5rem;
+  color: #0d0d0c;
+  text-wrap: balance;
+}
+
+.section[data-tone="dark"] .title {
+  color: #fff;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.7;
+  color: inherit;
+}
+
+/* ---------- prose ---------- */
+
+.prose {
+  max-width: 46rem;
+  font-size: 1.02rem;
+  line-height: 1.8;
+}
+
+.prose p {
+  margin: 0 0 1.15rem;
+}
+
+.prose p:last-child {
+  margin-bottom: 0;
+}
+
+/* ---------- text + image ---------- */
+
+.split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(1.5rem, 4vw, 3.5rem);
+  align-items: center;
+}
+
+.split .prose {
+  max-width: none;
+}
+
+.splitMedia {
+  order: 2;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.split[data-image-first] .splitMedia {
+  order: 0;
+}
+
+.splitMedia img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+@media (max-width: 860px) {
+  .split {
+    grid-template-columns: 1fr;
+  }
+  /* On one column the picture always leads, whichever side was chosen —
+     text-then-image reads as an orphaned caption. */
+  .splitMedia,
+  .split[data-image-first] .splitMedia {
+    order: 0;
+  }
+}
+
+/* ---------- checklist / faq ---------- */
+
+.checklistWrap {
+  margin-top: 1.75rem;
+  max-width: 46rem;
+}
+
+.faqWrap {
+  margin-top: 1.5rem;
+  max-width: 52rem;
+}
+
+/* ---------- cards ---------- */
+
+.cards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+}
+
+.card {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 14px;
+  padding: 1.6rem 1.5rem;
+  background: #fafafa;
+}
+
+.section[data-tone="dark"] .card {
+  background: #161616;
+  border-color: hsla(0, 0%, 100%, 0.1);
+}
+
+/* Numbered because a card grid built from an ordered list genuinely is a
+   sequence — the admin controls the order line by line. */
+.cardIndex {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: rgba(0, 0, 0, 0.3);
+  margin-bottom: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.section[data-tone="dark"] .cardIndex {
+  color: hsla(0, 0%, 100%, 0.35);
+}
+
+.card h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #0d0d0c;
+  text-wrap: balance;
+}
+
+.section[data-tone="dark"] .card h3 {
+  color: #fff;
+}
+
+.card p {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: inherit;
+}
+
+/* ---------- call to action ---------- */
+
+.cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem 2.5rem;
+  padding: clamp(1.75rem, 4vw, 2.75rem);
+  border-radius: 16px;
+  background: #1c1c1c;
+  color: hsla(0, 0%, 100%, 0.75);
+}
+
+.section[data-tone="dark"] .cta {
+  background: #161616;
+  border: 1px solid hsla(0, 0%, 100%, 0.1);
+}
+
+.ctaTitle {
+  margin: 0 0 0.4rem;
+  font-size: clamp(1.3rem, 2.4vw, 1.75rem);
+  font-weight: 300;
+  color: #fff;
+  text-wrap: balance;
+}
+
+.ctaText {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.65;
+  max-width: 42rem;
+}
+
+.ctaButton {
+  flex: 0 0 auto;
+  display: inline-block;
+  background: #fff;
+  color: #1c1c1c;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 0.85rem 1.6rem;
+  border-radius: 8px;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.ctaButton:hover {
+  background: #eaeaea;
+  transform: translateY(-2px);
+}
+
+.ctaButton:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ctaButton {
+    transition: none;
+  }
+  .ctaButton:hover {
+    transform: none;
+  }
+}

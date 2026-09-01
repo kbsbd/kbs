@@ -1,0 +1,49 @@
+/* Frame for admin-built pages. The content blocks bring their own styling
+   (components/pages/PageSections.module.css); this file only covers the
+   optional lede between the banner and the first block. */
+
+.main {
+  background: #fff;
+}
+
+.intro {
+  background: #fff;
+  padding: clamp(2.5rem, 5vw, 4.5rem) 0 0;
+}
+
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 clamp(1rem, 4vw, 2rem);
+}
+
+.containerNarrow {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 0 clamp(1rem, 4vw, 2rem);
+}
+
+.introTitle {
+  font-size: clamp(1.6rem, 3.2vw, 2.4rem);
+  font-weight: 300;
+  line-height: 1.2;
+  color: #0d0d0c;
+  margin: 0 0 1rem;
+  max-width: 42rem;
+  text-wrap: balance;
+}
+
+.introBody {
+  max-width: 46rem;
+  color: #6e7070;
+  font-size: 1.08rem;
+  line-height: 1.8;
+}
+
+.introBody p {
+  margin: 0 0 1.15rem;
+}
+
+.introBody p:last-child {
+  margin-bottom: 0;
+}

@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import LegalPageForm from "./LegalPageForm";
 import styles from "../../admin.module.css";
 
-export const metadata = { title: "Legal Pages" };
+export const metadata = { title: "Legal & privacy" };
 
 const DEFAULT_PAGE = { slug: "privacy-policy", title: "Privacy Policy", content: "" };
 
@@ -20,7 +20,7 @@ export default async function AdminLegalPage() {
 
   return (
     <>
-      <h1 className={styles.pageTitle}>Legal Pages</h1>
+      <h1 className={styles.pageTitle}>Legal &amp; privacy</h1>
       <p className={styles.pageDescription}>
         Plain markdown/text content, rendered at <code>/legal/[slug]</code>.
       </p>

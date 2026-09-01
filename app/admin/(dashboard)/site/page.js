@@ -5,14 +5,14 @@ import ContactForm from "./ContactForm";
 import FooterSettingsForm from "./FooterSettingsForm";
 import styles from "../../admin.module.css";
 
-export const metadata = { title: "Site & Branding" };
+export const metadata = { title: "Branding & contact" };
 
 export default async function AdminSitePage() {
   const settings = await getSiteSettings();
 
   return (
     <>
-      <h1 className={styles.pageTitle}>Site &amp; Branding</h1>
+      <h1 className={styles.pageTitle}>Branding &amp; contact</h1>
       <p className={styles.pageDescription}>
         The name, icon and contact details used across every page — browser tab icon, header
         wordmark, search-result snippet, footer address and the share preview.

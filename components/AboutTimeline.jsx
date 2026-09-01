@@ -32,13 +32,20 @@ import { TIMELINE } from "@/lib/data/timeline";
  *   - prev is disabled at 0, next at the last entry
  */
 
-export default function AboutTimeline() {
+/* `entries` comes from the timeline_entries table so the history is editable;
+   the bundled TIMELINE stays as the fallback, which keeps this component
+   rendering identically before migration 0008 is applied. The interaction —
+   rail scrolling, active state, disabled arrows, the swapped media/body
+   order — is untouched. */
+export default function AboutTimeline({ entries }) {
+  const data = entries?.length ? entries : TIMELINE;
   const [index, setIndex] = useState(0);
   const railRef = useRef(null);
 
-  const go = useCallback((i) => {
-    setIndex(Math.max(0, Math.min(i, TIMELINE.length - 1)));
-  }, []);
+  const go = useCallback(
+    (i) => setIndex(Math.max(0, Math.min(i, data.length - 1))),
+    [data.length]
+  );
 
   useEffect(() => {
     const rail = railRef.current;
@@ -49,7 +56,9 @@ export default function AboutTimeline() {
     }
   }, [index]);
 
-  const entry = TIMELINE[index];
+  if (data.length === 0) return null;
+
+  const entry = data[Math.min(index, data.length - 1)];
   const imageLeft = entry.imagePosition === "left";
   const hasLink = entry.link && entry.link !== "#";
 
@@ -86,7 +95,7 @@ export default function AboutTimeline() {
         </button>
         <div className="nm-timeline__rail">
           <div className="nm-timeline__railInner" id="nmRailInner" ref={railRef}>
-            {TIMELINE.map((e, i) => (
+            {data.map((e, i) => (
               <button
                 key={e.date + e.title}
                 type="button"
@@ -105,7 +114,7 @@ export default function AboutTimeline() {
           className="nm-timeline__ctl"
           id="nmNextBtn"
           aria-label="Next"
-          disabled={index === TIMELINE.length - 1}
+          disabled={index === data.length - 1}
           onClick={() => go(index + 1)}
         >
           ›

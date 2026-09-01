@@ -8,12 +8,14 @@ import PropertyFilterToggle from "@/components/PropertyFilterToggle";
 import PropertyArchiveFilterPanel from "@/components/PropertyArchiveFilterPanel";
 import { getProperties } from "@/lib/data/properties.server";
 import { getFooterLinks, getSocialLinks } from "@/lib/data/footer";
+import { getSiteSettings } from "@/lib/data/site";
 import {
   filterProperties,
   archiveFacets,
   PER_PAGE,
 } from "@/lib/data/property-filters";
 import "./properties.css";
+import { buildRouteMetadata } from "@/lib/data/routes";
 
 /*
  * /properties/ — the bti_properties archive, ported 1:1 from WordPress.
@@ -46,13 +48,20 @@ import "./properties.css";
  */
 
 const THEME = "/wp-content/themes/bti-new-properties-special/assets/img";
+/* Fallback only — the banner photo is admin-managed via
+   site_settings.properties_hero_url (migration 0008). */
 const HERO = `${THEME}/demo/properties-hero.webp`;
 
-export const metadata = {
-  title: "Properties",
-  description:
-    "Browse every KBS property across Dhaka and Chattogram.",
-};
+/* Search visibility for this route is admin-controlled: the noindex
+   flag and any title/description override come from route_settings.
+   With no row, buildRouteMetadata returns this base unchanged. */
+export async function generateMetadata() {
+  return buildRouteMetadata("/properties", {
+    title: "Properties",
+    description:
+      "Browse every KBS property across Dhaka and Chattogram.",
+  });
+}
 
 function Select({ id, name, placeholder, options, value }) {
   return (
@@ -105,10 +114,11 @@ function Pagination({ page, pages }) {
 
 export default async function PropertiesPage({ searchParams }) {
   const sp = await searchParams;
-  const [all, footerLinks, socialLinks] = await Promise.all([
+  const [all, footerLinks, socialLinks, settings] = await Promise.all([
     getProperties(),
     getFooterLinks(),
     getSocialLinks(),
+    getSiteSettings(),
   ]);
 
   const facets = archiveFacets(all);
@@ -123,7 +133,7 @@ export default async function PropertiesPage({ searchParams }) {
 
       <div
         className="breadcumb-wrapper properties-breadcumb-wrapper background-image"
-        style={{ backgroundImage: `url(${HERO})` }}
+        style={{ backgroundImage: `url(${settings.properties_hero_url || HERO})` }}
       >
         <div className="container properties-search-container">
           <div className="row justify-content-center">
@@ -174,7 +184,7 @@ export default async function PropertiesPage({ searchParams }) {
 
         <div className="container nm-property-breadcrumb-footer d-none">
           <p className="nm-property-archive-static-count">
-            <strong>{matched.length}</strong> ongoing properties
+            <strong>{matched.length}</strong> {settings.properties_count_label || "ongoing properties"}
           </p>
         </div>
 

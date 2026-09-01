@@ -12,7 +12,7 @@ import {
 } from "@/lib/actions/footer";
 import styles from "../../admin.module.css";
 
-export const metadata = { title: "Footer & Social" };
+export const metadata = { title: "Footer & social links" };
 
 const FOOTER_FIELDS = [
   { name: "label", label: "Label", type: "text", required: true, placeholder: "Gallery" },
@@ -65,7 +65,7 @@ export default async function AdminFooterPage() {
 
   return (
     <>
-      <h1 className={styles.pageTitle}>Footer &amp; Social</h1>
+      <h1 className={styles.pageTitle}>Footer &amp; social links</h1>
       <p className={styles.pageDescription}>
         The link list and social icons at the bottom of every page. The address, copyright line and
         newsletter heading live under Site &amp; Branding.

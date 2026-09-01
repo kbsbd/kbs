@@ -5,7 +5,7 @@ import { CTA_ICON_LABELS } from "@/components/CtaIcon";
 import { createCtaButton, updateCtaButton, deleteCtaButton } from "@/lib/actions/cta";
 import styles from "../../admin.module.css";
 
-export const metadata = { title: "CTA Buttons" };
+export const metadata = { title: "Floating contact buttons" };
 
 const FIELDS = [
   { name: "label", label: "Label", type: "text", required: true, placeholder: "Call" },
@@ -43,14 +43,16 @@ const FIELDS = [
 ];
 
 export default async function AdminCtaPage() {
-  const buttons = (await getCtaButtons({ includeInactive: true })).map((row) => ({
-    ...row,
-    _meta: CTA_ICON_LABELS[row.icon] || row.icon,
+  const buttons = await getCtaButtons({ includeInactive: true });
+
+  const rows = buttons.map((button) => ({
+    ...button,
+    meta: CTA_ICON_LABELS[button.icon] || button.icon,
   }));
 
   return (
     <>
-      <h1 className={styles.pageTitle}>CTA Buttons</h1>
+      <h1 className={styles.pageTitle}>Floating contact buttons</h1>
       <p className={styles.pageDescription}>
         The floating buttons pinned to the right edge of every page.
       </p>
@@ -67,7 +69,7 @@ export default async function AdminCtaPage() {
 
       <div className={styles.card}>
         <CrudManager
-          rows={buttons}
+          rows={rows}
           fields={FIELDS}
           createAction={createCtaButton}
           updateAction={updateCtaButton}

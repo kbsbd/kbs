@@ -126,14 +126,20 @@
 }
 
 .sidebar {
-  width: 240px;
-  flex: 0 0 240px;
+  width: 248px;
+  flex: 0 0 248px;
   background: #121212;
   border-right: 1px solid rgba(255, 255, 255, 0.08);
   padding: 1.5rem 1rem;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.25rem;
+  /* The menu is long enough to scroll on a laptop — keep it pinned and let it
+     scroll on its own rather than the whole page. */
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+  overflow-y: auto;
 }
 
 .sidebarBrand {
@@ -151,11 +157,15 @@
 }
 
 .sidebarNav a {
-  color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: rgba(255, 255, 255, 0.62);
   text-decoration: none;
-  padding: 0.6rem 0.75rem;
+  padding: 0.55rem 0.7rem;
   border-radius: 8px;
   font-size: 0.9rem;
+  line-height: 1.2;
 }
 
 .sidebarNav a:hover {
@@ -163,9 +173,37 @@
   color: #fff;
 }
 
+.navIcon {
+  flex: 0 0 auto;
+  opacity: 0.75;
+}
+
 .sidebarNavActive {
   background: rgba(255, 255, 255, 0.1) !important;
   color: #fff !important;
+  font-weight: 500;
+}
+
+.sidebarNavActive .navIcon {
+  opacity: 1;
+}
+
+/* Shown only on the phone / tablet layout (see the media query), where it
+   toggles the collapsed menu. display:none keeps it out of the desktop
+   sidebar and out of the tab order there. */
+.navToggle {
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 0.55rem 0.8rem;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
 }
 
 .sidebarFooter {
@@ -215,22 +253,44 @@
   gap: 1rem;
 }
 
-@media (max-width: 640px) {
+/* Phone + tablet: the sidebar becomes a full-width header and the menu
+   collapses behind the "Menu" button so it never pushes the page down. */
+@media (max-width: 900px) {
   .shell {
     flex-direction: column;
   }
   .sidebar {
     width: auto;
     flex: none;
-    flex-direction: row;
-    overflow-x: auto;
+    position: static;
+    height: auto;
+    overflow: visible;
+    flex-direction: column;
+    gap: 0.9rem;
+    padding: 1rem 1rem 1.1rem;
+    border-right: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   }
+  .navToggle {
+    display: flex;
+  }
+  /* Collapsed by default; the button flips data-open. */
   .sidebarNav {
-    flex-direction: row;
-  }
-  .sidebarFooter {
     display: none;
   }
+  .sidebarNav[data-open="true"] {
+    display: flex;
+  }
+  .sidebarFooter {
+    margin-top: 0;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 640px) {
   .grid2 {
     grid-template-columns: 1fr;
   }
@@ -363,22 +423,6 @@
   padding: 0 0.75rem;
 }
 
-@media (max-width: 640px) {
-  .sidebarNav {
-    flex-direction: row;
-    gap: 0.75rem;
-  }
-  .sidebarGroup {
-    flex-direction: row;
-    margin-bottom: 0;
-    flex-shrink: 0;
-  }
-  /* The group headings would double the sidebar's height on a phone, where it
-     is a single horizontal scroller. */
-  .sidebarGroupTitle {
-    display: none;
-  }
-}
 
 /* Separates two independent forms sharing one card (e.g. contact details vs.
    contact page artwork), so they don't read as one long form. */
@@ -386,4 +430,84 @@
   border: 0;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   margin: 1.75rem 0;
+}
+
+/* ---------------------------------------------------------------------------
+   Added in the pages pass: definition lists for template descriptions,
+   checkboxes with explanatory text, and the built-in route rows.
+   --------------------------------------------------------------------------- */
+
+.defList {
+  margin: 0 0 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.defList dt {
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.92rem;
+  margin-bottom: 0.2rem;
+}
+
+.defList dd {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+/* A checkbox whose label carries a second explanatory line. The label is a
+   flex column elsewhere in this file, so the row direction has to be forced. */
+.inlineCheck {
+  flex-direction: row !important;
+  align-items: flex-start;
+  gap: 0.6rem !important;
+}
+
+.inlineCheck input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin-top: 0.2rem;
+  flex: 0 0 auto;
+  accent-color: #6ea8ff;
+}
+
+.inlineCheck > span {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  color: #fff;
+  font-size: 0.88rem;
+}
+
+.routeHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+
+.routePath {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.8rem;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+}
+
+.badgeWarn {
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #ffbe5c;
+  border: 1px solid rgba(255, 190, 92, 0.4);
+  background: rgba(255, 190, 92, 0.1);
+  border-radius: 999px;
+  padding: 0.2rem 0.6rem;
+  white-space: nowrap;
 }

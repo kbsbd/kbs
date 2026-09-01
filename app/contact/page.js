@@ -2,6 +2,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { getFooterLinks, getSocialLinks } from "@/lib/data/footer";
 import { getSiteSettings } from "@/lib/data/site";
+import { buildRouteMetadata } from "@/lib/data/routes";
 import ContactForm from "./ContactForm";
 import styles from "./contact.module.css";
 
@@ -29,10 +30,12 @@ export async function generateMetadata() {
   const settings = await getSiteSettings();
   const name = settings.site_name || "KBS";
 
-  return {
+  /* Search visibility for this route is admin-controlled — see
+     lib/data/routes.js and Admin → Search & visibility. */
+  return buildRouteMetadata("/contact", {
     title: "Contact",
     description: `Get in touch with ${name} — address, phone, email, and a direct message form.`,
-  };
+  });
 }
 
 /** Builds the info cards, skipping any whose fields the admin has cleared. */

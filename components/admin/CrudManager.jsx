@@ -20,6 +20,14 @@ import styles from "./CrudManager.module.css";
  *   { name, label, type, options?, placeholder?, required?, hint?, accept? }
  * type is one of: text | url | tel | number | select | checkbox | textarea |
  *                 color | media
+ *
+ * `extraFields` is a flat {name: value} map rendered as hidden inputs on both
+ * the create and edit forms — how the page editor tells every section which
+ * page it belongs to. Values only; never pass a function through here, because
+ * these props cross the Server/Client boundary and functions do not serialise.
+ * Anything derived — a jsonb list shown as editable lines, or the small grey
+ * label under each row (`metaKey`, default `meta`) — is computed onto the row
+ * by the Server Component before it reaches this one.
  */
 
 const initialState = { ok: false, message: "" };
@@ -88,6 +96,7 @@ function Field({ field, row }) {
           placeholder={field.placeholder}
           required={field.required}
         />
+        {field.hint && <span className={styles.hint}>{field.hint}</span>}
       </label>
     );
   }
@@ -108,12 +117,24 @@ function Field({ field, row }) {
   );
 }
 
-function EditForm({ fields, row, action, onDone }) {
+function HiddenFields({ extraFields }) {
+  if (!extraFields) return null;
+  return (
+    <>
+      {Object.entries(extraFields).map(([name, val]) => (
+        <input key={name} type="hidden" name={name} value={val} />
+      ))}
+    </>
+  );
+}
+
+function EditForm({ fields, row, action, onDone, extraFields }) {
   const [state, formAction, pending] = useActionState(action, initialState);
 
   return (
     <form action={formAction} className={styles.form}>
       <input type="hidden" name="id" value={row.id} />
+      <HiddenFields extraFields={extraFields} />
       <div className={styles.fieldGrid}>
         {fields.map((field) => (
           <Field key={field.name} field={field} row={row} />
@@ -136,7 +157,7 @@ function EditForm({ fields, row, action, onDone }) {
   );
 }
 
-function CreateForm({ fields, action, addLabel }) {
+function CreateForm({ fields, action, addLabel, extraFields }) {
   const [state, formAction, pending] = useActionState(action, initialState);
   const [open, setOpen] = useState(false);
 
@@ -150,6 +171,7 @@ function CreateForm({ fields, action, addLabel }) {
 
   return (
     <form action={formAction} className={styles.form}>
+      <HiddenFields extraFields={extraFields} />
       <div className={styles.fieldGrid}>
         {fields.map((field) => (
           <Field key={field.name} field={field} row={undefined} />
@@ -225,6 +247,8 @@ export default function CrudManager({
   primaryKey = "label",
   secondaryKey = "href",
   confirmLabel = "Delete this permanently?",
+  metaKey = "meta",
+  extraFields,
 }) {
   const [editingId, setEditingId] = useState(null);
 
@@ -246,9 +270,7 @@ export default function CrudManager({
                     {inactive && <span className={styles.badge}>hidden</span>}
                   </strong>
                   <span className={styles.itemSub}>{row[secondaryKey]}</span>
-                  {row._meta != null && row._meta !== "" && (
-                    <span className={styles.itemMeta}>{row._meta}</span>
-                  )}
+                  {row[metaKey] && <span className={styles.itemMeta}>{row[metaKey]}</span>}
                 </div>
 
                 <div className={styles.itemActions}>
@@ -295,6 +317,7 @@ export default function CrudManager({
                   row={row}
                   action={updateAction}
                   onDone={() => setEditingId(null)}
+                  extraFields={extraFields}
                 />
               )}
             </li>
@@ -303,7 +326,12 @@ export default function CrudManager({
       </ul>
 
       <div className={styles.createArea}>
-        <CreateForm fields={fields} action={createAction} addLabel={addLabel} />
+        <CreateForm
+          fields={fields}
+          action={createAction}
+          addLabel={addLabel}
+          extraFields={extraFields}
+        />
       </div>
     </div>
   );

@@ -30,8 +30,14 @@ const SLIDER_OPTIONS = {
   autoplay: { delay: 6000, disableOnInteraction: false },
 };
 
-export default function AboutReviewSlider() {
+/* `reviews` comes from the section's stored blocks so the quotes are
+   editable; ABOUT_REVIEWS remains the fallback. Slider options, autoplay and
+   drag behaviour are unchanged. */
+export default function AboutReviewSlider({ reviews }) {
+  const data = reviews?.length ? reviews : ABOUT_REVIEWS;
   const slider = useRef(null);
+
+  if (data.length === 0) return null;
 
   return (
     <NativeSlider
@@ -41,11 +47,11 @@ export default function AboutReviewSlider() {
       clickFirstDrag
       className="th-slider landowner-review-slider"
     >
-      {ABOUT_REVIEWS.map((r) => (
-        <div className="swiper-slide" key={`${r.name}-${r.desig}`}>
+      {data.map((r) => (
+        <div className="swiper-slide" key={`${r.name}-${r.desig || r.role || ""}`}>
           <div className="testi-card">
             <div className="testi-grid_review">
-              {Array.from({ length: r.stars }).map((_, i) => (
+              {Array.from({ length: r.stars || 5 }).map((_, i) => (
                 // eslint-disable-next-line react/no-array-index-key
                 <i className="fa-solid fa-star" key={i} />
               ))}
@@ -57,7 +63,7 @@ export default function AboutReviewSlider() {
               </div>
               <div className="media-body">
                 <h3 className="testi-card_name">{r.name}</h3>
-                <span className="testi-card_desig">{r.desig}</span>
+                <span className="testi-card_desig">{r.desig || r.role}</span>
               </div>
             </div>
           </div>

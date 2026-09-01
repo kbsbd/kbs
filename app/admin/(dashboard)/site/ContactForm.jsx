@@ -83,7 +83,7 @@ function DetailsForm({ settings }) {
 
       <p className={styles.fieldHint}>
         Changing the phone or WhatsApp number here does not move the floating Call / WhatsApp
-        buttons — those have their own links under CTA Buttons.
+        buttons — those have their own links under Site settings → Floating buttons.
       </p>
 
       {state.message && (

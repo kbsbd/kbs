@@ -6,17 +6,18 @@ import {
   updateFeaturedSection,
   updateTestimonialsSection,
   updateSbuSection,
+  updatePropertiesArchive,
 } from "@/lib/actions/homepage";
 import styles from "../../admin.module.css";
 
-export const metadata = { title: "Homepage" };
+export const metadata = { title: "Home page sections" };
 
 export default async function AdminHomepagePage() {
   const settings = await getSiteSettings();
 
   return (
     <>
-      <h1 className={styles.pageTitle}>Homepage</h1>
+      <h1 className={styles.pageTitle}>Home page sections</h1>
       <p className={styles.pageDescription}>
         The heading, blurb and button on each band of the homepage, in the order they appear.
       </p>
@@ -24,10 +25,10 @@ export default async function AdminHomepagePage() {
       <div className={styles.notice}>
         <strong>What lives elsewhere</strong>
         <p>
-          The hero video is under <Link href="/admin/hero">Hero &amp; Video</Link>, the arrival
-          video under <Link href="/admin/arrival">Statement of Arrival</Link>, the review images
-          under <Link href="/admin/testimonials">Testimonials</Link>, and the business units under{" "}
-          <Link href="/admin/sbu">SBU Units</Link>. Which properties appear in the Special offer and
+          The hero video is under <Link href="/admin/hero">Hero video</Link>, the mid-page video
+          under <Link href="/admin/arrival">Video band</Link>, the review images
+          under <Link href="/admin/testimonials">Customer reviews</Link>, and the business units under{" "}
+          <Link href="/admin/sbu">Business units</Link>. Which properties appear in the Special offer and
           Featured bands is set per property under <Link href="/admin/properties">Properties</Link>.
         </p>
       </div>
@@ -140,6 +141,33 @@ export default async function AdminHomepagePage() {
               value: settings.sbu_bg_url,
               folder: "kbs/homepage",
               hint: "Sits behind the slider under a dark overlay. A wide, low-contrast photo works best.",
+            },
+          ]}
+        />
+      </div>
+      <div className={styles.card}>
+        <h2 className={styles.cardTitle}>Properties listing page</h2>
+        <p className={styles.fieldHint} style={{ display: "block", marginBottom: "1.25rem" }}>
+          The <code>/properties</code> page is a banner photo over the search form, then a grid
+          built from your property records — so there is no headline or intro to edit here. Its
+          title and description in search results live under Search &amp; visibility.
+        </p>
+        <SectionForm
+          action={updatePropertiesArchive}
+          fields={[
+            {
+              name: "properties_hero_url",
+              label: "Banner photo",
+              type: "media",
+              value: settings.properties_hero_url,
+              folder: "kbs/pages",
+            },
+            {
+              name: "properties_count_label",
+              label: "Results count wording",
+              value: settings.properties_count_label,
+              placeholder: "ongoing properties",
+              hint: "Reads as “12 ongoing properties”. Change the words after the number.",
             },
           ]}
         />

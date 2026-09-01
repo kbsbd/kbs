@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import ProfileForm from "./ProfileForm";
 import styles from "../../admin.module.css";
 
-export const metadata = { title: "Profile" };
+export const metadata = { title: "My account" };
 
 export default async function AdminProfilePage() {
   const supabase = await createClient();
@@ -12,7 +12,7 @@ export default async function AdminProfilePage() {
 
   return (
     <>
-      <h1 className={styles.pageTitle}>Profile</h1>
+      <h1 className={styles.pageTitle}>My account</h1>
       <p className={styles.pageDescription}>Update the admin sign-in email or password.</p>
 
       <div className={styles.card}>

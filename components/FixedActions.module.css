@@ -73,21 +73,28 @@
 }
 
 /* ==========================================================================
-   Tablet + mobile: collapse to a single dot indicator
+   Tablet + mobile: collapse to a single draggable dot indicator
    ========================================================================== */
 @media (max-width: 1024px) {
+  /* The wrap shrinks to just the dot; the panel is taken out of normal flow
+     (position: absolute) so the dot alone is what a dragged position anchors
+     to. Default corner is bottom-right; JS overrides left/top once dragged. */
   .wrap {
     right: 12px;
     top: auto;
     bottom: max(20px, env(safe-area-inset-bottom, 0px));
     transform: none;
-    gap: 10px;
+    gap: 0;
+    touch-action: none;
   }
 
   /* Collapsed is the DEFAULT here — no attribute selector — so it holds on the
      server-rendered markup too. visibility:hidden (not opacity alone) is what
      takes the links out of the tab order and the a11y tree while closed. */
   .panel {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 10px);
     gap: 8px;
     opacity: 0;
     visibility: hidden;
@@ -95,6 +102,22 @@
     transform-origin: bottom right;
     pointer-events: none;
     transition: opacity 0.22s ease, transform 0.22s ease, visibility 0.22s;
+  }
+
+  /* Unfold toward the middle of the screen from wherever the dot was parked. */
+  .wrap[data-side="left"] .panel {
+    right: auto;
+    left: 0;
+    transform-origin: bottom left;
+  }
+  .wrap[data-dir="down"] .panel {
+    bottom: auto;
+    top: calc(100% + 10px);
+    transform: scale(0.8) translateY(-12px);
+    transform-origin: top right;
+  }
+  .wrap[data-dir="down"][data-side="left"] .panel {
+    transform-origin: top left;
   }
 
   .wrap[data-open="true"] .panel {
@@ -116,6 +139,16 @@
     opacity: 0;
     transform: scale(0.5) translateY(20px);
     transition: opacity 0.22s ease, transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .wrap[data-side="left"] .action {
+    transform-origin: bottom left;
+  }
+  .wrap[data-dir="down"] .action {
+    transform-origin: top right;
+    transform: scale(0.5) translateY(-20px);
+  }
+  .wrap[data-dir="down"][data-side="left"] .action {
+    transform-origin: top left;
   }
 
   .wrap[data-open="true"] .action {
@@ -142,6 +175,7 @@
     background: rgba(0, 0, 0, 0.55);
     backdrop-filter: blur(6px);
     cursor: pointer;
+    touch-action: none;
     -webkit-tap-highlight-color: transparent;
     transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
       background-color 0.2s ease;
@@ -150,6 +184,18 @@
   .dot:focus-visible {
     outline: 2px solid #fff;
     outline-offset: 3px;
+  }
+
+  /* Being dragged: lift it, drop the halo, and don't spring on every move. */
+  .wrap[data-dragging="true"] .dot {
+    transition: background-color 0.2s ease;
+    transform: scale(1.12);
+    background: rgba(0, 0, 0, 0.8);
+    cursor: grabbing;
+  }
+  .wrap[data-dragging="true"] .dotPulse {
+    animation: none;
+    opacity: 0;
   }
 
   .dotCore {

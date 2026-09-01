@@ -3,7 +3,7 @@ import { getNavLinks } from "@/lib/data/nav";
 import { createNavLink, updateNavLink, deleteNavLink, moveNavLink } from "@/lib/actions/nav";
 import styles from "../../admin.module.css";
 
-export const metadata = { title: "Navigation" };
+export const metadata = { title: "Menu links" };
 
 const FIELDS = [
   { name: "label", label: "Label", type: "text", required: true, placeholder: "About Us" },
@@ -48,14 +48,18 @@ const PLACEMENT_LABELS = {
 };
 
 export default async function AdminNavigationPage() {
-  const links = (await getNavLinks()).map((row) => ({
-    ...row,
-    _meta: PLACEMENT_LABELS[row.placement] || row.placement,
+  const links = await getNavLinks();
+
+  /* The small grey label under each row is computed here, not passed as a
+     render function — a function prop cannot cross into a Client Component. */
+  const rows = links.map((link) => ({
+    ...link,
+    meta: PLACEMENT_LABELS[link.placement] || link.placement,
   }));
 
   return (
     <>
-      <h1 className={styles.pageTitle}>Navigation</h1>
+      <h1 className={styles.pageTitle}>Menu links</h1>
       <p className={styles.pageDescription}>
         The links in the header bar and the slide-out menu. “Header bar” is the short strip next to
         the logo on desktop; “menu drawer” is the panel behind the ☰ button, which is also the whole
@@ -64,7 +68,7 @@ export default async function AdminNavigationPage() {
 
       <div className={styles.card}>
         <CrudManager
-          rows={links}
+          rows={rows}
           fields={FIELDS}
           createAction={createNavLink}
           updateAction={updateNavLink}

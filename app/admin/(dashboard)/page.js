@@ -28,11 +28,11 @@ async function getCounts() {
 }
 
 const QUICK_LINKS = [
-  { href: "/admin/site", label: "Site & branding" },
-  { href: "/admin/navigation", label: "Menu links" },
-  { href: "/admin/cta", label: "CTA buttons" },
-  { href: "/admin/hero", label: "Hero video" },
   { href: "/admin/properties/new", label: "Add a property" },
+  { href: "/admin/pages", label: "Edit a page" },
+  { href: "/admin/homepage", label: "Home page sections" },
+  { href: "/admin/site", label: "Branding & contact" },
+  { href: "/admin/navigation", label: "Menu links" },
   { href: "/admin/media", label: "Media library" },
 ];
 
@@ -65,7 +65,7 @@ export default async function AdminOverviewPage() {
           </div>
           <div className={styles.statBox}>
             <span className={styles.statValue}>{counts.leads}</span>
-            <span className={styles.statLabel}>Leads captured</span>
+            <span className={styles.statLabel}>Contact form enquiries</span>
           </div>
           <div className={styles.statBox}>
             <span className={styles.statValue}>{counts.subscribers}</span>

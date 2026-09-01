@@ -3,7 +3,7 @@ import { getSbuUnits } from "@/lib/data/sbu";
 import { createSbuUnit, updateSbuUnit, deleteSbuUnit, moveSbuUnit } from "@/lib/actions/sbu";
 import styles from "../../admin.module.css";
 
-export const metadata = { title: "SBU Units" };
+export const metadata = { title: "Business units" };
 
 const FIELDS = [
   {
@@ -42,7 +42,7 @@ export default async function AdminSbuPage() {
 
   return (
     <>
-      <h1 className={styles.pageTitle}>SBU Units</h1>
+      <h1 className={styles.pageTitle}>Business units</h1>
       <p className={styles.pageDescription}>
         The business units in the “Other Initiatives” slider near the bottom of the homepage.
       </p>

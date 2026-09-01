@@ -8,7 +8,7 @@ import {
 } from "@/lib/actions/testimonials";
 import styles from "../../admin.module.css";
 
-export const metadata = { title: "Testimonials" };
+export const metadata = { title: "Customer reviews" };
 
 const FIELDS = [
   {
@@ -44,14 +44,16 @@ const FIELDS = [
 ];
 
 export default async function AdminTestimonialsPage() {
-  const testimonials = (await getTestimonials({ includeInactive: true })).map((row) => ({
-    ...row,
-    _meta: row.width && row.height ? `${row.width}×${row.height}` : null,
+  const testimonials = await getTestimonials({ includeInactive: true });
+
+  const rows = testimonials.map((item) => ({
+    ...item,
+    meta: item.width && item.height ? `${item.width}\u00d7${item.height}` : null,
   }));
 
   return (
     <>
-      <h1 className={styles.pageTitle}>Testimonials</h1>
+      <h1 className={styles.pageTitle}>Customer reviews</h1>
       <p className={styles.pageDescription}>
         The customer-review images in the homepage slider. Clicking one on the site opens it full
         size in a lightbox.
@@ -67,7 +69,7 @@ export default async function AdminTestimonialsPage() {
 
       <div className={styles.card}>
         <CrudManager
-          rows={testimonials}
+          rows={rows}
           fields={FIELDS}
           createAction={createTestimonial}
           updateAction={updateTestimonial}
