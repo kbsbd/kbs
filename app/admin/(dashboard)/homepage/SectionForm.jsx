@@ -33,6 +33,7 @@ export default function SectionForm({ action, fields, submitLabel = "Save" }) {
               accept={field.accept || "image"}
               folder={field.folder || "kbs"}
               hint={field.hint}
+              {...(field.maxDimension ? { maxDimension: field.maxDimension } : {})}
             />
           );
         }

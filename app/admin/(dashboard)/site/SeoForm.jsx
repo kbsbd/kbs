@@ -44,7 +44,8 @@ export default function SeoForm({ settings }) {
         label="Share image"
         defaultValue={settings.og_image_url || ""}
         folder="kbs/brand"
-        hint="Shown when the site is shared on Facebook, WhatsApp or LinkedIn. 1200×630 is the standard size."
+        maxDimension={1200}
+        hint="Shown when the site is shared on Facebook, WhatsApp or LinkedIn. 1200×630 is the standard size; larger uploads are shrunk to fit."
       />
 
       {state.message && (

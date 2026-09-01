@@ -46,6 +46,7 @@ function Field({ field, row }) {
         folder={field.folder || "kbs"}
         hint={field.hint}
         required={field.required}
+        {...(field.maxDimension ? { maxDimension: field.maxDimension } : {})}
       />
     );
   }

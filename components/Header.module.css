@@ -725,8 +725,19 @@
 
 /* Logo image, used when site_settings.logo_url is set. Without a logo the
    header falls back to the site-name wordmark, which .headerLogo already
-   styles, so this rule only has to size the <img>. */
-.headerLogoImg {
+   styles, so this rule only has to size the <img>.
+ *
+ * The selector is deliberately heavier than it looks. The theme's global
+ * image reset in theme.css is:
+ *
+ *     img:not([draggable]), embed, object, video { max-width: 100%; height: auto }
+ *
+ * `:not()` takes the specificity of its argument, so that selector scores
+ * (0,1,1) — which BEATS a lone class at (0,1,0). A plain `.headerLogoImg`
+ * rule loses the height and max-width to it and the logo renders at its
+ * natural size; a 288px square logo then swamps the header. Qualifying with
+ * the parent and the element takes this to (0,2,1) so it wins cleanly. */
+.headerLogo img.headerLogoImg {
   display: block;
   height: 38px;
   width: auto;
@@ -735,7 +746,7 @@
 }
 
 @media (max-width: 767px) {
-  .headerLogoImg {
+  .headerLogo img.headerLogoImg {
     height: 30px;
     max-width: 150px;
   }

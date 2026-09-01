@@ -18,7 +18,8 @@ const FIELDS = [
     label: "Logo",
     type: "media",
     folder: "kbs/sbu",
-    hint: "Shown as a square tile behind a shaped mask. A square image on a plain background works best.",
+    maxDimension: 600,
+    hint: "Shown as a square tile behind a shaped mask, about 500px. A square image on a plain background works best.",
   },
   {
     name: "description",

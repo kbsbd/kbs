@@ -38,8 +38,8 @@ export default function BrandingForm({ settings }) {
         label="Header logo"
         defaultValue={settings.logo_url || ""}
         folder="kbs/brand"
-        resize={{ maxWidth: 600, maxHeight: 240 }}
-        hint="Leave empty to show the site name as a text wordmark instead. An SVG scales to any screen and is ideal; a transparent PNG also works — large ones are automatically resized down (to ~600px, plenty for high-density displays) before upload."
+        maxDimension={400}
+        hint="Leave empty to show the site name as a text wordmark instead. A transparent PNG or SVG works best. Big files are shrunk to 400px on upload — the header shows it about 38px tall, so anything larger is wasted."
       />
 
       <label>
@@ -57,8 +57,8 @@ export default function BrandingForm({ settings }) {
         label="Favicon (browser tab icon)"
         defaultValue={settings.favicon_url || ""}
         folder="kbs/brand"
-        resize={{ maxWidth: 128, maxHeight: 128 }}
-        hint="A square PNG or ICO. Upload any size — it's resized to 128×128 before upload."
+        maxDimension={256}
+        hint="A square PNG or ICO. Anything larger is shrunk to 256px, which covers every browser size."
       />
 
       <MediaPicker
@@ -66,8 +66,8 @@ export default function BrandingForm({ settings }) {
         label="Apple touch icon"
         defaultValue={settings.apple_icon_url || ""}
         folder="kbs/brand"
-        resize={{ maxWidth: 180, maxHeight: 180 }}
-        hint="Shown when someone saves the site to an iPhone home screen. Square — it's resized to 180×180 before upload."
+        maxDimension={180}
+        hint="Shown when someone saves the site to an iPhone home screen. Square — shrunk to 180×180, which is the size iOS asks for."
       />
 
       {state.message && (
