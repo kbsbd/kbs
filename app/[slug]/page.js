@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import CmsPageView, { cmsPageMetadata } from "@/components/pages/CmsPageView";
-import { getPageBySlug, getPages } from "@/lib/data/pages";
+import { getPageBySlug } from "@/lib/data/pages";
 
 /*
  * Serves every page built from the dashboard, at /<slug>.
@@ -11,22 +11,17 @@ import { getPageBySlug, getPages } from "@/lib/data/pages";
  * route only ever sees a path that nothing else claimed — and if there is no
  * matching row, it 404s exactly as an unknown URL should.
  *
+ * Rendered per-request (not statically): getPageBySlug reads the request
+ * cookies through the Supabase server client, so this route can't be
+ * prerendered. A `generateStaticParams` here would make Next try to statically
+ * generate unknown slugs and then crash with "static to dynamic at runtime".
+ *
  * Migration 0007 also blocks the built-in slugs at the database level, so a
  * page can't be created at a name that would be shadowed and silently
  * unreachable.
  */
 
-export const dynamicParams = true;
-
-/** Pre-renders the pages that exist at build time; new ones render on demand. */
-export async function generateStaticParams() {
-  const pages = await getPages();
-  return pages
-    // about/nrb/landowner have their own route files; listing them here too
-    // would declare the same path twice.
-    .filter((page) => !["about", "nrb", "landowner"].includes(page.slug))
-    .map((page) => ({ slug: page.slug }));
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
