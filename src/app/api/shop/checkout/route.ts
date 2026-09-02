@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
+import { createAuthClient } from "@/lib/supabase/auth";
 import { sendMail } from "@/lib/mail";
 import { seed } from "@/content/seed";
 import { shippingFor } from "@/components/shop/checkout-math";
@@ -58,6 +59,10 @@ export async function POST(req: Request) {
   if (!supabase)
     return NextResponse.json({ error: "store is not available" }, { status: 503 });
 
+  // link to the signed-in customer, if there is one
+  const authed = await createAuthClient();
+  const userId = authed ? (await authed.auth.getUser()).data.user?.id ?? null : null;
+
   // fresh product data — never trust the client's prices
   const { data: rows, error: fetchErr } = await supabase
     .from("products")
@@ -97,6 +102,7 @@ export async function POST(req: Request) {
     const { data, error } = await supabase
       .from("quote_requests")
       .insert({
+        user_id: userId,
         name,
         email,
         phone,
@@ -141,6 +147,7 @@ export async function POST(req: Request) {
   const { data: order, error: orderErr } = await supabase
     .from("orders")
     .insert({
+      user_id: userId,
       status: "pending",
       payment_status: "unpaid",
       payment_method: "cod",

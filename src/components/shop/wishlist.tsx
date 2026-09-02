@@ -1,11 +1,12 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { createContext, useContext, useEffect, useRef, useState, useCallback } from "react";
+import { browserClient } from "@/lib/supabase/browser";
 
 /**
- * Wishlist. For now it lives in localStorage, keyed by product id. When accounts
- * land, a signed-in visitor's local list is merged into the `wishlists` table on
- * login and this provider reads from there instead.
+ * Wishlist. Anonymous visitors keep it in localStorage. Once signed in, the
+ * local list is merged into the `wishlists` table and every toggle writes
+ * through to the database, so it follows the account across devices.
  */
 
 const KEY = "kbs:wishlist:v1";
@@ -30,26 +31,60 @@ function load(): string[] {
 
 export function WishlistProvider({ children }: { children: React.ReactNode }) {
   const [ids, setIds] = useState<string[]>([]);
-  const [hydrated, setHydrated] = useState(false);
+  const userId = useRef<string | null>(null);
+  const hydrated = useRef(false);
 
-  // one-time read of the persisted list after mount
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIds(load());
-    setHydrated(true);
+    const local = load();
+    const sb = browserClient();
+
+    async function init() {
+      const { data } = (await sb?.auth.getUser()) ?? { data: { user: null } };
+      if (sb && data.user) {
+        userId.current = data.user.id;
+        const { data: rows } = await sb.from("wishlists").select("product_id").eq("user_id", data.user.id);
+        const remote = (rows ?? []).map((r) => String(r.product_id));
+        const merged = Array.from(new Set([...remote, ...local]));
+        // push anything that was only local
+        const toAdd = local.filter((id) => !remote.includes(id));
+        if (toAdd.length) {
+          await sb.from("wishlists").insert(toAdd.map((id) => ({ user_id: data.user!.id, product_id: id })));
+        }
+        setIds(merged);
+        try {
+          localStorage.removeItem(KEY);
+        } catch {
+          /* ignore */
+        }
+      } else {
+        setIds(local);
+      }
+      hydrated.current = true;
+    }
+    init();
   }, []);
 
   useEffect(() => {
-    if (!hydrated) return;
+    if (!hydrated.current || userId.current) return;
     try {
       localStorage.setItem(KEY, JSON.stringify(ids));
     } catch {
       /* ignore */
     }
-  }, [ids, hydrated]);
+  }, [ids]);
 
   const toggle = useCallback((id: string) => {
-    setIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+    setIds((prev) => {
+      const on = prev.includes(id);
+      const next = on ? prev.filter((x) => x !== id) : [...prev, id];
+      const sb = browserClient();
+      const uid = userId.current;
+      if (sb && uid) {
+        if (on) sb.from("wishlists").delete().eq("user_id", uid).eq("product_id", id).then(() => {});
+        else sb.from("wishlists").insert({ user_id: uid, product_id: id }).then(() => {});
+      }
+      return next;
+    });
   }, []);
 
   return (

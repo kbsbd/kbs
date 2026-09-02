@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import type { Locale, SiteContent } from "@/content/seed";
 import FixedActions from "@/components/FixedActions";
 import CartButton from "@/components/shop/CartButton";
+import AccountLink from "@/components/auth/AccountLink";
 
 /**
  * Everything that wraps the page: the nav, the footer, the living line, the
@@ -183,6 +184,7 @@ export default function SiteChrome({
               {t(content.nav.langLabel)}
             </Link>
 
+            {shopOn && <AccountLink l={locale} />}
             {shopOn && <CartButton label={t(content.shop.labels.cart)} />}
 
             <a
