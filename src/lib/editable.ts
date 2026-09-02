@@ -111,14 +111,46 @@ export const SITE_FIELDS: Array<{ key: string; label: string; hint?: string; typ
   },
   { key: "email", label: "Email address" },
   { key: "mapEmbed", label: "Google Maps embed URL", hint: "Leave blank to hide the map" },
+];
+
+/**
+ * The Integrations tab. Stored under the `integrations` key, separate from the
+ * business details. Blank = that tag never loads.
+ */
+export const INTEGRATION_FIELDS: Array<{
+  key: string;
+  label: string;
+  placeholder?: string;
+  hint?: string;
+}> = [
+  {
+    key: "gtmId",
+    label: "Google Tag Manager",
+    placeholder: "GTM-XXXXXXX",
+    hint: "tagmanager.google.com → your container → the GTM-XXXXXXX id at the top. Once this is set you can add Google Ads, GA, TikTok, LinkedIn and any other tag from inside GTM without touching the site.",
+  },
+  {
+    key: "ga4Id",
+    label: "Google Analytics 4",
+    placeholder: "G-XXXXXXXXXX",
+    hint: "Only needed if you are NOT using Tag Manager. Analytics → Admin → Data streams → your stream → Measurement ID.",
+  },
   {
     key: "metaPixelId",
-    label: "Meta Pixel ID",
-    hint: "Blank means no Meta script loads at all. Booking submissions fire the Lead event.",
+    label: "Meta (Facebook) Pixel ID",
+    placeholder: "123456789012345",
+    hint: "Events Manager → your pixel → Settings. The contact form and the site-visit booking both fire the Lead event.",
   },
   {
     key: "googleSiteVerification",
-    label: "Google Search Console verification code",
-    hint: "The content value from the HTML tag method, not the whole tag",
+    label: "Google Search Console — verification",
+    placeholder: '<meta name="google-site-verification" content="..."> or just the code',
+    hint: "In Search Console pick the URL-prefix property for https://kbsbd.com, choose the “HTML tag” method, and paste the whole tag (or just the code) here. Save, then click Verify back in Search Console.",
+  },
+  {
+    key: "bingSiteVerification",
+    label: "Bing Webmaster Tools — verification",
+    placeholder: '<meta name="msvalidate.01" content="..."> or just the code',
+    hint: "Bing Webmaster Tools → Add site → “HTML Meta Tag” method. Paste the tag or code, save, then verify in Bing.",
   },
 ];

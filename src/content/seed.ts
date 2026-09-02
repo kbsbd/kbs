@@ -437,8 +437,25 @@ export const site = {
   },
   mapEmbed: "",
   socials: [] as Array<{ id: string; label: string; href: string }>,
+};
+
+/**
+ * Third-party integrations. All admin-editable, all blank by default — a blank
+ * value loads no script and adds no tag, so a fresh install ships with zero
+ * third parties. Verification fields accept either the bare code or the whole
+ * <meta> tag pasted from the provider; the site pulls the code out either way.
+ */
+export const integrations = {
+  /** GTM-XXXXXXX — the container. Once set, add any other tag through GTM. */
+  gtmId: "",
+  /** G-XXXXXXXXXX — GA4, for when GTM is not in use. */
+  ga4Id: "",
+  /** Numeric Meta (Facebook) Pixel id. Booking + contact submits fire Lead. */
   metaPixelId: "",
+  /** Google Search Console, HTML-tag method. */
   googleSiteVerification: "",
+  /** Bing Webmaster Tools, meta-tag method. */
+  bingSiteVerification: "",
 };
 
 export const footer = {
@@ -642,6 +659,7 @@ export const contact = {
 
 export const seed = {
   site,
+  integrations,
   nav,
   heroBands,
   staticHero,

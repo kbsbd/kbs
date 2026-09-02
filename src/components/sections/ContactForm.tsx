@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { Locale, SiteContent } from "@/content/seed";
 import ChannelIcon from "@/components/ChannelIcon";
+import { trackLead } from "@/components/Integrations";
 
 /**
  * The contact / reach-us form. One endpoint, /api/contact, which emails the
@@ -40,7 +41,7 @@ export default function ContactForm({ c, l }: { c: SiteContent; l: Locale }) {
       });
       if (!res.ok) throw new Error("failed");
       setState("sent");
-      window.fbq?.("track", "Lead", { content_name: "contact" });
+      trackLead("contact");
     } catch {
       setState("error");
     }

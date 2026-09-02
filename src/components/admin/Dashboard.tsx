@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import type { EditableString } from "@/lib/editable";
-import { SITE_FIELDS } from "@/lib/editable";
+import { SITE_FIELDS, INTEGRATION_FIELDS } from "@/lib/editable";
 import ImageUpload from "@/components/admin/ImageUpload";
 import {
   saveContent,
@@ -42,12 +42,20 @@ type Props = {
   email: string;
   groups: Record<string, EditableString[]>;
   site: Record<string, unknown>;
+  integrations: Record<string, unknown>;
   bookings: Booking[];
   projects: Project[];
   notes: Array<{ key: string; value: string }>;
 };
 
-const TABS = ["Bookings", "Site details", "Text", "Projects", "Internal"] as const;
+const TABS = [
+  "Bookings",
+  "Site details",
+  "Text",
+  "Projects",
+  "Integrations",
+  "Internal",
+] as const;
 type Tab = (typeof TABS)[number];
 
 const STATUSES = ["new", "contacted", "visit booked", "visited", "closed"];
@@ -60,6 +68,7 @@ export default function Dashboard({
   email,
   groups,
   site,
+  integrations,
   bookings,
   projects,
   notes,
@@ -126,6 +135,9 @@ export default function Dashboard({
         {tab === "Site details" && <SiteDetails site={site} groups={groups} notify={setToast} />}
         {tab === "Text" && <TextEditor groups={groups} notify={setToast} />}
         {tab === "Projects" && <Projects rows={projects} notify={setToast} />}
+        {tab === "Integrations" && (
+          <IntegrationsPanel data={integrations} notify={setToast} />
+        )}
         {tab === "Internal" && <Internal notes={notes} notify={setToast} />}
       </div>
     </main>
@@ -397,6 +409,107 @@ function BiField({
           />
         </label>
       </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+
+function IntegrationsPanel({
+  data,
+  notify,
+}: {
+  data: Record<string, unknown>;
+  notify: (s: string) => void;
+}) {
+  const [values, setValues] = useState<Record<string, string>>(() =>
+    Object.fromEntries(INTEGRATION_FIELDS.map((f) => [f.key, String(data[f.key] ?? "")]))
+  );
+  const [pending, start] = useTransition();
+
+  function save() {
+    const edits = INTEGRATION_FIELDS.map((f) => ({
+      root: "integrations",
+      path: f.key,
+      value: values[f.key].trim(),
+    }));
+    start(async () => {
+      const r = await saveContent(edits);
+      notify(r.ok ? "Saved. The tags update on the next page load." : r.error);
+    });
+  }
+
+  return (
+    <div className="max-w-3xl space-y-8">
+      <div className="rounded-xl border border-[color:var(--panel-edge)] bg-[color:var(--panel)]/40 p-4 text-sm leading-relaxed text-[color:var(--text-secondary)]">
+        <p className="font-mono-label text-[color:var(--text-quiet)]">
+          Verifying the domain with Google
+        </p>
+        <ol className="mt-2 list-decimal space-y-1 pl-5">
+          <li>
+            Open{" "}
+            <a
+              className="text-[color:var(--accent)] hover:underline"
+              href="https://search.google.com/search-console"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Google Search Console
+            </a>{" "}
+            and add a <strong>URL prefix</strong> property for{" "}
+            <code>https://kbsbd.com</code>.
+          </li>
+          <li>
+            Choose the <strong>HTML tag</strong> method. Google shows a line like{" "}
+            <code className="break-all">
+              &lt;meta name=&quot;google-site-verification&quot; content=&quot;…&quot;&gt;
+            </code>
+          </li>
+          <li>
+            Paste that whole line (or just the code inside{" "}
+            <code>content=&quot;…&quot;</code>) into the field below and press{" "}
+            <strong>Save changes</strong>.
+          </li>
+          <li>
+            Wait about a minute, then click <strong>Verify</strong> back in Search Console.
+            The tag is now in the <code>&lt;head&gt;</code> of every page.
+          </li>
+        </ol>
+        <p className="mt-2 text-[color:var(--text-quiet)]">
+          Bing Webmaster Tools works the same way. The DNS / TXT-record method needs
+          nothing here — that one is done at the domain registrar.
+        </p>
+      </div>
+
+      <div className="space-y-5">
+        {INTEGRATION_FIELDS.map((f) => (
+          <div key={f.key}>
+            <label className="font-mono-label text-[color:var(--text-quiet)]">
+              {f.label}
+            </label>
+            <input
+              className={`${field} mt-2 font-mono`}
+              placeholder={f.placeholder}
+              value={values[f.key]}
+              onChange={(e) => setValues((v) => ({ ...v, [f.key]: e.target.value }))}
+            />
+            {f.hint && (
+              <p className="mt-1.5 text-xs leading-relaxed text-[color:var(--text-quiet)]">
+                {f.hint}
+              </p>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <p className="text-xs leading-relaxed text-[color:var(--text-quiet)]">
+        Every field is optional. A blank field loads nothing — no third-party script and
+        no tag. None of these load on this dashboard, only on the public site.
+      </p>
+
+      <button className="btn btn-primary" onClick={save} disabled={pending}>
+        {pending ? "Saving" : "Save changes"}
+      </button>
     </div>
   );
 }

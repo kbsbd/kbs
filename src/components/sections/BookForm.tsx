@@ -4,6 +4,7 @@
 import { useState } from "react";
 import type { Locale, SiteContent } from "@/content/seed";
 import { img } from "@/lib/media";
+import { trackLead } from "@/components/Integrations";
 
 /**
  * The single call to action the whole page funnels to.
@@ -40,7 +41,7 @@ export default function BookForm({ c, l }: { c: SiteContent; l: Locale }) {
       });
       if (!res.ok) throw new Error("failed");
       setState("sent");
-      window.fbq?.("track", "Lead", { content_name: "site_visit" });
+      trackLead("site_visit");
     } catch {
       setState("error");
     }

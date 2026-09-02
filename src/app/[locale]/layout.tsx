@@ -4,6 +4,8 @@ import { Archivo, Hanken_Grotesk, IBM_Plex_Mono, Anek_Bangla, Hind_Siliguri } fr
 import "../globals.css";
 import { LOCALES, type Locale } from "@/content/seed";
 import { getContent } from "@/lib/content";
+import { resolveIntegrations } from "@/lib/integrations";
+import { img } from "@/lib/media";
 import { siteUrl } from "@/lib/site-url";
 
 /* Display: wide, geometric, architectural. Echoes the building's concrete slabs.
@@ -57,6 +59,7 @@ export async function generateMetadata({
   const { locale } = await params;
   const l = (LOCALES as readonly string[]).includes(locale) ? (locale as Locale) : "en";
   const c = await getContent();
+  const integrations = resolveIntegrations(c);
 
   const title =
     l === "bn"
@@ -71,9 +74,14 @@ export async function generateMetadata({
     metadataBase: new URL(siteUrl()),
     title,
     description,
-    other: c.site.googleSiteVerification
-      ? { "google-site-verification": c.site.googleSiteVerification }
-      : undefined,
+    other: {
+      ...(integrations.googleSiteVerification
+        ? { "google-site-verification": integrations.googleSiteVerification }
+        : {}),
+      ...(integrations.bingSiteVerification
+        ? { "msvalidate.01": integrations.bingSiteVerification }
+        : {}),
+    },
     alternates: {
       languages: { en: "/en", bn: "/bn" },
     },
@@ -83,7 +91,7 @@ export async function generateMetadata({
       type: "website",
       locale: l === "bn" ? "bn_BD" : "en_US",
       url: `${siteUrl()}/${l}`,
-      images: ["/media/hero-ending.jpg"],
+      images: [img("hero-ending", 1200)],
     },
     icons: {
       icon: [
@@ -115,6 +123,7 @@ export default async function LocaleLayout({
   if (!(LOCALES as readonly string[]).includes(locale)) notFound();
   const l = locale as Locale;
   const content = await getContent();
+  const { gtmId } = resolveIntegrations(content);
 
   const fontVars = [
     display.variable,
@@ -127,6 +136,17 @@ export default async function LocaleLayout({
   return (
     <html lang={l} className={fontVars}>
       <body>
+        {gtmId && (
+          <noscript>
+            <iframe
+              src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
+              height="0"
+              width="0"
+              style={{ display: "none", visibility: "hidden" }}
+              title="gtm"
+            />
+          </noscript>
+        )}
         <a href="#main" className="skip-link">
           {l === "bn" ? "মূল অংশে যান" : "Skip to content"}
         </a>

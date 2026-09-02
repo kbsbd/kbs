@@ -31,6 +31,7 @@ export default async function AdminPage({
       email={session!.email}
       groups={editableStrings(content)}
       site={content.site}
+      integrations={content.integrations}
       bookings={bookingsRes.data ?? []}
       projects={projectsRes.data ?? []}
       notes={notesRes.data ?? []}
