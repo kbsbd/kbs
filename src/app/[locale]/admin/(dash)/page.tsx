@@ -17,7 +17,7 @@ export default async function AdminPage({
   const supabase = await createAuthClient();
   /* The (dash) layout already gates this, but it renders alongside the page
      rather than strictly before it, so guard here too before the non-null uses. */
-  if (!session || !supabase) redirect(`/${locale}/admin/login`);
+  if (!session || !supabase) redirect(`/${locale}/login?next=/${locale}/admin`);
   const content = await getContent();
 
   const [bookingsRes, projectsRes, notesRes, shop, pagesRes, menuRes] = await Promise.all([

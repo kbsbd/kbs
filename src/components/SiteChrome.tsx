@@ -9,6 +9,7 @@ import FixedActions from "@/components/FixedActions";
 import CartButton from "@/components/shop/CartButton";
 import AccountLink from "@/components/auth/AccountLink";
 import MobileMenu from "@/components/MobileMenu";
+import { SocialIcon, SOCIAL_PLATFORMS } from "@/components/icons/SocialIcons";
 
 /**
  * Everything that wraps the page: the nav, the footer, the living line, the
@@ -272,18 +273,32 @@ export default function SiteChrome({
                   </a>
                 </li>
               )}
-              {content.site.socials.map((s) => (
-                <li key={s.id}>
-                  <a
-                    href={s.href}
-                    className="transition-colors duration-300 hover:text-[color:var(--accent)]"
-                    rel="noopener"
-                  >
-                    {s.label}
-                  </a>
-                </li>
-              ))}
             </ul>
+
+            {content.site.socials.length > 0 && (
+              <div className="mt-5 flex flex-wrap gap-2">
+                {content.site.socials
+                  .filter((s) => s.href)
+                  .map((s) => {
+                    const name =
+                      s.label ||
+                      SOCIAL_PLATFORMS.find((p) => p.key === s.platform)?.label ||
+                      "Link";
+                    return (
+                      <a
+                        key={s.id}
+                        href={s.href}
+                        aria-label={name}
+                        rel="noopener noreferrer"
+                        target="_blank"
+                        className="grid h-10 w-10 place-items-center rounded-full border border-[color:var(--panel-edge)] text-[color:var(--text-secondary)] transition-colors duration-300 hover:border-[color:var(--accent)] hover:text-[color:var(--accent)]"
+                      >
+                        <SocialIcon platform={s.platform} className="h-[18px] w-[18px]" />
+                      </a>
+                    );
+                  })}
+              </div>
+            )}
           </div>
 
           <div>

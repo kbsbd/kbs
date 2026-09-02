@@ -36,7 +36,25 @@ export default function AuthForm({ mode, l }: { mode: Mode; l: Locale }) {
   const m = c[mode];
   const router = useRouter();
   const search = useSearchParams();
-  const next = search.get("next") || `/${l}/account`;
+  const next = search.get("next") || "";
+
+  /* One login for everyone: an account with a row in `admins` lands in the
+     dashboard, everyone else in their own area (or wherever `next` points). */
+  async function routeByRole(fallback: string) {
+    const sb = browserClient();
+    const { data } = (await sb?.auth.getUser()) ?? { data: { user: null } };
+    let dest = next || fallback;
+    if (data.user && sb) {
+      const { data: adminRow } = await sb
+        .from("admins")
+        .select("user_id")
+        .eq("user_id", data.user.id)
+        .maybeSingle();
+      if (adminRow) dest = `/${l}/admin`;
+    }
+    router.push(dest);
+    router.refresh();
+  }
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -58,8 +76,7 @@ export default function AuthForm({ mode, l }: { mode: Mode; l: Locale }) {
       if (mode === "login") {
         const { error } = await sb.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        router.push(next);
-        router.refresh();
+        await routeByRole(`/${l}/account`);
       } else if (mode === "signup") {
         const { error } = await sb.auth.signUp({
           email,
@@ -70,8 +87,7 @@ export default function AuthForm({ mode, l }: { mode: Mode; l: Locale }) {
         // autoconfirm is on, so a session exists straight away
         const { data } = await sb.auth.getSession();
         if (data.session) {
-          router.push(next);
-          router.refresh();
+          await routeByRole(`/${l}/account`);
         } else {
           setState("sent");
         }
@@ -169,7 +185,7 @@ export default function AuthForm({ mode, l }: { mode: Mode; l: Locale }) {
         </p>
       )}
 
-      <button className="btn btn-primary w-full" disabled={state === "busy"}>
+      <button type="submit" className="btn btn-primary w-full" disabled={state === "busy"}>
         {state === "busy" ? "…" : m.cta}
       </button>
 

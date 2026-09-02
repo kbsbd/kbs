@@ -111,6 +111,7 @@ export const SITE_FIELDS: Array<{ key: string; label: string; hint?: string; typ
   },
   { key: "email", label: "Email address" },
   { key: "mapEmbed", label: "Google Maps embed URL", hint: "Leave blank to hide the map" },
+  { key: "founded", label: "Founded (year)", hint: 'Shown in the footer as "SINCE 1995"' },
 ];
 
 /**

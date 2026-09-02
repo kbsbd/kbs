@@ -436,7 +436,9 @@ export const site = {
     bn: "KB Homes, Faidabad, Dokhinkhan, Dhaka - 1230",
   },
   mapEmbed: "",
-  socials: [] as Array<{ id: string; label: string; href: string }>,
+  /** Footer social links. `platform` picks the icon; `label` is an optional
+   *  override for the accessible name. Ships empty and the row hides itself. */
+  socials: [] as Array<{ id: string; platform: string; label: string; href: string }>,
 };
 
 /**

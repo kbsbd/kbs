@@ -14,6 +14,7 @@ import ShopAdmin, {
 } from "@/components/admin/ShopAdmin";
 import CmsAdmin, { type AdminPage, type AdminMenuItem } from "@/components/admin/CmsAdmin";
 import MediaAdmin, { type MediaContent } from "@/components/admin/MediaAdmin";
+import { SOCIAL_PLATFORMS } from "@/components/icons/SocialIcons";
 import {
   saveContent,
   setBookingStatus,
@@ -269,11 +270,16 @@ function SiteDetails({
   const [bi, setBi] = useState<Record<string, { en: string; bn: string }>>(() =>
     Object.fromEntries(bilingual.map((s) => [`${s.root}|${s.path}`, { ...s.values }]))
   );
+  type Social = { id: string; platform: string; label: string; href: string };
+  const [socials, setSocials] = useState<Social[]>(
+    () => (Array.isArray(site.socials) ? (site.socials as Social[]) : [])
+  );
   const [pending, start] = useTransition();
 
   function save() {
     const edits = [
       ...SITE_FIELDS.map((f) => ({ root: "site", path: f.key, value: values[f.key] })),
+      { root: "site", path: "socials", value: socials.filter((s) => s.href.trim()) },
       ...bilingual.map((s) => ({
         root: s.root,
         path: s.path,
@@ -285,6 +291,9 @@ function SiteDetails({
       notify(r.ok ? "Saved. The public site is already showing it." : r.error);
     });
   }
+
+  const setSocial = (i: number, patch: Partial<Social>) =>
+    setSocials((list) => list.map((s, j) => (j === i ? { ...s, ...patch } : s)));
 
   return (
     <div className="max-w-3xl space-y-8">
@@ -316,6 +325,72 @@ function SiteDetails({
             onChange={(v) => setBi((b) => ({ ...b, [`${s.root}|${s.path}`]: v }))}
           />
         ))}
+      </div>
+
+      <div className="border-t border-[color:var(--panel-edge)] pt-8">
+        <div className="flex items-center">
+          <h3 className="font-display text-lg">Footer social links</h3>
+          <button
+            type="button"
+            className="btn btn-ghost ml-auto text-xs"
+            onClick={() =>
+              setSocials((l) => [
+                ...l,
+                { id: Math.random().toString(36).slice(2, 9), platform: "facebook", label: "", href: "" },
+              ])
+            }
+          >
+            Add link
+          </button>
+        </div>
+        <p className="mt-1 text-xs text-[color:var(--text-quiet)]">
+          Each appears as an icon in the footer. Paste the full profile URL.
+        </p>
+
+        <div className="mt-4 space-y-3">
+          {socials.map((s, i) => (
+            <div
+              key={s.id}
+              className="flex flex-wrap items-center gap-2 rounded-xl border border-[color:var(--panel-edge)] p-3"
+            >
+              <select
+                className={`${field} w-auto`}
+                value={s.platform}
+                onChange={(e) => setSocial(i, { platform: e.target.value })}
+              >
+                {SOCIAL_PLATFORMS.map((p) => (
+                  <option key={p.key} value={p.key}>
+                    {p.label}
+                  </option>
+                ))}
+              </select>
+              <input
+                className={`${field} flex-1`}
+                placeholder="https://…"
+                value={s.href}
+                onChange={(e) => setSocial(i, { href: e.target.value })}
+              />
+              {s.platform === "other" && (
+                <input
+                  className={`${field} w-40`}
+                  placeholder="Label"
+                  value={s.label}
+                  onChange={(e) => setSocial(i, { label: e.target.value })}
+                />
+              )}
+              <button
+                type="button"
+                className="text-sm text-[color:var(--clay)] hover:underline"
+                onClick={() => setSocials((l) => l.filter((_, j) => j !== i))}
+              >
+                Remove
+              </button>
+            </div>
+          ))}
+          {socials.length === 0 && (
+            <p className="text-sm text-[color:var(--text-quiet)]">No social links yet.</p>
+          )}
+        </div>
       </div>
 
       <button className="btn btn-primary" onClick={save} disabled={pending}>
