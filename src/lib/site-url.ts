@@ -1,0 +1,11 @@
+/**
+ * The live origin. Vercel provides VERCEL_PROJECT_PRODUCTION_URL automatically,
+ * so a deploy is correct even before anyone sets the variable by hand.
+ */
+export function siteUrl(): string {
+  const explicit = process.env.NEXT_PUBLIC_SITE_URL;
+  if (explicit) return explicit.replace(/\/$/, "");
+  const vercel = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  if (vercel) return `https://${vercel}`;
+  return "http://localhost:3000";
+}
