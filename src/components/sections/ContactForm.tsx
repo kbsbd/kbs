@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { Locale, SiteContent } from "@/content/seed";
+import ChannelIcon from "@/components/ChannelIcon";
 
 /**
  * The contact / reach-us form. One endpoint, /api/contact, which emails the
@@ -127,6 +128,37 @@ export default function ContactForm({ c, l }: { c: SiteContent; l: Locale }) {
       <button type="submit" className="btn btn-primary w-full" disabled={state === "sending"}>
         {state === "sending" ? t(f.sending) : t(f.submit)}
       </button>
+
+      {(c.site.phone || c.site.whatsapp) && (
+        <div className="border-t border-[color:var(--panel-edge)] pt-4">
+          <p className="font-mono-label text-[color:var(--text-quiet)]">
+            {t(c.contact.talkNow)}
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2.5">
+            {c.site.phone && (
+              <a
+                href={`tel:${c.site.phone.replace(/\s/g, "")}`}
+                className="btn btn-ghost text-sm"
+              >
+                <ChannelIcon name="phone" size={16} />
+                {c.site.phone}
+              </a>
+            )}
+            {c.site.whatsapp && (
+              <a
+                href={`https://wa.me/${c.site.whatsapp.replace(/[^\d]/g, "")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-ghost text-sm"
+                style={{ borderColor: "#25D366", color: "#25D366" }}
+              >
+                <ChannelIcon name="whatsapp" size={16} />
+                {c.site.whatsapp}
+              </a>
+            )}
+          </div>
+        </div>
+      )}
     </form>
   );
 }

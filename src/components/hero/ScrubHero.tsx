@@ -106,6 +106,19 @@ export default function ScrubHero({
       ? sources.h264
       : sources.vp9;
 
+    /* Narrow screens: the full-fat master (~15 MB) cannot stream in before the
+       visitor has scrolled the hero, so the scrub looks dead on a phone. If the
+       file is on Cloudinary, ask for a lighter derivative — about a third of the
+       size, still sharp enough for a viewport-cover background. Desktop is
+       untouched and keeps the pristine 8-frame-keyframe master. */
+    const narrow = window.matchMedia("(max-width: 900px)").matches;
+    const cld = source.url.match(
+      /^(https:\/\/res\.cloudinary\.com\/[^/]+\/video\/upload\/)(.+)$/
+    );
+    const sourceUrl =
+      narrow && cld ? `${cld[1]}q_auto:eco,w_1000/${cld[2]}` : source.url;
+    const sourceBytes = narrow && cld ? Math.round(source.bytes * 0.33) : source.bytes;
+
     /* ---------- scroll progress through the pinned region ---------- */
     function heroProgress() {
       const el = heroRef.current;
@@ -231,14 +244,15 @@ export default function ScrubHero({
       aborter = new AbortController();
       let watchdog = window.setTimeout(() => aborter?.abort(), 20000);
       try {
-        const res = await fetch(source.url, {
-          // yields to critical resources so the page stays instantly usable
-          priority: "low",
+        const res = await fetch(sourceUrl, {
+          // the hero footage IS the content here, so let it compete for
+          // bandwidth rather than sitting at the back of the queue
+          priority: "auto",
           signal: aborter.signal,
         });
         if (!res.ok || !res.body) throw new Error("hero video unavailable");
 
-        const total = Number(res.headers.get("Content-Length")) || source.bytes;
+        const total = Number(res.headers.get("Content-Length")) || sourceBytes;
         const reader = res.body.getReader();
         const chunks: Uint8Array[] = [];
         let got = 0;
@@ -299,7 +313,8 @@ export default function ScrubHero({
       img.onload = startBlobFetch;
       img.onerror = startBlobFetch;
       img.src = posterUrl;
-      posterTimer = window.setTimeout(startBlobFetch, 4000);
+      // don't let a slow poster hold the footage back for long
+      posterTimer = window.setTimeout(startBlobFetch, 1500);
     }
 
     /* ---------- reduced motion: pin and unpin, both directions ---------- */

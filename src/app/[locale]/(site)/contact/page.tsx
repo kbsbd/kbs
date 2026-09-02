@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { LOCALES, type Locale } from "@/content/seed";
 import { getContent } from "@/lib/content";
 import ContactForm from "@/components/sections/ContactForm";
+import ChannelIcon from "@/components/ChannelIcon";
 
 export const metadata: Metadata = {
   title: "Reach us — KBS / Kanchan Builders",
@@ -61,9 +62,29 @@ export default async function ContactPage({
                 <p className="mt-3">
                   <a
                     href={`tel:${c.site.phone.replace(/\s/g, "")}`}
-                    className="transition-colors duration-300 hover:text-[color:var(--accent)]"
+                    className="inline-flex items-center gap-2.5 transition-colors duration-300 hover:text-[color:var(--accent)]"
                   >
+                    <ChannelIcon name="phone" size={18} />
                     {c.site.phone}
+                  </a>
+                </p>
+              </div>
+            )}
+
+            {c.site.whatsapp && (
+              <div>
+                <h2 className="font-mono-label text-[color:var(--text-quiet)]">
+                  {t(ct.whatsappHead)}
+                </h2>
+                <p className="mt-3">
+                  <a
+                    href={`https://wa.me/${c.site.whatsapp.replace(/[^\d]/g, "")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2.5 transition-colors duration-300 hover:text-[color:var(--accent)]"
+                  >
+                    <ChannelIcon name="whatsapp" size={18} />
+                    {c.site.whatsapp}
                   </a>
                 </p>
               </div>

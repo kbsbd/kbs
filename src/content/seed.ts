@@ -428,8 +428,8 @@ export const site = {
     en: "Building in Bangladesh since 1995.",
     bn: "১৯৯৫ সাল থেকে বাংলাদেশে নির্মাণ।",
   },
-  phone: "",
-  whatsapp: "",
+  phone: "+880 19 5402 2530",
+  whatsapp: "+880 17 1073 7157",
   email: "Info@kbsbd.com",
   address: {
     en: "KB Homes, Faidabad, Dokhinkhan, Dhaka - 1230",
@@ -616,7 +616,9 @@ export const contact = {
   addressHead: soon("Address"),
   address: soon("KB Homes, Faidabad, Dokhinkhan, Dhaka - 1230"),
   emailHead: soon("Email"),
-  phoneHead: soon("Phone"),
+  phoneHead: soon("Call"),
+  whatsappHead: soon("WhatsApp"),
+  talkNow: soon("Prefer to talk now?"),
   fields: {
     name: soon("Your name"),
     email: soon("Email address"),

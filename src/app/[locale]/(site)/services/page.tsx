@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { LOCALES, type Locale } from "@/content/seed";
 import { getContent } from "@/lib/content";
 import MediaSlot from "@/components/MediaSlot";
+import ChannelIcon from "@/components/ChannelIcon";
 
 export const metadata: Metadata = {
   title: "Services — KBS / Kanchan Builders",
@@ -70,10 +71,28 @@ export default async function ServicesPage({
           ))}
         </div>
 
-        <div className="mt-16">
+        <div className="mt-16 flex flex-wrap items-center gap-3">
           <a href={`/${l}/contact`} className="btn btn-primary">
             {t(c.contact.fields.topicProject)}
           </a>
+          {c.site.phone && (
+            <a href={`tel:${c.site.phone.replace(/\s/g, "")}`} className="btn btn-ghost">
+              <ChannelIcon name="phone" size={16} />
+              {c.site.phone}
+            </a>
+          )}
+          {c.site.whatsapp && (
+            <a
+              href={`https://wa.me/${c.site.whatsapp.replace(/[^\d]/g, "")}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-ghost"
+              style={{ borderColor: "#25D366", color: "#25D366" }}
+            >
+              <ChannelIcon name="whatsapp" size={16} />
+              {c.site.whatsapp}
+            </a>
+          )}
         </div>
       </div>
     </div>
