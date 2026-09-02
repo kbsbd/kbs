@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { LOCALES, type Locale } from "@/content/seed";
 import { getContent } from "@/lib/content";
+import { siteUrl } from "@/lib/site-url";
 import ContactForm from "@/components/sections/ContactForm";
 import ChannelIcon from "@/components/ChannelIcon";
+import JsonLd from "@/components/JsonLd";
 
 export const metadata: Metadata = {
   title: "Reach us — KBS / Kanchan Builders",
@@ -21,9 +23,27 @@ export default async function ContactPage({
   const c = await getContent();
   const ct = c.contact;
   const t = (v: Record<Locale, string>) => v[l];
+  const base = siteUrl();
+
+  const ld = [
+    {
+      "@type": "ContactPage",
+      "@id": `${base}/${l}/contact#page`,
+      name: t(ct.head),
+      about: { "@id": `${base}/#org` },
+    },
+    {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: `${base}/${l}` },
+        { "@type": "ListItem", position: 2, name: t(ct.head) },
+      ],
+    },
+  ];
 
   return (
     <div className="page">
+      <JsonLd data={ld} />
       <div className="page-wrap">
         <p className="chip font-mono-label">{t(ct.kicker)}</p>
         <h1 className="font-display mt-6 text-[clamp(2.2rem,6vw,3.6rem)]">{t(ct.head)}</h1>

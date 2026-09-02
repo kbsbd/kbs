@@ -12,19 +12,8 @@ import { img } from "@/lib/media";
 export default function StructuredData({ c, l }: { c: SiteContent; l: Locale }) {
   const base = siteUrl();
 
-  const org = {
-    "@type": "Organization",
-    "@id": `${base}/#org`,
-    name: c.site.name,
-    url: base,
-    foundingDate: c.site.founded,
-    description: c.site.tagline[l],
-    ...(c.site.phone ? { telephone: c.site.phone } : {}),
-    ...(c.site.email ? { email: c.site.email } : {}),
-    ...(c.site.address[l] ? { address: { "@type": "PostalAddress", streetAddress: c.site.address[l] } } : {}),
-    ...(c.site.socials.length ? { sameAs: c.site.socials.map((s) => s.href) } : {}),
-  };
-
+  /* Organization + WebSite come from the site layout, on every page. Here the
+     home page adds the building itself and the FAQ, both tied back to the org. */
   const project = {
     "@type": "ApartmentComplex",
     name: "KB HOUSE",
@@ -33,6 +22,7 @@ export default function StructuredData({ c, l }: { c: SiteContent; l: Locale }) 
     image: `${base}${img("hero-ending", 1600)}`,
     numberOfFloors: 9,
     address: { "@type": "PostalAddress", addressLocality: "Dhaka", addressCountry: "BD" },
+    provider: { "@id": `${base}/#org` },
     amenityFeature: c.amenities.items.map((a) => ({
       "@type": "LocationFeatureSpecification",
       name: a.title[l],
@@ -42,6 +32,7 @@ export default function StructuredData({ c, l }: { c: SiteContent; l: Locale }) 
 
   const faq = {
     "@type": "FAQPage",
+    "@id": `${base}/${l}#faq`,
     mainEntity: c.faq.items.map((f) => ({
       "@type": "Question",
       name: f.q[l],
@@ -49,7 +40,7 @@ export default function StructuredData({ c, l }: { c: SiteContent; l: Locale }) 
     })),
   };
 
-  const graph = { "@context": "https://schema.org", "@graph": [org, project, faq] };
+  const graph = { "@context": "https://schema.org", "@graph": [project, faq] };
 
   return (
     <script

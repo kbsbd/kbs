@@ -55,6 +55,19 @@ export default async function AdminPage({
       email={session.email}
       role={session.role}
       groups={editableStrings(content)}
+      lists={{
+        "heroBands|": content.heroBands,
+        "nav|links": content.nav.links,
+        "faq|items": content.faq.items,
+        "trust|items": content.trust.items,
+        "amenities|items": content.amenities.items,
+        "amenities|listed": content.amenities.listed,
+        "kbHomes|intro": content.kbHomes.intro,
+        "kbHomes|highlights": content.kbHomes.highlights,
+        "servicesPage|intro": content.servicesPage.intro,
+        "servicesPage|items": content.servicesPage.items,
+        "servicesPage|sisterConcerns": content.servicesPage.sisterConcerns,
+      }}
       site={content.site}
       integrations={content.integrations}
       bookings={bookingsRes.data ?? []}

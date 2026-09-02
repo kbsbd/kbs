@@ -124,7 +124,7 @@ export default function SiteChrome({
     href.startsWith("/") || href.startsWith("#") ? `/${locale}${href}` : href;
 
   return (
-    <>
+    <div className="site-shell">
       <div className="motes" aria-hidden="true">
         {[
           [8, 0], [22, -7], [37, -14], [54, -3], [69, -19], [83, -9], [93, -24],
@@ -352,7 +352,7 @@ export default function SiteChrome({
         phone={content.site.phone}
         whatsapp={content.site.whatsapp}
       />
-    </>
+    </div>
   );
 }
 

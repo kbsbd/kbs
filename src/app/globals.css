@@ -162,6 +162,22 @@ html[lang="bn"] .font-mono-label {
   border-radius: 3px;
 }
 
+/* Sticky footer: the shell is at least a screen tall and the main column grows
+   to fill it, so short pages (cart, account, a thin CMS page) do not leave a
+   strip of bare background below the footer. */
+.site-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100svh;
+}
+.site-shell > main {
+  flex: 1 0 auto;
+}
+.site-shell > footer {
+  flex-shrink: 0;
+}
+
 .skip-link {
   position: absolute;
   left: -9999px;

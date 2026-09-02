@@ -59,8 +59,13 @@ export async function saveContent(
       .eq("key", root)
       .maybeSingle();
 
-    const merged = (existing?.value as Record<string, unknown>) ?? {};
-    for (const { path, value } of list) setPath(merged, path, value);
+    /* An empty path replaces the whole key — used when the content value is
+       itself an array (heroBands) rather than an object of sections. */
+    let merged: unknown = (existing?.value as Record<string, unknown>) ?? {};
+    for (const { path, value } of list) {
+      if (!path) merged = value;
+      else setPath(merged as Record<string, unknown>, path, value);
+    }
 
     const { error } = await ctx.supabase
       .from("site_content")

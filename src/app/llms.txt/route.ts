@@ -46,11 +46,11 @@ ${shopOn ? `- [Shop](${base}/en/shop): sanitary ware, plumbing fittings, pumps, 
 
 ## Contact
 
-- [Contact form](${base}/en/contact)
+- [Contact form](${base}/en/contact): general, project or product enquiry
 - [Book a site visit](${base}/en#book): name, phone number and preferred day
-${c.site.phone ? `- Phone: ${c.site.phone}` : ""}
-${c.site.whatsapp ? `- WhatsApp: ${c.site.whatsapp}` : ""}
-${c.site.email ? `- Email: ${c.site.email}` : ""}
+${c.site.phone ? `- [Call the office](tel:${c.site.phone.replace(/[^\d+]/g, "")})` : ""}
+${c.site.whatsapp ? `- [WhatsApp](https://wa.me/${c.site.whatsapp.replace(/[^\d]/g, "")})` : ""}
+${c.site.email ? `- [Email](mailto:${c.site.email})` : ""}
 ${
   shopOn && products.length
     ? `\n## Products\n\n${productLines}\n`

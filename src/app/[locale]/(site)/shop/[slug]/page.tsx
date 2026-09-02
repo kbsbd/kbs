@@ -17,6 +17,7 @@ import AddToCart from "@/components/shop/AddToCart";
 import ProductCard from "@/components/shop/ProductCard";
 import StarRating from "@/components/shop/StarRating";
 import ReviewForm from "@/components/shop/ReviewForm";
+import JsonLd from "@/components/JsonLd";
 
 export const revalidate = 60;
 
@@ -68,8 +69,57 @@ export default async function ProductPage({
       ? Math.round(100 - (product.price / product.compareAtPrice) * 100)
       : 0;
 
+  const base = siteUrl();
+  const inStock = !product.trackStock || product.stock > 0;
+  const productLd = {
+    "@type": "Product",
+    name,
+    description: description.slice(0, 500) || name,
+    ...(product.images.length ? { image: product.images.map((i) => i.url) } : {}),
+    ...(product.sku ? { sku: product.sku } : {}),
+    ...(product.category
+      ? { category: pick(product.category.name, product.category.name_bn, l) }
+      : {}),
+    brand: { "@type": "Brand", name: c.site.name },
+    offers: {
+      "@type": "Offer",
+      url: `${base}/${l}/shop/${product.slug}`,
+      priceCurrency: "BDT",
+      price: product.price,
+      availability: `https://schema.org/${inStock ? "InStock" : "OutOfStock"}`,
+      seller: { "@id": `${base}/#org` },
+    },
+    ...(summary.count > 0
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: summary.avg,
+            reviewCount: summary.count,
+          },
+        }
+      : {}),
+    ...(reviews.length
+      ? {
+          review: reviews.slice(0, 10).map((r) => ({
+            "@type": "Review",
+            reviewRating: { "@type": "Rating", ratingValue: r.rating },
+            author: { "@type": "Person", name: r.authorName },
+            ...(r.body ? { reviewBody: r.body } : {}),
+          })),
+        }
+      : {}),
+  };
+  const breadcrumbLd = {
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: t(s.head), item: `${base}/${l}/shop` },
+      { "@type": "ListItem", position: 2, name },
+    ],
+  };
+
   return (
     <div className="page">
+      <JsonLd data={[productLd, breadcrumbLd]} />
       <div className="page-wrap">
         <nav className="mb-8 text-sm text-[color:var(--text-quiet)]">
           <Link href={`/${l}/shop`} className="hover:text-[color:var(--accent)]">

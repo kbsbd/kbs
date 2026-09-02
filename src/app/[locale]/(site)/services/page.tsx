@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { LOCALES, type Locale } from "@/content/seed";
 import { getContent } from "@/lib/content";
+import { siteUrl } from "@/lib/site-url";
 import MediaSlot from "@/components/MediaSlot";
 import ChannelIcon from "@/components/ChannelIcon";
+import JsonLd from "@/components/JsonLd";
 
 export const metadata: Metadata = {
   title: "Services — KBS / Kanchan Builders",
@@ -22,9 +24,29 @@ export default async function ServicesPage({
   const c = await getContent();
   const s = c.servicesPage;
   const t = (v: Record<Locale, string>) => v[l];
+  const base = siteUrl();
+
+  const ld = [
+    {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: `${base}/${l}` },
+        { "@type": "ListItem", position: 2, name: t(s.head) },
+      ],
+    },
+    ...s.items.map((it) => ({
+      "@type": "Service",
+      name: t(it.title),
+      description: t(it.body).slice(0, 500),
+      serviceType: t(it.title),
+      provider: { "@id": `${base}/#org` },
+      areaServed: "BD",
+    })),
+  ];
 
   return (
     <div className="page">
+      <JsonLd data={ld} />
       <div className="page-wrap">
         <p className="chip font-mono-label">{t(s.kicker)}</p>
         <h1 className="font-display mt-6 text-[clamp(2.2rem,6vw,3.6rem)]">{t(s.head)}</h1>

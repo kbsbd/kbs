@@ -14,6 +14,7 @@ import ShopAdmin, {
 } from "@/components/admin/ShopAdmin";
 import CmsAdmin, { type AdminPage, type AdminMenuItem } from "@/components/admin/CmsAdmin";
 import MediaAdmin, { type MediaContent } from "@/components/admin/MediaAdmin";
+import ListEditor, { CONTENT_LISTS } from "@/components/admin/ContentLists";
 import { SOCIAL_PLATFORMS } from "@/components/icons/SocialIcons";
 import { MenuIcon, CloseIcon } from "@/components/icons/Icons";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -74,6 +75,7 @@ type Props = {
   };
   cms: { pages: AdminPage[]; menu: AdminMenuItem[] };
   media: MediaContent;
+  lists: Record<string, Array<Record<string, unknown> | { en: string; bn: string }>>;
 };
 
 const TABS = [
@@ -112,6 +114,7 @@ export default function Dashboard({
   shop,
   cms,
   media,
+  lists,
 }: Props) {
   const isAdmin = role === "admin";
   const tabs = isAdmin ? TABS : MANAGER_TABS;
@@ -244,7 +247,7 @@ export default function Dashboard({
           {tab === "Pages" && <CmsAdmin {...cms} notify={setToast} />}
           {tab === "Media" && <MediaAdmin media={media} notify={setToast} />}
           {tab === "Site details" && <SiteDetails site={site} groups={groups} notify={setToast} />}
-          {tab === "Text" && <TextEditor groups={groups} notify={setToast} />}
+          {tab === "Text" && <TextEditor groups={groups} lists={lists} notify={setToast} />}
           {tab === "Projects" && <Projects rows={projects} notify={setToast} />}
           {tab === "Team" && <TeamSection notify={setToast} />}
           {tab === "Integrations" && (
@@ -828,9 +831,11 @@ function TeamSection({ notify }: { notify: (s: string) => void }) {
 
 function TextEditor({
   groups,
+  lists,
   notify,
 }: {
   groups: Record<string, EditableString[]>;
+  lists: Props["lists"];
   notify: (s: string) => void;
 }) {
   const sections = useMemo(
@@ -843,6 +848,12 @@ function TextEditor({
 
   const key = (s: EditableString) => `${s.root}|${s.path}`;
   const dirty = Object.keys(edited).length;
+
+  /* the list editors own the repeatable arrays; the field editor below keeps
+     only the section's own scalar strings (no `items.3.title` style paths). */
+  const isListPath = (p: string) => /(^|\.)\d+(\.|$)/.test(p);
+  const scalarFields = (groups[open] ?? []).filter((s) => !isListPath(s.path));
+  const sectionLists = CONTENT_LISTS[open] ?? [];
 
   function save() {
     const edits = Object.entries(edited).map(([k, value]) => {
@@ -886,7 +897,7 @@ function TextEditor({
       </div>
 
       <div className="max-w-3xl space-y-5">
-        {(groups[open] ?? []).map((s) => (
+        {scalarFields.map((s) => (
           <BiField
             key={key(s)}
             label={s.label}
@@ -894,7 +905,25 @@ function TextEditor({
             onChange={(v) => setEdited((e) => ({ ...e, [key(s)]: v }))}
           />
         ))}
+        {scalarFields.length === 0 && sectionLists.length === 0 && (
+          <p className="text-sm text-[color:var(--text-quiet)]">
+            Nothing editable in this section.
+          </p>
+        )}
       </div>
+
+      {sectionLists.length > 0 && (
+        <div className="max-w-3xl space-y-6">
+          {sectionLists.map((spec) => (
+            <ListEditor
+              key={`${spec.root}|${spec.path}`}
+              spec={spec}
+              initial={lists[`${spec.root}|${spec.path}`] ?? []}
+              notify={notify}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
