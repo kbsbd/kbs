@@ -61,6 +61,15 @@ export default async function AdminPage({
       notes={notesRes.data ?? []}
       shop={shop}
       cms={cms}
+      media={{
+        staticHero: { image: content.staticHero.image },
+        premise: { image: content.premise.image },
+        building: { image: content.building.image },
+        amenities: { items: content.amenities.items },
+        servicesPage: { items: content.servicesPage.items },
+        kbHomes: { gallery: content.kbHomes.gallery },
+        clientsPage: { logos: content.clientsPage.logos },
+      }}
     />
   );
 }

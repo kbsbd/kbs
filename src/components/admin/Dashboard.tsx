@@ -13,6 +13,7 @@ import ShopAdmin, {
   type AdminGateway,
 } from "@/components/admin/ShopAdmin";
 import CmsAdmin, { type AdminPage, type AdminMenuItem } from "@/components/admin/CmsAdmin";
+import MediaAdmin, { type MediaContent } from "@/components/admin/MediaAdmin";
 import {
   saveContent,
   setBookingStatus,
@@ -64,12 +65,14 @@ type Props = {
     gateways: AdminGateway[];
   };
   cms: { pages: AdminPage[]; menu: AdminMenuItem[] };
+  media: MediaContent;
 };
 
 const TABS = [
   "Bookings",
   "Shop",
   "Pages",
+  "Media",
   "Site details",
   "Text",
   "Projects",
@@ -94,6 +97,7 @@ export default function Dashboard({
   notes,
   shop,
   cms,
+  media,
 }: Props) {
   const [tab, setTab] = useState<Tab>("Bookings");
   const [toast, setToast] = useState("");
@@ -156,6 +160,7 @@ export default function Dashboard({
         {tab === "Bookings" && <Bookings rows={bookings} notify={setToast} />}
         {tab === "Shop" && <ShopAdmin {...shop} notify={setToast} />}
         {tab === "Pages" && <CmsAdmin {...cms} notify={setToast} />}
+        {tab === "Media" && <MediaAdmin media={media} notify={setToast} />}
         {tab === "Site details" && <SiteDetails site={site} groups={groups} notify={setToast} />}
         {tab === "Text" && <TextEditor groups={groups} notify={setToast} />}
         {tab === "Projects" && <Projects rows={projects} notify={setToast} />}
