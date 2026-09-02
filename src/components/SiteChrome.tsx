@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { Locale, SiteContent } from "@/content/seed";
 import FixedActions from "@/components/FixedActions";
+import CartButton from "@/components/shop/CartButton";
 
 /**
  * Everything that wraps the page: the nav, the footer, the living line, the
@@ -25,10 +26,14 @@ export default function SiteChrome({
   children: React.ReactNode;
 }) {
   const [navSolid, setNavSolid] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const spineRef = useRef<SVGSVGElement>(null);
   const pathname = usePathname();
   const other: Locale = locale === "en" ? "bn" : "en";
   const otherPath = pathname.replace(/^\/(en|bn)/, `/${other}`) || `/${other}`;
+  const shopOn = content.shop.enabled;
+  const navLinks = content.nav.links.filter((x) => x.href !== "/shop" || shopOn);
+  const closeMenu = () => setMenuOpen(false);
 
   /* section entrances, and retiring the stagger when they finish */
   useEffect(() => {
@@ -158,7 +163,7 @@ export default function SiteChrome({
           </Link>
 
           <div className="ml-auto hidden items-center gap-7 lg:flex">
-            {content.nav.links.map((link) => (
+            {navLinks.map((link) => (
               <a
                 key={link.href}
                 href={navHref(link.href)}
@@ -169,21 +174,65 @@ export default function SiteChrome({
             ))}
           </div>
 
-          <Link
-            href={otherPath}
-            className="ml-auto text-sm text-[color:var(--text-secondary)] transition-colors duration-300 hover:text-[color:var(--accent)] lg:ml-0"
-            hrefLang={other}
-          >
-            {t(content.nav.langLabel)}
-          </Link>
+          <div className="ml-auto flex items-center gap-5 lg:ml-0 lg:gap-6">
+            <Link
+              href={otherPath}
+              className="text-sm text-[color:var(--text-secondary)] transition-colors duration-300 hover:text-[color:var(--accent)]"
+              hrefLang={other}
+            >
+              {t(content.nav.langLabel)}
+            </Link>
 
-          <a
-            href={`/${locale}#book`}
-            className="btn btn-primary hidden text-sm sm:inline-flex"
-          >
-            {t(content.nav.cta)}
-          </a>
+            {shopOn && <CartButton label={t(content.shop.labels.cart)} />}
+
+            <a
+              href={`/${locale}#book`}
+              className="btn btn-primary hidden text-sm sm:inline-flex"
+            >
+              {t(content.nav.cta)}
+            </a>
+
+            <button
+              type="button"
+              className="lg:hidden text-[color:var(--text-secondary)]"
+              aria-label="Menu"
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen((v) => !v)}
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                {menuOpen ? (
+                  <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                ) : (
+                  <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                )}
+              </svg>
+            </button>
+          </div>
         </nav>
+
+        {menuOpen && (
+          <div className="relative border-t border-[color:var(--panel-edge)] bg-[color:var(--canvas)]/95 backdrop-blur-xl lg:hidden">
+            <div className="mx-auto flex max-w-[86rem] flex-col px-5 py-3 sm:px-8">
+              {navLinks.map((link) => (
+                <a
+                  key={link.href}
+                  href={navHref(link.href)}
+                  onClick={closeMenu}
+                  className="border-b border-[color:var(--panel-edge)] py-3 text-[color:var(--text-secondary)] last:border-0 hover:text-[color:var(--text-primary)]"
+                >
+                  {t(link.label)}
+                </a>
+              ))}
+              <a
+                href={`/${locale}#book`}
+                onClick={closeMenu}
+                className="btn btn-primary mt-3 self-start text-sm"
+              >
+                {t(content.nav.cta)}
+              </a>
+            </div>
+          </div>
+        )}
       </header>
 
       <main id="main" tabIndex={-1}>

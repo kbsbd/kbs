@@ -150,9 +150,9 @@ export const nav = {
      the DB-backed menu editor will take over once Supabase is connected. */
   links: [
     { href: "/services", label: soon("Services") },
+    { href: "/shop", label: soon("Shop") },
     { href: "/kb-homes", label: soon("KB Homes") },
     { href: "/clients", label: soon("Clients") },
-    { href: "#faq", label: { en: "Questions", bn: "প্রশ্ন" } },
     { href: "/contact", label: soon("Contact") },
   ],
   cta: { en: "Book a visit", bn: "ভিজিট বুক করুন" },
@@ -657,9 +657,43 @@ export const contact = {
   ),
 };
 
+export const shop = {
+  /** Master switch. Off = the Shop nav link and every /shop route 404. */
+  enabled: true,
+  kicker: soon("SHOP"),
+  head: soon("Products"),
+  body: soon(
+    "Sanitary ware, plumbing fittings, pumps, CPVC pipe and water-treatment equipment — the same lines we install and distribute."
+  ),
+  emptyNote: soon("Products are being added here."),
+  /** BDT throughout. Symbol is what shows next to a price. */
+  currencySymbol: "৳",
+  /** Flat delivery charge added at checkout; 0 hides the line. */
+  flatShipping: 0,
+  /** Order subtotal at or above this ships free; 0 disables the rule. */
+  freeShippingOver: 0,
+  /** "cod" collects an address, "quote" turns the cart into a quote request. */
+  checkoutModes: ["quote", "cod"] as Array<"quote" | "cod" | "bkash" | "nagad" | "sslcommerz">,
+  labels: {
+    addToCart: soon("Add to cart"),
+    buyNow: soon("Buy now"),
+    outOfStock: soon("Out of stock"),
+    inStock: soon("In stock"),
+    lowStock: soon("Only a few left"),
+    wishlist: soon("Save"),
+    cart: soon("Cart"),
+    checkout: soon("Checkout"),
+    quoteCta: soon("Request a quote"),
+    reviews: soon("Reviews"),
+    writeReview: soon("Write a review"),
+    relatedHead: soon("You might also need"),
+  },
+};
+
 export const seed = {
   site,
   integrations,
+  shop,
   nav,
   heroBands,
   staticHero,
