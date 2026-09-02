@@ -12,6 +12,7 @@ import ShopAdmin, {
   type AdminReview,
   type AdminGateway,
 } from "@/components/admin/ShopAdmin";
+import CmsAdmin, { type AdminPage, type AdminMenuItem } from "@/components/admin/CmsAdmin";
 import {
   saveContent,
   setBookingStatus,
@@ -62,11 +63,13 @@ type Props = {
     reviews: AdminReview[];
     gateways: AdminGateway[];
   };
+  cms: { pages: AdminPage[]; menu: AdminMenuItem[] };
 };
 
 const TABS = [
   "Bookings",
   "Shop",
+  "Pages",
   "Site details",
   "Text",
   "Projects",
@@ -90,6 +93,7 @@ export default function Dashboard({
   projects,
   notes,
   shop,
+  cms,
 }: Props) {
   const [tab, setTab] = useState<Tab>("Bookings");
   const [toast, setToast] = useState("");
@@ -151,6 +155,7 @@ export default function Dashboard({
       <div className="mx-auto max-w-[80rem] px-5 py-10 sm:px-8">
         {tab === "Bookings" && <Bookings rows={bookings} notify={setToast} />}
         {tab === "Shop" && <ShopAdmin {...shop} notify={setToast} />}
+        {tab === "Pages" && <CmsAdmin {...cms} notify={setToast} />}
         {tab === "Site details" && <SiteDetails site={site} groups={groups} notify={setToast} />}
         {tab === "Text" && <TextEditor groups={groups} notify={setToast} />}
         {tab === "Projects" && <Projects rows={projects} notify={setToast} />}

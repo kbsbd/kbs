@@ -1,6 +1,7 @@
 import { LOCALES, type Locale } from "@/content/seed";
 import { getContent } from "@/lib/content";
 import { resolveIntegrations } from "@/lib/integrations";
+import { getMenu } from "@/lib/cms";
 import SiteChrome from "@/components/SiteChrome";
 import Integrations from "@/components/Integrations";
 import { CartProvider } from "@/components/shop/cart";
@@ -21,13 +22,13 @@ export default async function SiteLayout({
 }) {
   const { locale } = await params;
   const l = ((LOCALES as readonly string[]).includes(locale) ? locale : "en") as Locale;
-  const content = await getContent();
+  const [content, menu] = await Promise.all([getContent(), getMenu()]);
   const shopOn = content.shop.enabled;
 
   return (
     <CartProvider>
       <WishlistProvider>
-        <SiteChrome content={content} locale={l}>
+        <SiteChrome content={content} locale={l} menu={menu}>
           {children}
         </SiteChrome>
         {shopOn && <CartDrawer l={l} symbol={content.shop.currencySymbol} />}

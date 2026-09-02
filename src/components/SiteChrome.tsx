@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { Locale, SiteContent } from "@/content/seed";
+import type { MenuItem } from "@/lib/cms";
 import FixedActions from "@/components/FixedActions";
 import CartButton from "@/components/shop/CartButton";
 import AccountLink from "@/components/auth/AccountLink";
@@ -20,10 +21,12 @@ const LEAF_STOPS = [0.16, 0.31, 0.46, 0.6, 0.74, 0.88];
 export default function SiteChrome({
   content,
   locale,
+  menu = [],
   children,
 }: {
   content: SiteContent;
   locale: Locale;
+  menu?: MenuItem[];
   children: React.ReactNode;
 }) {
   const [navSolid, setNavSolid] = useState(false);
@@ -33,7 +36,14 @@ export default function SiteChrome({
   const other: Locale = locale === "en" ? "bn" : "en";
   const otherPath = pathname.replace(/^\/(en|bn)/, `/${other}`) || `/${other}`;
   const shopOn = content.shop.enabled;
-  const navLinks = content.nav.links.filter((x) => x.href !== "/shop" || shopOn);
+  const seedLinks = content.nav.links.filter((x) => x.href !== "/shop" || shopOn);
+  /* An admin-built menu (cms_menu_items) replaces the seed nav wholesale. */
+  const navLinks =
+    menu.length > 0
+      ? menu
+          .filter((m) => !m.parentId)
+          .map((m) => ({ href: m.href, label: { en: m.label, bn: m.label_bn || m.label } }))
+      : seedLinks;
   const closeMenu = () => setMenuOpen(false);
 
   /* section entrances, and retiring the stagger when they finish */
