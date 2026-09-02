@@ -151,9 +151,11 @@ export default function ContactForm({ c, l }: { c: SiteContent; l: Locale }) {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn btn-ghost text-sm"
-                style={{ borderColor: "#25D366", color: "#25D366" }}
+                style={{ borderColor: "#25D366" }}
               >
-                <ChannelIcon name="whatsapp" size={16} />
+                <span style={{ color: "#25D366" }}>
+                  <ChannelIcon name="whatsapp" size={16} />
+                </span>
                 {c.site.whatsapp}
               </a>
             )}

@@ -27,7 +27,9 @@ export default function AccountLink({ l }: { l: Locale }) {
   return (
     <Link
       href={authed ? `/${l}/account` : `/${l}/login`}
-      aria-label={authed ? "My account" : "Sign in"}
+      /* logged-out shows visible text, so it needs no aria-label (and a
+         mismatched English one fails "Label in Name"); logged-in is icon-only */
+      aria-label={authed ? (l === "bn" ? "আমার অ্যাকাউন্ট" : "My account") : undefined}
       className="inline-flex h-11 items-center justify-center rounded-full text-[color:var(--text-secondary)] transition-colors duration-300 hover:text-[color:var(--text-primary)]"
     >
       {authed ? (

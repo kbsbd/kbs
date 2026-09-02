@@ -42,12 +42,16 @@ export default function CartDrawer({ l, symbol }: { l: Locale; symbol: string })
   return (
     <>
       <div className="drawer-scrim" data-open={drawerOpen} onClick={closeDrawer} aria-hidden="true" />
-      <aside
+      {/* A <div>, not <aside>: `aside` does not permit role="dialog". `inert`
+          while closed keeps the off-screen panel out of the a11y tree and the
+          tab order, so an agent never sees a stray "Cart" dialog. */}
+      <div
         className="drawer"
         data-open={drawerOpen}
         role="dialog"
         aria-label={t.cart}
-        aria-modal={drawerOpen}
+        aria-modal="true"
+        inert={!drawerOpen}
       >
         <header className="flex items-center justify-between border-b border-[color:var(--panel-edge)] px-5 py-4">
           <span className="font-display text-lg">
@@ -132,7 +136,7 @@ export default function CartDrawer({ l, symbol }: { l: Locale; symbol: string })
             </div>
           </div>
         )}
-      </aside>
+      </div>
     </>
   );
 }

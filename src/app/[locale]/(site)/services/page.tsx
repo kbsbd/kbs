@@ -109,9 +109,11 @@ export default async function ServicesPage({
               target="_blank"
               rel="noopener noreferrer"
               className="btn btn-ghost"
-              style={{ borderColor: "#25D366", color: "#25D366" }}
+              style={{ borderColor: "#25D366" }}
             >
-              <ChannelIcon name="whatsapp" size={16} />
+              <span style={{ color: "#25D366" }}>
+                <ChannelIcon name="whatsapp" size={16} />
+              </span>
               {c.site.whatsapp}
             </a>
           )}
