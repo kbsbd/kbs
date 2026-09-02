@@ -205,12 +205,13 @@ export default function SiteChrome({
             )}
             {shopOn && <CartButton label={t(content.shop.labels.cart)} />}
 
-            <a
-              href={`/${locale}#book`}
-              className="btn btn-primary ml-1 hidden text-sm lg:inline-flex"
-            >
-              {t(content.nav.cta)}
-            </a>
+            {/* wrapped, not `hidden` on the <a>: .btn sets its own display and
+                beats the `hidden` utility depending on stylesheet order */}
+            <span className="ml-1 hidden lg:inline-flex">
+              <a href={`/${locale}#book`} className="btn btn-primary text-sm">
+                {t(content.nav.cta)}
+              </a>
+            </span>
 
             <MobileMenu
               locale={locale}
