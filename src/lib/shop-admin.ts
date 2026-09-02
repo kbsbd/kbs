@@ -123,11 +123,14 @@ export async function loadShopAdmin(supabase: SupabaseClient): Promise<{
   }));
 
   const byId = new Map(((gwRes.data as Row[]) ?? []).map((g) => [String(g.id), g]));
-  const gateways: AdminGateway[] = (["bkash", "nagad", "sslcommerz"] as const).map((id) => {
+  const gateways: AdminGateway[] = (
+    ["quote", "cod", "bkash", "nagad", "sslcommerz"] as const
+  ).map((id) => {
     const g = byId.get(id);
     return {
       id,
-      enabled: Boolean(g?.enabled),
+      // quote + cod default on; the online gateways default off
+      enabled: g ? Boolean(g.enabled) : id === "quote" || id === "cod",
       mode: (String(g?.mode ?? "sandbox") as "sandbox" | "live"),
       config: (g?.config as Record<string, string>) ?? {},
     };

@@ -424,6 +424,10 @@ export const book = {
 export const site = {
   name: "KBS",
   founded: "1995",
+  /** Cloudinary URL. When set it replaces the "KBS" wordmark in the header/footer. */
+  logo: "",
+  /** Cloudinary URL of a square source image; the browser-tab icon is derived from it. */
+  favicon: "",
   tagline: {
     en: "Building in Bangladesh since 1995.",
     bn: "১৯৯৫ সাল থেকে বাংলাদেশে নির্মাণ।",

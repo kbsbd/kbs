@@ -176,13 +176,21 @@ create index if not exists quote_requests_created_idx on public.quote_requests (
 -- payment gateway config — keys entered from the dashboard later
 -- ------------------------------------------------------------
 create table if not exists public.payment_gateways (
-  id text primary key check (id in ('bkash', 'nagad', 'sslcommerz')),
+  id text primary key check (id in ('bkash', 'nagad', 'sslcommerz', 'cod', 'quote')),
   enabled boolean not null default false,
   mode text not null default 'sandbox' check (mode in ('sandbox', 'live')),
   config jsonb not null default '{}'::jsonb,
   updated_at timestamptz not null default now()
 );
 
+-- widen an already-created table
+alter table public.payment_gateways drop constraint if exists payment_gateways_id_check;
+alter table public.payment_gateways add constraint payment_gateways_id_check
+  check (id in ('bkash', 'nagad', 'sslcommerz', 'cod', 'quote'));
+
+-- cod + quote work out of the box; the online gateways stay off until keys exist
+insert into public.payment_gateways (id, enabled) values ('cod', true), ('quote', true)
+on conflict (id) do nothing;
 insert into public.payment_gateways (id) values ('bkash'), ('nagad'), ('sslcommerz')
 on conflict (id) do nothing;
 

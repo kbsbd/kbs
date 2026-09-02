@@ -35,6 +35,39 @@
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
 
   --hero-vh: 1000;
+
+  color-scheme: dark;
+}
+
+/* ------------------------------------------------------------
+   Light theme. The no-flash script in the root layout resolves
+   the system preference to an explicit data-theme, so a single
+   [data-theme="light"] block covers both "chose light" and
+   "system is light". The scroll hero stays dark in both — it is
+   footage with white captions and its own dark scrims.
+   ------------------------------------------------------------ */
+:root[data-theme="light"] {
+  --canvas: #f5f3ec;
+  --canvas-deep: #ebe7db;
+  --panel: #ffffff;
+  --panel-edge: #ddd7c7;
+
+  --accent: #4e7d16;
+  --accent-hover: #3c6410;
+  --accent-muted: rgba(78, 125, 22, 0.14);
+
+  --clay: #8a5344;
+  --clay-deep: #6f4234;
+
+  --leaf: #5a6b3c;
+  --sky: #cdd9e8;
+  --sky-mid: #a9c0dd;
+
+  --text-primary: #1b2530;
+  --text-secondary: #4c5b6a;
+  --text-quiet: #75808b;
+
+  color-scheme: light;
 }
 
 @theme inline {
@@ -154,6 +187,9 @@ html[lang="bn"] .font-mono-label {
   background: linear-gradient(180deg, var(--sky) 0%, var(--canvas) 42%, var(--canvas-deep) 100%);
   opacity: 0.55;
 }
+:root[data-theme="light"] .env {
+  opacity: 0.7;
+}
 
 .env::after {
   content: "";
@@ -226,7 +262,7 @@ html[lang="bn"] .font-mono-label {
   top: 0;
   height: 100vh;
   overflow: hidden;
-  background: var(--canvas-deep);
+  background: #07101a; /* the hero is always dark, whatever the theme */
 }
 
 .stage video {

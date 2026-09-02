@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { notFound } from "next/navigation";
 import { Archivo, Hanken_Grotesk, IBM_Plex_Mono, Anek_Bangla, Hind_Siliguri } from "next/font/google";
 import "../globals.css";
 import { LOCALES, type Locale } from "@/content/seed";
 import { getContent } from "@/lib/content";
 import { resolveIntegrations } from "@/lib/integrations";
-import { img } from "@/lib/media";
+import { img, faviconUrl } from "@/lib/media";
 import { siteUrl } from "@/lib/site-url";
 
 /* Display: wide, geometric, architectural. Echoes the building's concrete slabs.
@@ -93,24 +94,38 @@ export async function generateMetadata({
       url: `${siteUrl()}/${l}`,
       images: [img("hero-ending", 1200)],
     },
-    icons: {
-      icon: [
-        {
-          url:
-            "data:image/svg+xml," +
-            encodeURIComponent(
-              `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" fill="#0B1622"/><g fill="#88C038"><path d="M6 6h9l-4.5 10z"/><path d="M6 26h9l-4.5-10z"/><path d="M17 6h4a5 5 0 0 1 0 10h-4z"/><path d="M17 16h5a5 5 0 0 1 0 10h-5z"/></g></svg>`
-            ),
-          type: "image/svg+xml",
+    icons: c.site.favicon
+      ? {
+          icon: [
+            { url: faviconUrl(c.site.favicon, 32), sizes: "32x32" },
+            { url: faviconUrl(c.site.favicon, 192), sizes: "192x192" },
+          ],
+          apple: [{ url: faviconUrl(c.site.favicon, 180), sizes: "180x180" }],
+        }
+      : {
+          icon: [
+            {
+              url:
+                "data:image/svg+xml," +
+                encodeURIComponent(
+                  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" fill="#0B1622"/><g fill="#88C038"><path d="M6 6h9l-4.5 10z"/><path d="M6 26h9l-4.5-10z"/><path d="M17 6h4a5 5 0 0 1 0 10h-4z"/><path d="M17 16h5a5 5 0 0 1 0 10h-5z"/></g></svg>`
+                ),
+              type: "image/svg+xml",
+            },
+          ],
         },
-      ],
-    },
   };
 }
 
 export const viewport = {
-  themeColor: "#0B1622",
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#0b1622" },
+    { media: "(prefers-color-scheme: light)", color: "#f5f3ec" },
+  ],
 };
+
+/* Resolves the theme before the first paint, so there is no flash. */
+const THEME_SCRIPT = `(function(){try{var t=localStorage.getItem('kbs:theme');if(t!=='light'&&t!=='dark'){t=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';}document.documentElement.dataset.theme=t;}catch(e){document.documentElement.dataset.theme='dark';}})();`;
 
 export default async function LocaleLayout({
   children,
@@ -134,8 +149,11 @@ export default async function LocaleLayout({
   ].join(" ");
 
   return (
-    <html lang={l} className={fontVars}>
+    <html lang={l} className={fontVars} suppressHydrationWarning>
       <body>
+        <Script id="theme-init" strategy="beforeInteractive">
+          {THEME_SCRIPT}
+        </Script>
         {gtmId && (
           <noscript>
             <iframe

@@ -1,5 +1,6 @@
 "use client";
 
+/* eslint-disable @next/next/no-img-element */
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type { Locale } from "@/content/seed";
@@ -30,6 +31,7 @@ export default function MobileMenu({
   ctaHref,
   phone,
   accountHref,
+  logo,
   labels,
 }: {
   locale: Locale;
@@ -38,6 +40,7 @@ export default function MobileMenu({
   ctaHref: string;
   phone?: string;
   accountHref?: string;
+  logo?: string;
   labels: { open: string; close: string; account: string; call: string };
 }) {
   const [open, setOpen] = useState(false);
@@ -119,7 +122,11 @@ export default function MobileMenu({
           }}
         >
           <div className="flex items-center px-5 py-3.5 sm:px-8">
-            <span className="mr-auto font-display text-lg tracking-tight">KBS</span>
+            {logo ? (
+              <img src={logo} alt="KBS" className="mr-auto h-8 w-auto max-w-[160px] object-contain" />
+            ) : (
+              <span className="mr-auto font-display text-lg tracking-tight">KBS</span>
+            )}
             <button
               type="button"
               onClick={() => setOpen(false)}

@@ -274,7 +274,16 @@ function SiteDetails({
   const [socials, setSocials] = useState<Social[]>(
     () => (Array.isArray(site.socials) ? (site.socials as Social[]) : [])
   );
+  const [logo, setLogo] = useState(String(site.logo ?? ""));
+  const [favicon, setFavicon] = useState(String(site.favicon ?? ""));
   const [pending, start] = useTransition();
+
+  function saveOne(path: string, value: string, msg: string) {
+    start(async () => {
+      const r = await saveContent([{ root: "site", path, value }]);
+      notify(r.ok ? msg : r.error);
+    });
+  }
 
   function save() {
     const edits = [
@@ -302,7 +311,31 @@ function SiteDetails({
         the page.
       </p>
 
-      <div className="space-y-5">
+      <div className="space-y-6">
+        <h3 className="font-display text-lg">Logo &amp; favicon</h3>
+        <ImageUpload
+          label="Logo"
+          variant="logo"
+          value={logo}
+          hint="PNG with a transparent background, wide rather than tall (about 200×60px or larger). Shown ~32px tall in the header and ~36px in the footer. Leave blank to use the KBS wordmark."
+          onChange={(url) => {
+            setLogo(url);
+            saveOne("logo", url, url ? "Logo updated." : "Logo cleared.");
+          }}
+        />
+        <ImageUpload
+          label="Favicon"
+          variant="favicon"
+          value={favicon}
+          hint="A square image, at least 256×256px (512 is better). We centre-crop it and generate the 32px browser-tab icon and the 180px iOS icon. PNG with a transparent or solid background."
+          onChange={(url) => {
+            setFavicon(url);
+            saveOne("favicon", url, url ? "Favicon updated — it may take a minute to refresh in the tab." : "Favicon cleared.");
+          }}
+        />
+      </div>
+
+      <div className="space-y-5 border-t border-[color:var(--panel-edge)] pt-8">
         {SITE_FIELDS.map((f) => (
           <div key={f.key}>
             <label className="font-mono-label text-[color:var(--text-quiet)]">{f.label}</label>

@@ -199,17 +199,21 @@ export async function moderateReview(
 /* ---------------- payment gateways ---------------- */
 
 export async function saveGateway(input: {
-  id: "bkash" | "nagad" | "sslcommerz";
+  id: "cod" | "quote" | "bkash" | "nagad" | "sslcommerz";
   enabled: boolean;
   mode: "sandbox" | "live";
   config: Record<string, string>;
 }): Promise<Result> {
   const ctx = await guard();
   if (!ctx) return { ok: false, error: "Not signed in as an admin." };
+  if (!["cod", "quote", "bkash", "nagad", "sslcommerz"].includes(input.id))
+    return { ok: false, error: "Unknown payment method." };
   const { error } = await ctx.supabase
     .from("payment_gateways")
-    .update({ enabled: input.enabled, mode: input.mode, config: input.config })
-    .eq("id", input.id);
+    .upsert(
+      { id: input.id, enabled: input.enabled, mode: input.mode, config: input.config },
+      { onConflict: "id" }
+    );
   if (error) return { ok: false, error: error.message };
   revalidatePath("/en/admin");
   return { ok: true };

@@ -72,8 +72,9 @@ export type AdminReview = {
   status: string;
   created_at: string;
 };
+export type GatewayId = "cod" | "quote" | "bkash" | "nagad" | "sslcommerz";
 export type AdminGateway = {
-  id: "bkash" | "nagad" | "sslcommerz";
+  id: GatewayId;
   enabled: boolean;
   mode: "sandbox" | "live";
   config: Record<string, string>;
@@ -727,6 +728,34 @@ function ReviewsPanel({ reviews, notify }: { reviews: AdminReview[]; notify: (s:
 
 /* ================= Payments ================= */
 
+const GATEWAY_META: Record<GatewayId, { label: string; desc: string; keys: boolean }> = {
+  quote: {
+    label: "Request a quote",
+    desc: "The cart becomes a quote request — no payment. Good for large / project orders.",
+    keys: false,
+  },
+  cod: {
+    label: "Cash on delivery",
+    desc: "Customer places the order and pays on delivery.",
+    keys: false,
+  },
+  bkash: {
+    label: "bKash",
+    desc: "Shows at checkout. Until the keys below are live the order is placed unpaid and you follow up for payment.",
+    keys: true,
+  },
+  nagad: {
+    label: "Nagad",
+    desc: "Shows at checkout. Until the keys below are live the order is placed unpaid and you follow up for payment.",
+    keys: true,
+  },
+  sslcommerz: {
+    label: "Card / mobile banking (SSLCommerz)",
+    desc: "Shows at checkout. Until the keys below are live the order is placed unpaid and you follow up for payment.",
+    keys: true,
+  },
+};
+
 const GATEWAY_FIELDS: Record<string, Array<{ key: string; label: string }>> = {
   bkash: [
     { key: "app_key", label: "App Key" },
@@ -756,9 +785,9 @@ function PaymentsPanel({
   return (
     <div className="max-w-2xl space-y-6">
       <p className="text-sm leading-relaxed text-[color:var(--text-secondary)]">
-        Enter the keys from your merchant account, tick <b>Enabled</b>, and the option appears at
-        checkout. Leave a gateway disabled and it stays hidden. Keys are stored server-side and are
-        never sent to the browser.
+        Tick <b>Show at checkout</b> to make a method appear to customers; untick it and it
+        disappears from the checkout. Merchant keys are stored server-side and never sent to the
+        browser.
       </p>
       {gateways.map((g) => (
         <GatewayForm key={g.id} gateway={g} notify={notify} />
@@ -772,25 +801,29 @@ function GatewayForm({ gateway, notify }: { gateway: AdminGateway; notify: (s: s
   const [mode, setMode] = useState<"sandbox" | "live">(gateway.mode);
   const [config, setConfig] = useState<Record<string, string>>(gateway.config ?? {});
   const [pending, start] = useTransition();
-  const fields = GATEWAY_FIELDS[gateway.id] ?? [];
+  const meta = GATEWAY_META[gateway.id];
+  const fields = meta.keys ? GATEWAY_FIELDS[gateway.id] ?? [] : [];
 
   return (
     <div className="rounded-xl border border-[color:var(--panel-edge)] p-4">
       <div className="flex items-center gap-4">
-        <span className="font-medium capitalize">{gateway.id}</span>
+        <span className="font-medium">{meta.label}</span>
         <label className="flex items-center gap-2 text-sm">
           <input type="checkbox" checked={enabled} onChange={(e) => setEnabled(e.target.checked)} />
-          Enabled
+          Show at checkout
         </label>
-        <select
-          className={`${field} ml-auto w-auto`}
-          value={mode}
-          onChange={(e) => setMode(e.target.value as "sandbox" | "live")}
-        >
-          <option value="sandbox">Sandbox</option>
-          <option value="live">Live</option>
-        </select>
+        {meta.keys && (
+          <select
+            className={`${field} ml-auto w-auto`}
+            value={mode}
+            onChange={(e) => setMode(e.target.value as "sandbox" | "live")}
+          >
+            <option value="sandbox">Sandbox</option>
+            <option value="live">Live</option>
+          </select>
+        )}
       </div>
+      <p className="mt-1.5 text-xs text-[color:var(--text-quiet)]">{meta.desc}</p>
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         {fields.map((f) => (
           <label key={f.key} className="block">

@@ -9,22 +9,27 @@ export default async function CheckoutDonePage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ kind?: string; ref?: string }>;
+  searchParams: Promise<{ kind?: string; ref?: string; pay?: string }>;
 }) {
   const { locale } = await params;
-  const { kind, ref } = await searchParams;
+  const { kind, ref, pay } = await searchParams;
   if (!(LOCALES as readonly string[]).includes(locale)) notFound();
   const l = locale as Locale;
   const isOrder = kind === "order";
+  const followUp = pay === "followup";
 
   const t = {
     head: isOrder
       ? l === "bn" ? "অর্ডার পেয়েছি।" : "Order received."
       : l === "bn" ? "রিকোয়েস্ট পেয়েছি।" : "Request received.",
     body: isOrder
-      ? l === "bn"
-        ? "আমরা শীঘ্রই আপনার দেওয়া নম্বরে যোগাযোগ করে ডেলিভারি নিশ্চিত করব।"
-        : "We'll call you on the number you gave to confirm delivery."
+      ? followUp
+        ? l === "bn"
+          ? "আমরা অর্ডার নিশ্চিত করে পেমেন্টের বিস্তারিত আপনার নম্বরে বা ইমেইলে পাঠাব।"
+          : "We'll confirm the order and send you the payment details by phone or email."
+        : l === "bn"
+          ? "আমরা শীঘ্রই আপনার দেওয়া নম্বরে যোগাযোগ করে ডেলিভারি নিশ্চিত করব।"
+          : "We'll call you on the number you gave to confirm delivery."
       : l === "bn"
         ? "আমরা দাম ও স্টক যাচাই করে ইমেইল বা ফোনে কোটেশন পাঠাব, সাধারণত একই কর্মদিবসে।"
         : "We'll check pricing and stock and send a quote by email or phone, usually the same working day.",

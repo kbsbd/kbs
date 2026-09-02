@@ -19,13 +19,10 @@ async function guard() {
   return supabase ? { session, supabase } : null;
 }
 
-const PAGE_PATHS = ["", "/services", "/kb-homes", "/clients", "/contact"];
-
 function refresh() {
-  for (const l of ["/en", "/bn"]) {
-    for (const p of PAGE_PATHS) revalidatePath(`${l}${p}`);
-    revalidatePath(`${l}/admin`);
-  }
+  /* site.logo / site.favicon / nav / socials live in the shared chrome, so
+     revalidate the whole locale tree rather than a fixed page list. */
+  for (const l of ["/en", "/bn"]) revalidatePath(l, "layout");
 }
 
 /**

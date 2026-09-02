@@ -19,6 +19,18 @@ export function img(name: string, width = 1920): string {
 }
 
 /**
+ * A square derivative of a stored favicon URL, at `size` px. Chains a transform
+ * in front of whatever the stored URL already carries; a non-Cloudinary URL is
+ * returned untouched.
+ */
+export function faviconUrl(stored: string, size: number): string {
+  if (!stored) return "";
+  const m = stored.match(/^(https:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(.+)$/);
+  if (!m) return stored;
+  return `${m[1]}c_fill,w_${size},h_${size}/${m[2]}`;
+}
+
+/**
  * The scrub video, in two encodes.
  *
  * H.264 is the primary: every mainstream browser decodes it and it seeks

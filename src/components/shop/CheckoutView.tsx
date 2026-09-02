@@ -10,12 +10,24 @@ import { browserClient } from "@/lib/supabase/browser";
 import { useCart } from "./cart";
 import { shippingFor, type CheckoutMode } from "./checkout-math";
 
-const MODE_META: Record<CheckoutMode, { en: string; bn: string; soon?: boolean }> = {
+const MODE_META: Record<CheckoutMode, { en: string; bn: string; note?: { en: string; bn: string } }> = {
   quote: { en: "Request a quote", bn: "কোটেশন চান" },
   cod: { en: "Cash on delivery", bn: "ক্যাশ অন ডেলিভারি" },
-  bkash: { en: "bKash", bn: "বিকাশ", soon: true },
-  nagad: { en: "Nagad", bn: "নগদ", soon: true },
-  sslcommerz: { en: "Card / SSLCommerz", bn: "কার্ড / SSLCommerz", soon: true },
+  bkash: {
+    en: "bKash",
+    bn: "বিকাশ",
+    note: { en: "We confirm the order, then send bKash details.", bn: "অর্ডার নিশ্চিত করে বিকাশের তথ্য পাঠানো হবে।" },
+  },
+  nagad: {
+    en: "Nagad",
+    bn: "নগদ",
+    note: { en: "We confirm the order, then send Nagad details.", bn: "অর্ডার নিশ্চিত করে নগদের তথ্য পাঠানো হবে।" },
+  },
+  sslcommerz: {
+    en: "Card / mobile banking",
+    bn: "কার্ড / মোবাইল ব্যাংকিং",
+    note: { en: "We confirm the order, then send a payment link.", bn: "অর্ডার নিশ্চিত করে পেমেন্ট লিংক পাঠানো হবে।" },
+  },
 };
 
 export default function CheckoutView({
@@ -116,7 +128,9 @@ export default function CheckoutView({
       if (!res.ok || !json.ok) throw new Error(json.error || "Something went wrong.");
       clear();
       const ref = json.orderNumber || json.ref || "";
-      router.push(`/${l}/shop/checkout/done?kind=${json.kind}&ref=${encodeURIComponent(ref)}`);
+      router.push(
+        `/${l}/shop/checkout/done?kind=${json.kind}${json.followUp ? "&pay=followup" : ""}&ref=${encodeURIComponent(ref)}`
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
       setState("error");
@@ -132,29 +146,36 @@ export default function CheckoutView({
           <fieldset>
             <legend className={lbl}>{t.how}</legend>
             <div className="mt-3 grid gap-2">
+              {modes.length === 0 && (
+                <p className="text-sm text-[color:var(--text-quiet)]">
+                  {l === "bn"
+                    ? "চেকআউট এখন বন্ধ। যোগাযোগ করুন।"
+                    : "Checkout is closed right now — please contact us."}
+                </p>
+              )}
               {modes.map((m) => {
                 const meta = MODE_META[m];
+                if (!meta) return null;
                 return (
                   <label
                     key={m}
-                    className={`flex items-center gap-3 rounded-xl border px-4 py-3 ${
+                    className={`flex cursor-pointer flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border px-4 py-3 ${
                       mode === m
                         ? "border-[color:var(--accent)]"
                         : "border-[color:var(--panel-edge)]"
-                    } ${meta.soon ? "opacity-50" : "cursor-pointer"}`}
+                    }`}
                   >
                     <input
                       type="radio"
                       name="mode"
                       value={m}
                       checked={mode === m}
-                      disabled={meta.soon}
                       onChange={() => setMode(m)}
                     />
                     <span>{l === "bn" ? meta.bn : meta.en}</span>
-                    {meta.soon && (
-                      <span className="ml-auto text-xs text-[color:var(--text-quiet)]">
-                        {l === "bn" ? "শীঘ্রই" : "soon"}
+                    {meta.note && mode === m && (
+                      <span className="w-full pl-7 text-xs text-[color:var(--text-quiet)]">
+                        {l === "bn" ? meta.note.bn : meta.note.en}
                       </span>
                     )}
                   </label>

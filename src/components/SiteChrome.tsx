@@ -1,5 +1,6 @@
 "use client";
 
+/* eslint-disable @next/next/no-img-element */
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -9,6 +10,7 @@ import FixedActions from "@/components/FixedActions";
 import CartButton from "@/components/shop/CartButton";
 import AccountLink from "@/components/auth/AccountLink";
 import MobileMenu from "@/components/MobileMenu";
+import ThemeToggle from "@/components/ThemeToggle";
 import { SocialIcon, SOCIAL_PLATFORMS } from "@/components/icons/SocialIcons";
 
 /**
@@ -34,9 +36,13 @@ export default function SiteChrome({
   const [navSolid, setNavSolid] = useState(false);
   const spineRef = useRef<SVGSVGElement>(null);
   const pathname = usePathname();
+  /* The transparent-over-footage header is only right on the home page, where
+     the scrub hero sits behind it. Everywhere else the bar is solid. */
+  const isHome = /^\/(en|bn)\/?$/.test(pathname);
   const other: Locale = locale === "en" ? "bn" : "en";
   const otherPath = pathname.replace(/^\/(en|bn)/, `/${other}`) || `/${other}`;
   const shopOn = content.shop.enabled;
+  const logo = content.site.logo;
   const seedLinks = content.nav.links.filter((x) => x.href !== "/shop" || shopOn);
   /* An admin-built menu (cms_menu_items) replaces the seed nav wholesale. */
   const navLinks =
@@ -92,7 +98,7 @@ export default function SiteChrome({
       });
     };
     const onScroll = () => {
-      setNavSolid(window.scrollY > window.innerHeight * 0.9);
+      setNavSolid(!isHome || window.scrollY > window.innerHeight * 0.9);
       if (raf === null) raf = requestAnimationFrame(write);
     };
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -101,7 +107,8 @@ export default function SiteChrome({
       window.removeEventListener("scroll", onScroll);
       if (raf !== null) cancelAnimationFrame(raf);
     };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isHome]);
 
   /* pause every animation on a hidden tab. animation-play-state does not
      inherit, so the CSS rule targets elements and pseudo-elements alike. */
@@ -173,8 +180,14 @@ export default function SiteChrome({
             className="mr-auto flex items-center gap-2.5"
             aria-label="KBS"
           >
-            <Mark />
-            <span className="font-display text-lg tracking-tight">KBS</span>
+            {logo ? (
+              <img src={logo} alt="KBS" className="h-8 w-auto max-w-[180px] object-contain" />
+            ) : (
+              <>
+                <Mark />
+                <span className="font-display text-lg tracking-tight">KBS</span>
+              </>
+            )}
           </Link>
 
           <div className="hidden items-center gap-7 lg:flex">
@@ -199,6 +212,8 @@ export default function SiteChrome({
               {t(content.nav.langLabel)}
             </Link>
 
+            <ThemeToggle label={locale === "bn" ? "থিম" : "Theme"} />
+
             {shopOn && (
               <span className="hidden lg:inline-flex">
                 <AccountLink l={locale} />
@@ -221,6 +236,7 @@ export default function SiteChrome({
               ctaHref="#book"
               phone={content.site.phone}
               accountHref={shopOn ? `/${locale}/account` : undefined}
+              logo={logo}
               labels={{
                 open: locale === "bn" ? "মেনু" : "Menu",
                 close: locale === "bn" ? "মেনু বন্ধ করুন" : "Close menu",
@@ -240,8 +256,14 @@ export default function SiteChrome({
         <div className="mx-auto grid max-w-[86rem] gap-10 px-5 py-16 sm:px-8 md:grid-cols-3">
           <div>
             <div className="flex items-center gap-2.5">
-              <Mark />
-              <span className="font-display text-xl">KBS</span>
+              {logo ? (
+                <img src={logo} alt="KBS" className="h-9 w-auto max-w-[200px] object-contain" />
+              ) : (
+                <>
+                  <Mark />
+                  <span className="font-display text-xl">KBS</span>
+                </>
+              )}
             </div>
             <p className="mt-4 max-w-[30ch] text-sm leading-relaxed text-[color:var(--text-secondary)]">
               {t(content.site.tagline)}

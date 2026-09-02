@@ -59,6 +59,20 @@ export async function POST(req: Request) {
   if (!supabase)
     return NextResponse.json({ error: "store is not available" }, { status: 503 });
 
+  // the method must be one the admin has switched on
+  const { data: gw } = await supabase
+    .from("payment_gateways")
+    .select("id")
+    .eq("id", mode)
+    .eq("enabled", true)
+    .maybeSingle();
+  if (!gw) {
+    return NextResponse.json(
+      { error: "That payment method is not available. Please choose another." },
+      { status: 409 }
+    );
+  }
+
   // link to the signed-in customer, if there is one
   const authed = await createAuthClient();
   const userId = authed ? (await authed.auth.getUser()).data.user?.id ?? null : null;
@@ -135,22 +149,19 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, mode, ref: data.id, kind: "quote" });
   }
 
-  // ---- online gateways: recognised, not yet wired ---------------------
-  if (mode === "bkash" || mode === "nagad" || mode === "sslcommerz") {
-    return NextResponse.json(
-      { error: `${mode} is not set up yet. Choose Cash on delivery or Request a quote.` },
-      { status: 501 }
-    );
-  }
+  // ---- an order (cash on delivery, or an online method) --------------
+  // The online gateways are not wired to charge yet: the order is placed
+  // unpaid and pending, and the team follows up with payment details. Once a
+  // gateway is implemented this branch hands off to its redirect flow instead.
+  const online = mode === "bkash" || mode === "nagad" || mode === "sslcommerz";
 
-  // ---- cash on delivery order ---------------------------------------
   const { data: order, error: orderErr } = await supabase
     .from("orders")
     .insert({
       user_id: userId,
       status: "pending",
       payment_status: "unpaid",
-      payment_method: "cod",
+      payment_method: mode,
       currency: "BDT",
       subtotal,
       shipping,
@@ -191,7 +202,7 @@ export async function POST(req: Request) {
     subject: `[KBS order ${order.order_number}] ${name}`,
     replyTo: email || undefined,
     text: [
-      `Order:   ${order.order_number}  (Cash on delivery)`,
+      `Order:   ${order.order_number}  (${mode.toUpperCase()}${online ? " — follow up for payment" : ""})`,
       `Name:    ${name}`,
       `Phone:   ${phone}`,
       `Email:   ${email || "—"}`,
@@ -211,6 +222,7 @@ export async function POST(req: Request) {
     ok: true,
     mode,
     kind: "order",
+    followUp: online,
     orderNumber: order.order_number,
     ref: order.id,
   });

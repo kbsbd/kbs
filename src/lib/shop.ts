@@ -7,7 +7,7 @@
  * shop simply shows "nothing here yet" instead of a broken page.
  */
 
-import { createServerClient } from "./supabase/server";
+import { createServerClient, createAdminClient } from "./supabase/server";
 import type { Locale } from "@/content/seed";
 
 export type ProductImage = { url: string; alt: string };
@@ -178,6 +178,30 @@ export async function getReviews(productId: string): Promise<Review[]> {
     }));
   } catch {
     return [];
+  }
+}
+
+/**
+ * The checkout methods the admin has switched on, in display order. Read with
+ * the service-role client because `payment_gateways` is admin-only under RLS
+ * (it holds merchant keys) — only the enabled ids, never the config, leave the
+ * server. Falls back to quote + cod when the table is empty or unreachable.
+ */
+export async function getEnabledPaymentMethods(): Promise<string[]> {
+  const order = ["quote", "cod", "bkash", "nagad", "sslcommerz"];
+  const supabase = createAdminClient();
+  if (!supabase) return ["quote", "cod"];
+  try {
+    const { data, error } = await supabase
+      .from("payment_gateways")
+      .select("id, enabled")
+      .eq("enabled", true);
+    if (error) return ["quote", "cod"];
+    const on = new Set((data ?? []).map((r) => String(r.id)));
+    const list = order.filter((id) => on.has(id));
+    return list.length ? list : ["quote", "cod"];
+  } catch {
+    return ["quote", "cod"];
   }
 }
 
