@@ -16,7 +16,11 @@ export const DEFAULT_LOCALE: Locale = "en";
 /** A string that exists in both languages. */
 export type L = Record<Locale, string>;
 
-/** English now, Bengali later: used by pages whose copy is not translated yet. */
+/** A bilingual string. */
+export const bi = (en: string, bn: string): L => ({ en, bn });
+
+/** English now, Bengali later: used where the Bengali copy is not written yet
+ *  (the admin can fill it from the Text tab). */
 export const soon = (en: string): L => ({ en, bn: en });
 
 export type HeroBand = {
@@ -149,11 +153,11 @@ export const nav = {
      SiteChrome prefixes both with the active locale. This ordered list is what
      the DB-backed menu editor will take over once Supabase is connected. */
   links: [
-    { href: "/services", label: soon("Services") },
-    { href: "/shop", label: soon("Shop") },
-    { href: "/kb-homes", label: soon("KB Homes") },
-    { href: "/clients", label: soon("Clients") },
-    { href: "/contact", label: soon("Contact") },
+    { href: "/kb-homes", label: { en: "KB Homes", bn: "কেবি হোমস" } },
+    { href: "/shop", label: { en: "Shop", bn: "শপ" } },
+    { href: "/services", label: { en: "Services", bn: "সেবা" } },
+    { href: "/clients", label: { en: "Clients", bn: "ক্লায়েন্ট" } },
+    { href: "/contact", label: { en: "Contact us", bn: "যোগাযোগ" } },
   ],
   cta: { en: "Book a visit", bn: "ভিজিট বুক করুন" },
   langLabel: { en: "বাংলা", bn: "English" },
@@ -483,195 +487,221 @@ export const footer = {
    ============================================================ */
 
 export const servicesPage = {
-  kicker: soon("WHAT WE DO"),
-  head: soon("Our services"),
+  kicker: bi("WHAT WE DO", "আমরা যা করি"),
+  head: bi("Our services", "আমাদের সেবাসমূহ"),
   intro: [
-    soon(
-      "Welcome to Kanchan Builders. We are one of the leading Sanitary & Plumbing systems solution providing companies in the Bangladeshi market. For the last 36 years we have worked in this field, for a green world and to every international standard."
+    bi(
+      "Welcome to Kanchan Builders. We are one of the leading Sanitary & Plumbing systems solution providing companies in the Bangladeshi market. For the last 36 years we have worked in this field, for a green world and to every international standard.",
+      "কাঞ্চন বিল্ডার্সে স্বাগতম। বাংলাদেশের বাজারে স্যানিটারি ও প্লাম্বিং সিস্টেম সমাধানদানকারী শীর্ষ প্রতিষ্ঠানগুলোর একটি আমরা। গত ৩৬ বছর ধরে একটি সবুজ পৃথিবীর লক্ষ্যে এবং প্রতিটি আন্তর্জাতিক মান বজায় রেখে আমরা এই ক্ষেত্রে কাজ করে আসছি।"
     ),
-    soon(
-      "We are an export-oriented, integrated Environmental Engineering and Trading company, specialising mainly in the water purifier and water treatment sector of Bangladesh. Since our foundation we have held to steady, deliberate growth as our guiding idea, and in a fiercely competitive market we have moved forward without pause to become one of the top-ranked water companies in the country."
+    bi(
+      "We are an export-oriented, integrated Environmental Engineering and Trading company, specialising mainly in the water purifier and water treatment sector of Bangladesh. Since our foundation we have held to steady, deliberate growth as our guiding idea, and in a fiercely competitive market we have moved forward without pause to become one of the top-ranked water companies in the country.",
+      "আমরা একটি রপ্তানিমুখী, সমন্বিত পরিবেশ প্রকৌশল ও ট্রেডিং প্রতিষ্ঠান, মূলত বাংলাদেশের পানি বিশুদ্ধকরণ ও পানি পরিশোধন খাতে বিশেষজ্ঞ। প্রতিষ্ঠার শুরু থেকেই স্থিতিশীল ও পরিকল্পিত প্রবৃদ্ধিকে মূল ভাবনা হিসেবে ধরে রেখে, তীব্র প্রতিযোগিতাপূর্ণ বাজারে থেমে না থেকে দেশের অন্যতম শীর্ষ পানি প্রতিষ্ঠানে পরিণত হয়েছি।"
     ),
-    soon(
-      "Our divisional structure lets us focus on the specific needs of each market. We bring quality products to our customers and build international brand awareness across our core sectors, and we have strengthened our place in the domestic distribution market by launching a series of strong foreign brands across the group's well-developed distribution network. Abiding by the principle of “Quality First, Service Perfect, Prestige Supreme”, we have built a capable young team, an advanced marketing system and global sourcing."
+    bi(
+      "Our divisional structure lets us focus on the specific needs of each market. We bring quality products to our customers and build international brand awareness across our core sectors, and we have strengthened our place in the domestic distribution market by launching a series of strong foreign brands across the group's well-developed distribution network. Abiding by the principle of “Quality First, Service Perfect, Prestige Supreme”, we have built a capable young team, an advanced marketing system and global sourcing.",
+      "আমাদের বিভাগীয় কাঠামো প্রতিটি বাজারের নির্দিষ্ট চাহিদার দিকে মনোযোগ দিতে সাহায্য করে। আমরা গ্রাহকদের কাছে মানসম্পন্ন পণ্য পৌঁছে দিই এবং মূল খাতগুলোতে আন্তর্জাতিক ব্র্যান্ড সচেতনতা গড়ে তুলি। গ্রুপের সুসংগঠিত পরিবেশক নেটওয়ার্কে একাধিক শক্তিশালী বিদেশি ব্র্যান্ড চালু করে দেশীয় বিতরণ বাজারে আমাদের অবস্থান আরও শক্ত করেছি। “গুণমান প্রথম, সেবা নিখুঁত, মর্যাদা সর্বোচ্চ” — এই নীতিতে চলে আমরা গড়ে তুলেছি একটি দক্ষ তরুণ দল, একটি উন্নত বিপণন ব্যবস্থা এবং বৈশ্বিক সোর্সিং।"
     ),
-    soon(
-      "The company has earned trust for its practical spirit and sound credit, and holds good relationships with financial institutions. It was awarded “Best Service Provider” by Vistara Architect. In a business environment that only grows more competitive and complex, we stay committed to the skills needed to evaluate, select and implement water treatment technologies — combining broad hands-on experience with the discipline of an engineering and contracting company."
+    bi(
+      "The company has earned trust for its practical spirit and sound credit, and holds good relationships with financial institutions. It was awarded “Best Service Provider” by Vistara Architect. In a business environment that only grows more competitive and complex, we stay committed to the skills needed to evaluate, select and implement water treatment technologies — combining broad hands-on experience with the discipline of an engineering and contracting company.",
+      "বাস্তবমুখী মনোভাব ও সুনামের কারণে প্রতিষ্ঠানটি আস্থা অর্জন করেছে এবং আর্থিক প্রতিষ্ঠানগুলোর সঙ্গে ভালো সম্পর্ক রাখে। ভিস্তারা আর্কিটেক্ট কর্তৃক “সেরা সেবাদানকারী” পুরস্কারে ভূষিত হয়েছে। ক্রমশ প্রতিযোগিতাপূর্ণ ও জটিল ব্যবসায়িক পরিবেশে আমরা পানি পরিশোধন প্রযুক্তি মূল্যায়ন, নির্বাচন ও বাস্তবায়নের দক্ষতা ধরে রাখতে প্রতিশ্রুতিবদ্ধ — বিস্তৃত হাতে-কলমে অভিজ্ঞতার সঙ্গে একটি প্রকৌশল ও ঠিকাদারি প্রতিষ্ঠানের নিয়মানুবর্তিতা মিলিয়ে।"
     ),
   ] as L[],
-  sisterHead: soon("Our sister concerns"),
+  sisterHead: bi("Our sister concerns", "আমাদের সহযোগী প্রতিষ্ঠান"),
   /** Admin lists the sister concerns here; ships empty and the block hides. */
   sisterConcerns: [] as Array<{ id: string; name: string; note: L }>,
   items: [
     {
       id: "plumbing-consultant",
       image: "",
-      title: soon("Sanitary & Plumbing consultancy"),
-      body: soon(
-        "Plumbing consultancy for residential, commercial, industrial, hospital and every other sector. We deliver within an agreed timeframe, using up-to-date equipment and methods."
+      title: bi("Sanitary & Plumbing consultancy", "স্যানিটারি ও প্লাম্বিং পরামর্শ"),
+      body: bi(
+        "Plumbing consultancy for residential, commercial, industrial, hospital and every other sector. We deliver within an agreed timeframe, using up-to-date equipment and methods.",
+        "আবাসিক, বাণিজ্যিক, শিল্প, হাসপাতালসহ সব খাতের জন্য প্লাম্বিং পরামর্শ সেবা। আধুনিক যন্ত্রপাতি ও পদ্ধতি ব্যবহার করে নির্ধারিত সময়ের মধ্যে কাজ সম্পন্ন করি।"
       ),
     },
     {
       id: "plumbing-works",
       image: "",
-      title: soon("Sanitary & Plumbing works"),
-      body: soon(
-        "All types of sanitary and plumbing work, done with care for detail. Remodelling or new construction, we give you expert advice and professional help to change how a bathroom looks and works."
+      title: bi("Sanitary & Plumbing works", "স্যানিটারি ও প্লাম্বিং কাজ"),
+      body: bi(
+        "All types of sanitary and plumbing work, done with care for detail. Remodelling or new construction, we give you expert advice and professional help to change how a bathroom looks and works.",
+        "সব ধরনের স্যানিটারি ও প্লাম্বিং কাজ, প্রতিটি খুঁটিনাটির প্রতি যত্ন নিয়ে করা হয়। সংস্কার হোক বা নতুন নির্মাণ, বাথরুমের চেহারা ও কার্যকারিতা বদলাতে আমরা বিশেষজ্ঞ পরামর্শ ও পেশাদার সহায়তা দিই।"
       ),
     },
     {
       id: "import-distribution",
       image: "",
-      title: soon("Import & distribution"),
-      body: soon(
-        "Over the years we have built a reputation as a trustworthy dealer in sanitary ware and allied building materials. We import and distribute all kinds of sanitary and plumbing products, and our strength is the quality of the goods, fair pricing and the service we give our clients."
+      title: bi("Import & distribution", "আমদানি ও বিতরণ"),
+      body: bi(
+        "Over the years we have built a reputation as a trustworthy dealer in sanitary ware and allied building materials. We import and distribute all kinds of sanitary and plumbing products, and our strength is the quality of the goods, fair pricing and the service we give our clients.",
+        "বছরের পর বছর ধরে স্যানিটারি ওয়্যার ও সংশ্লিষ্ট নির্মাণসামগ্রীর নির্ভরযোগ্য পরিবেশক হিসেবে আমরা সুনাম গড়ে তুলেছি। সব ধরনের স্যানিটারি ও প্লাম্বিং পণ্য আমদানি ও বিতরণ করি। আমাদের শক্তি পণ্যের গুণমান, ন্যায্য মূল্য এবং গ্রাহকদের প্রতি সেবা।"
       ),
     },
     {
       id: "booster-pump",
       image: "",
-      title: soon("Auto-pressurised booster pump"),
-      body: soon(
-        "A constant-pressure booster pump supplied as a complete package — drive, pump, motor and pressure switch. The domestic system is designed for small spaces, built in stainless steel, and runs smoothly and quietly."
+      title: bi("Auto-pressurised booster pump", "অটো প্রেশারাইজড বুস্টার পাম্প"),
+      body: bi(
+        "A constant-pressure booster pump supplied as a complete package — drive, pump, motor and pressure switch. The domestic system is designed for small spaces, built in stainless steel, and runs smoothly and quietly.",
+        "ড্রাইভ, পাম্প, মোটর ও প্রেশার সুইচসহ সম্পূর্ণ প্যাকেজে সরবরাহ করা কনস্ট্যান্ট-প্রেশার বুস্টার পাম্প। ঘরোয়া সিস্টেমটি ছোট জায়গার জন্য নকশা করা, স্টেইনলেস স্টিলে তৈরি এবং মসৃণ ও নিঃশব্দে চলে।"
       ),
     },
     {
       id: "core-hole-cutting",
       image: "",
-      title: soon("Core hole cutting"),
-      body: soon(
-        "Our range of modern equipment lets us cut walls, floors and roadways — from thin material through to heavily reinforced concrete at any depth. Core drilling runs from ½″ up to 60″ for plumbing, duct work, structural and electrical installations, in concrete, block, asphalt, brick and steel."
+      title: bi("Core hole cutting", "কোর হোল কাটিং"),
+      body: bi(
+        "Our range of modern equipment lets us cut walls, floors and roadways — from thin material through to heavily reinforced concrete at any depth. Core drilling runs from ½″ up to 60″ for plumbing, duct work, structural and electrical installations, in concrete, block, asphalt, brick and steel.",
+        "আধুনিক যন্ত্রপাতির সাহায্যে আমরা দেয়াল, মেঝে ও সড়ক কাটতে পারি — পাতলা উপাদান থেকে যেকোনো গভীরতার ভারী রিইনফোর্সড কংক্রিট পর্যন্ত। প্লাম্বিং, ডাক্ট, স্ট্রাকচারাল ও বৈদ্যুতিক স্থাপনার জন্য কংক্রিট, ব্লক, অ্যাসফল্ট, ইট ও স্টিলে ½″ থেকে ৬০″ পর্যন্ত কোর ড্রিলিং।"
       ),
     },
     {
       id: "deep-tubewell",
       image: "",
-      title: soon("Deep tube well"),
-      body: soon(
-        "We have grown into one of the country's leading deep-tube-well contractors. Bangladesh soil is largely alluvial, so we use both direct water-jet and reverse-circulation boring, with casing pipes and chemicals to handle the cave-ins common in local ground conditions."
+      title: bi("Deep tube well", "গভীর নলকূপ"),
+      body: bi(
+        "We have grown into one of the country's leading deep-tube-well contractors. Bangladesh soil is largely alluvial, so we use both direct water-jet and reverse-circulation boring, with casing pipes and chemicals to handle the cave-ins common in local ground conditions.",
+        "আমরা দেশের অন্যতম শীর্ষ গভীর নলকূপ ঠিকাদারে পরিণত হয়েছি। বাংলাদেশের মাটি বেশিরভাগ পলিমাটি, তাই আমরা ডাইরেক্ট ওয়াটার-জেট ও রিভার্স-সার্কুলেশন — দুই পদ্ধতিতেই বোরিং করি, স্থানীয় মাটিতে সাধারণ ধস সামলাতে কেসিং পাইপ ও কেমিক্যাল ব্যবহার করি।"
       ),
     },
     {
       id: "soft-water-plant",
       image: "",
-      title: soon("Soft water treatment plant"),
-      body: soon(
-        "Removes hardness by ion exchange, recharging the resin with salt. Built from 1 m³/hr to 100 m³/hr and above, in a choice of materials of construction. Simple to operate and maintain, designed to the client's requirement, and easy to install."
+      title: bi("Soft water treatment plant", "সফট ওয়াটার ট্রিটমেন্ট প্ল্যান্ট"),
+      body: bi(
+        "Removes hardness by ion exchange, recharging the resin with salt. Built from 1 m³/hr to 100 m³/hr and above, in a choice of materials of construction. Simple to operate and maintain, designed to the client's requirement, and easy to install.",
+        "আয়ন এক্সচেঞ্জ পদ্ধতিতে পানির খরতা দূর করে, লবণ দিয়ে রেজিন রিচার্জ করা হয়। ঘণ্টায় ১ ঘনমিটার থেকে ১০০ ঘনমিটার বা তার বেশি ক্ষমতায়, বিভিন্ন উপাদানে তৈরি। পরিচালনা ও রক্ষণাবেক্ষণ সহজ, গ্রাহকের চাহিদা অনুযায়ী নকশা করা এবং স্থাপন সহজ।"
       ),
     },
     {
       id: "recycle-water-plant",
       image: "",
-      title: soon("Recycle water treatment plant"),
-      body: soon(
-        "Capable of recycling 100% of waste water. Whether the source is sewage or industrial effluent, the recycled water can be made fit for irrigation on the campus, or for washing, flushing, gardening and horticulture."
+      title: bi("Recycle water treatment plant", "রিসাইকেল ওয়াটার ট্রিটমেন্ট প্ল্যান্ট"),
+      body: bi(
+        "Capable of recycling 100% of waste water. Whether the source is sewage or industrial effluent, the recycled water can be made fit for irrigation on the campus, or for washing, flushing, gardening and horticulture.",
+        "১০০% বর্জ্য পানি পুনর্ব্যবহারে সক্ষম। উৎস পয়ঃবর্জ্য হোক বা শিল্প বর্জ্য, পুনর্ব্যবহৃত পানি ক্যাম্পাসে সেচ, অথবা ধোয়া, ফ্লাশিং, বাগান ও হর্টিকালচারের উপযোগী করা যায়।"
       ),
     },
     {
       id: "sewage-water-plant",
       image: "",
-      title: soon("Sewage water treatment plant"),
-      body: soon(
-        "Built with proven technology for the effective removal of contaminants from sewage water. Our clients have approved these plants for high, fault-free performance."
+      title: bi("Sewage water treatment plant", "পয়ঃবর্জ্য পানি পরিশোধন প্ল্যান্ট"),
+      body: bi(
+        "Built with proven technology for the effective removal of contaminants from sewage water. Our clients have approved these plants for high, fault-free performance.",
+        "পয়ঃবর্জ্য পানি থেকে দূষক কার্যকরভাবে অপসারণে প্রমাণিত প্রযুক্তিতে তৈরি। উচ্চ ও ত্রুটিহীন কর্মক্ষমতার জন্য আমাদের গ্রাহকরা এই প্ল্যান্টগুলো অনুমোদন করেছেন।"
       ),
     },
     {
       id: "cpvc-products",
       image: "",
-      title: soon("CPVC products — import & distribution"),
-      body: soon(
-        "We import, distribute, wholesale and retail a broad range of CPVC pipe and fittings at economical prices, in a wide choice of specifications, and are a well-regarded supplier of CPVC pipe to our customers."
+      title: bi("CPVC products — import & distribution", "সিপিভিসি পণ্য — আমদানি ও বিতরণ"),
+      body: bi(
+        "We import, distribute, wholesale and retail a broad range of CPVC pipe and fittings at economical prices, in a wide choice of specifications, and are a well-regarded supplier of CPVC pipe to our customers.",
+        "আমরা বিস্তৃত পরিসরের সিপিভিসি পাইপ ও ফিটিংস সাশ্রয়ী দামে, নানা স্পেসিফিকেশনে আমদানি, বিতরণ, পাইকারি ও খুচরা বিক্রি করি এবং গ্রাহকদের কাছে সুপরিচিত সিপিভিসি পাইপ সরবরাহকারী।"
       ),
     },
   ] as Array<{ id: string; image: string; title: L; body: L }>,
 };
 
 export const clientsPage = {
-  kicker: soon("SELECTED WORK"),
-  head: soon("Clients we have worked with"),
-  body: soon(
-    "A selection of the developers, institutions and industrial clients we have delivered sanitary, plumbing and water-treatment work for over the last 36 years."
+  kicker: bi("SELECTED WORK", "নির্বাচিত কাজ"),
+  head: bi("Clients we have worked with", "যাদের সঙ্গে আমরা কাজ করেছি"),
+  body: bi(
+    "A selection of the developers, institutions and industrial clients we have delivered sanitary, plumbing and water-treatment work for over the last 36 years.",
+    "গত ৩৬ বছরে যেসব ডেভেলপার, প্রতিষ্ঠান ও শিল্প গ্রাহকের জন্য আমরা স্যানিটারি, প্লাম্বিং ও পানি পরিশোধনের কাজ করেছি তার একটি নির্বাচিত তালিকা।"
   ),
-  empty: soon("Client logos are being added here."),
+  empty: bi("Client logos are being added here.", "ক্লায়েন্টদের লোগো এখানে যুক্ত করা হচ্ছে।"),
   /** Admin adds rows; ships empty and the grid shows the note above. */
   logos: [] as Array<{ id: string; name: string; image: string; href: string }>,
 };
 
 export const kbHomes = {
-  kicker: soon("KB HOMES"),
-  head: soon("A refined urban living experience"),
+  kicker: bi("KB HOMES", "কেবি হোমস"),
+  head: bi("A refined urban living experience", "পরিশীলিত নাগরিক জীবনের অভিজ্ঞতা"),
   intro: [
-    soon(
-      "KB Homes, in Faidabad, Dokhinkhan, Dhaka - 1230, offers a sophisticated blend of contemporary architecture and natural living, positioned conveniently close to Hazrat Shahjalal International Airport. The building carries a striking modern façade of clean geometric lines, open balconies and carefully integrated greenery."
+    bi(
+      "KB Homes, in Faidabad, Dokhinkhan, Dhaka - 1230, offers a sophisticated blend of contemporary architecture and natural living, positioned conveniently close to Hazrat Shahjalal International Airport. The building carries a striking modern façade of clean geometric lines, open balconies and carefully integrated greenery.",
+      "ঢাকা - ১২৩০, দক্ষিণখানের ফায়দাবাদে অবস্থিত কেবি হোমস সমকালীন স্থাপত্য ও প্রাকৃতিক জীবনের এক পরিশীলিত সমন্বয়, হযরত শাহজালাল আন্তর্জাতিক বিমানবন্দরের কাছেই সুবিধাজনক অবস্থানে। ভবনটির আধুনিক সম্মুখভাগে রয়েছে পরিচ্ছন্ন জ্যামিতিক রেখা, খোলা বারান্দা ও যত্নে সাজানো সবুজ।"
     ),
-    soon(
-      "Designed to bring nature into everyday life, KB Homes works in abundant landscaping, lush green surroundings and thoughtfully placed plants throughout the building. The rooftop swimming pool is a refreshing retreat, and a dedicated community space encourages social interaction and a vibrant neighbourhood atmosphere."
+    bi(
+      "Designed to bring nature into everyday life, KB Homes works in abundant landscaping, lush green surroundings and thoughtfully placed plants throughout the building. The rooftop swimming pool is a refreshing retreat, and a dedicated community space encourages social interaction and a vibrant neighbourhood atmosphere.",
+      "প্রতিদিনের জীবনে প্রকৃতিকে আনার জন্য নকশা করা কেবি হোমসে রয়েছে প্রচুর ল্যান্ডস্কেপিং, সবুজ পরিবেশ ও ভবনজুড়ে চিন্তাভাবনা করে রাখা গাছপালা। ছাদের সুইমিং পুল এক প্রশান্তির আশ্রয়, আর একটি নির্দিষ্ট কমিউনিটি স্পেস সামাজিক মেলামেশা ও প্রাণবন্ত প্রতিবেশ গড়ে তোলে।"
     ),
-    soon(
-      "For comfort and uninterrupted living the building is equipped with a high-end lift, a generator facility and adequate car parking. Generous green areas add to the sense of openness and calm, giving residents a pleasant escape from the busy city around them."
+    bi(
+      "For comfort and uninterrupted living the building is equipped with a high-end lift, a generator facility and adequate car parking. Generous green areas add to the sense of openness and calm, giving residents a pleasant escape from the busy city around them.",
+      "আরাম ও নিরবচ্ছিন্ন জীবনযাপনের জন্য ভবনে রয়েছে উন্নত মানের লিফট, জেনারেটর সুবিধা ও পর্যাপ্ত গাড়ি পার্কিং। প্রশস্ত সবুজ এলাকা খোলামেলা ও শান্ত অনুভূতি বাড়ায়, বাসিন্দাদের ব্যস্ত শহর থেকে এক স্বস্তির অবকাশ দেয়।"
     ),
-    soon(
-      "With its contemporary design, natural features, premium facilities and strategic location, KB Homes is envisioned as a modern residential destination that balances comfort, connectivity, elegance and greenery in one thoughtfully designed community."
+    bi(
+      "With its contemporary design, natural features, premium facilities and strategic location, KB Homes is envisioned as a modern residential destination that balances comfort, connectivity, elegance and greenery in one thoughtfully designed community.",
+      "সমকালীন নকশা, প্রাকৃতিক বৈশিষ্ট্য, প্রিমিয়াম সুবিধা ও কৌশলগত অবস্থান নিয়ে কেবি হোমস এমন এক আধুনিক আবাসিক গন্তব্য হিসেবে কল্পিত, যেখানে আরাম, যোগাযোগ, রুচি ও সবুজ একসঙ্গে ভারসাম্যপূর্ণভাবে সাজানো।"
     ),
   ] as L[],
   highlights: [
-    soon("Rooftop swimming pool"),
-    soon("Dedicated community space"),
-    soon("High-end lift"),
-    soon("Generator facility"),
-    soon("Adequate car parking"),
-    soon("Landscaped green areas"),
+    bi("Rooftop swimming pool", "ছাদের সুইমিং পুল"),
+    bi("Dedicated community space", "নির্দিষ্ট কমিউনিটি স্পেস"),
+    bi("High-end lift", "উন্নত মানের লিফট"),
+    bi("Generator facility", "জেনারেটর সুবিধা"),
+    bi("Adequate car parking", "পর্যাপ্ত গাড়ি পার্কিং"),
+    bi("Landscaped green areas", "ল্যান্ডস্কেপড সবুজ এলাকা"),
   ] as L[],
-  address: soon("Faidabad, Dokhinkhan, Dhaka - 1230"),
-  addressNote: soon("A short drive from Hazrat Shahjalal International Airport"),
+  address: bi("Faidabad, Dokhinkhan, Dhaka - 1230", "ফায়দাবাদ, দক্ষিণখান, ঢাকা - ১২৩০"),
+  addressNote: bi(
+    "A short drive from Hazrat Shahjalal International Airport",
+    "হযরত শাহজালাল আন্তর্জাতিক বিমানবন্দর থেকে অল্প দূরত্বে"
+  ),
   mapEmbed: "",
-  cta: soon("Book a site visit"),
+  cta: bi("Book a site visit", "সাইট ভিজিট বুক করুন"),
   /** Admin attaches renders and photos; ships empty. */
   gallery: [] as Array<{ id: string; image: string; caption: L }>,
 };
 
 export const contact = {
-  kicker: soon("REACH US"),
-  head: soon("Talk to us"),
-  body: soon(
-    "Send a message about a project, a product or a general enquiry and we will get back to you, usually the same working day."
+  kicker: bi("REACH US", "যোগাযোগ করুন"),
+  head: bi("Talk to us", "আমাদের সঙ্গে কথা বলুন"),
+  body: bi(
+    "Send a message about a project, a product or a general enquiry and we will get back to you, usually the same working day.",
+    "কোনো প্রকল্প, পণ্য বা সাধারণ জিজ্ঞাসা নিয়ে বার্তা পাঠান — সাধারণত একই কর্মদিবসেই আমরা যোগাযোগ করব।"
   ),
-  addressHead: soon("Address"),
-  address: soon("KB Homes, Faidabad, Dokhinkhan, Dhaka - 1230"),
-  emailHead: soon("Email"),
-  phoneHead: soon("Call"),
-  whatsappHead: soon("WhatsApp"),
-  talkNow: soon("Prefer to talk now?"),
+  addressHead: bi("Address", "ঠিকানা"),
+  address: bi("KB Homes, Faidabad, Dokhinkhan, Dhaka - 1230", "কেবি হোমস, ফায়দাবাদ, দক্ষিণখান, ঢাকা - ১২৩০"),
+  emailHead: bi("Email", "ইমেইল"),
+  phoneHead: bi("Call", "কল"),
+  whatsappHead: bi("WhatsApp", "হোয়াটসঅ্যাপ"),
+  talkNow: bi("Prefer to talk now?", "এখনই কথা বলতে চান?"),
   fields: {
-    name: soon("Your name"),
-    email: soon("Email address"),
-    phone: soon("Phone number"),
-    topicLabel: soon("What is this about?"),
-    topicGeneral: soon("General enquiry"),
-    topicProject: soon("Project / full works inquiry"),
-    topicProduct: soon("Product quote"),
-    message: soon("How can we help?"),
-    submit: soon("Send message"),
-    sending: soon("Sending…"),
+    name: bi("Your name", "আপনার নাম"),
+    email: bi("Email address", "ইমেইল ঠিকানা"),
+    phone: bi("Phone number", "ফোন নম্বর"),
+    topicLabel: bi("What is this about?", "কী বিষয়ে?"),
+    topicGeneral: bi("General enquiry", "সাধারণ জিজ্ঞাসা"),
+    topicProject: bi("Project / full works inquiry", "প্রকল্প / সম্পূর্ণ কাজের জিজ্ঞাসা"),
+    topicProduct: bi("Product quote", "পণ্যের কোটেশন"),
+    message: bi("How can we help?", "আমরা কীভাবে সাহায্য করতে পারি?"),
+    submit: bi("Send message", "বার্তা পাঠান"),
+    sending: bi("Sending…", "পাঠানো হচ্ছে…"),
   },
-  successHead: soon("Message sent."),
-  successBody: soon(
-    "Thank you. We will reply to the email address or phone number you gave, usually the same working day."
+  successHead: bi("Message sent.", "বার্তা পাঠানো হয়েছে।"),
+  successBody: bi(
+    "Thank you. We will reply to the email address or phone number you gave, usually the same working day.",
+    "ধন্যবাদ। আপনার দেওয়া ইমেইল বা ফোন নম্বরে আমরা উত্তর দেব, সাধারণত একই কর্মদিবসেই।"
   ),
-  errorBody: soon(
-    "That did not send. Please try again, or email Info@kbsbd.com directly."
+  errorBody: bi(
+    "That did not send. Please try again, or email Info@kbsbd.com directly.",
+    "পাঠানো যায়নি। আবার চেষ্টা করুন, অথবা সরাসরি Info@kbsbd.com-এ ইমেইল করুন।"
   ),
 };
 
 export const shop = {
   /** Master switch. Off = the Shop nav link and every /shop route 404. */
   enabled: true,
-  kicker: soon("SHOP"),
-  head: soon("Products"),
-  body: soon(
-    "Sanitary ware, plumbing fittings, pumps, CPVC pipe and water-treatment equipment — the same lines we install and distribute."
+  kicker: bi("SHOP", "শপ"),
+  head: bi("Products", "পণ্য"),
+  body: bi(
+    "Sanitary ware, plumbing fittings, pumps, CPVC pipe and water-treatment equipment — the same lines we install and distribute.",
+    "স্যানিটারি ওয়্যার, প্লাম্বিং ফিটিংস, পাম্প, সিপিভিসি পাইপ ও পানি পরিশোধন যন্ত্রপাতি — যেসব আমরা স্থাপন ও বিতরণ করি সেগুলোই।"
   ),
-  emptyNote: soon("Products are being added here."),
+  emptyNote: bi("Products are being added here.", "পণ্য এখানে যুক্ত করা হচ্ছে।"),
   /** BDT throughout. Symbol is what shows next to a price. */
   currencySymbol: "৳",
   /** Flat delivery charge added at checkout; 0 hides the line. */
@@ -681,18 +711,18 @@ export const shop = {
   /** "cod" collects an address, "quote" turns the cart into a quote request. */
   checkoutModes: ["quote", "cod"] as Array<"quote" | "cod" | "bkash" | "nagad" | "sslcommerz">,
   labels: {
-    addToCart: soon("Add to cart"),
-    buyNow: soon("Buy now"),
-    outOfStock: soon("Out of stock"),
-    inStock: soon("In stock"),
-    lowStock: soon("Only a few left"),
-    wishlist: soon("Save"),
-    cart: soon("Cart"),
-    checkout: soon("Checkout"),
-    quoteCta: soon("Request a quote"),
-    reviews: soon("Reviews"),
-    writeReview: soon("Write a review"),
-    relatedHead: soon("You might also need"),
+    addToCart: bi("Add to cart", "কার্টে যোগ করুন"),
+    buyNow: bi("Buy now", "এখনই কিনুন"),
+    outOfStock: bi("Out of stock", "স্টকে নেই"),
+    inStock: bi("In stock", "স্টকে আছে"),
+    lowStock: bi("Only a few left", "মাত্র কয়েকটি বাকি"),
+    wishlist: bi("Save", "সেভ করুন"),
+    cart: bi("Cart", "কার্ট"),
+    checkout: bi("Checkout", "চেকআউট"),
+    quoteCta: bi("Request a quote", "কোটেশন চান"),
+    reviews: bi("Reviews", "রিভিউ"),
+    writeReview: bi("Write a review", "রিভিউ লিখুন"),
+    relatedHead: bi("You might also need", "আপনার আরও লাগতে পারে"),
   },
 };
 

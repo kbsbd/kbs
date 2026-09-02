@@ -168,6 +168,85 @@ export async function setOrderStatus(
   return { ok: true };
 }
 
+export type OrderInput = {
+  id?: string;
+  status: string;
+  payment_status: string;
+  payment_method: string;
+  customer_name: string;
+  customer_phone: string;
+  customer_email: string;
+  shipping_address: string;
+  notes: string;
+  shipping: number;
+  items: Array<{ name: string; qty: number; price: number }>;
+};
+
+const ORDER_STATUSES = ["pending", "confirmed", "processing", "shipped", "completed", "cancelled"];
+const PAY_STATUSES = ["unpaid", "paid", "refunded", "failed"];
+const PAY_METHODS = ["cod", "quote", "bkash", "nagad", "sslcommerz"];
+
+export async function saveOrder(input: OrderInput): Promise<Result<{ id: string }>> {
+  const ctx = await guard();
+  if (!ctx) return { ok: false, error: "Not signed in as an admin." };
+  if (input.customer_name.trim().length < 2)
+    return { ok: false, error: "Customer name is required." };
+  if (!ORDER_STATUSES.includes(input.status) || !PAY_STATUSES.includes(input.payment_status))
+    return { ok: false, error: "Unknown status." };
+  const method = PAY_METHODS.includes(input.payment_method) ? input.payment_method : "cod";
+
+  const lines = input.items
+    .map((i) => ({
+      name: String(i.name).trim(),
+      qty: Math.max(1, Math.round(Number(i.qty) || 1)),
+      price: Math.max(0, Number(i.price) || 0),
+    }))
+    .filter((i) => i.name)
+    .map((i) => ({ ...i, line_total: i.qty * i.price }));
+
+  const subtotal = lines.reduce((n, l) => n + l.line_total, 0);
+  const shipping = Math.max(0, Number(input.shipping) || 0);
+  const row = {
+    status: input.status,
+    payment_status: input.payment_status,
+    payment_method: method,
+    customer_name: input.customer_name.trim(),
+    customer_phone: input.customer_phone.trim(),
+    customer_email: input.customer_email.trim(),
+    shipping_address: input.shipping_address.trim(),
+    notes: input.notes.trim(),
+    currency: "BDT",
+    subtotal,
+    shipping,
+    total: subtotal + shipping,
+  };
+
+  const { data, error } = input.id
+    ? await ctx.supabase.from("orders").update(row).eq("id", input.id).select("id").single()
+    : await ctx.supabase.from("orders").insert(row).select("id").single();
+  if (error || !data) return { ok: false, error: error?.message || "Save failed." };
+  const orderId = data.id as string;
+
+  await ctx.supabase.from("order_items").delete().eq("order_id", orderId);
+  if (lines.length) {
+    await ctx.supabase
+      .from("order_items")
+      .insert(lines.map((l) => ({ ...l, order_id: orderId })));
+  }
+
+  revalidatePath("/en/admin");
+  return { ok: true, id: orderId };
+}
+
+export async function deleteOrderRow(id: string): Promise<Result> {
+  const ctx = await guard();
+  if (!ctx) return { ok: false, error: "Not signed in as an admin." };
+  const { error } = await ctx.supabase.from("orders").delete().eq("id", id);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/en/admin");
+  return { ok: true };
+}
+
 export async function setQuoteStatus(id: string, value: string): Promise<Result> {
   const ctx = await guard();
   if (!ctx) return { ok: false, error: "Not signed in as an admin." };

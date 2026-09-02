@@ -6,6 +6,7 @@ import type { Locale } from "@/content/seed";
 import type { Product } from "@/lib/shop";
 import { useCart } from "./cart";
 import { useWishlist } from "./wishlist";
+import { HeartIcon } from "@/components/icons/Icons";
 
 type Labels = {
   addToCart: string;
@@ -113,15 +114,7 @@ export default function AddToCart({
           onClick={() => wishlist.toggle(product.id)}
           style={saved ? { borderColor: "var(--accent)", color: "var(--accent)" } : undefined}
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
-            <path
-              d="M12 21s-7-4.35-9.5-8.5C.5 9 2.5 5 6 5c2 0 3.5 1.2 4 2 .5-.8 2-2 4-2 3.5 0 5.5 4 3.5 7.5C19 16.65 12 21 12 21z"
-              fill={saved ? "currentColor" : "none"}
-              stroke="currentColor"
-              strokeWidth="1.6"
-              strokeLinejoin="round"
-            />
-          </svg>
+          <HeartIcon className="h-[17px] w-[17px]" filled={saved} />
           {saved ? (l === "bn" ? "সেভ করা" : "Saved") : labels.wishlist}
         </button>
       </div>

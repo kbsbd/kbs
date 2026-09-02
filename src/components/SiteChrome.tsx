@@ -107,7 +107,6 @@ export default function SiteChrome({
       window.removeEventListener("scroll", onScroll);
       if (raf !== null) cancelAnimationFrame(raf);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isHome]);
 
   /* pause every animation on a hidden tab. animation-play-state does not
@@ -202,7 +201,11 @@ export default function SiteChrome({
             ))}
           </div>
 
-          <div className="flex items-center gap-0.5 sm:gap-1 lg:ml-4 lg:gap-2">
+          {/* Desktop cluster: Sign in · Cart · Theme · Language · Book a visit */}
+          <div className="ml-4 hidden items-center gap-2 lg:flex">
+            {shopOn && <AccountLink l={locale} />}
+            {shopOn && <CartButton label={t(content.shop.labels.cart)} />}
+            <ThemeToggle label={locale === "bn" ? "থিম" : "Theme"} />
             <Link
               href={otherPath}
               className="inline-flex h-11 items-center rounded-full px-2 text-sm text-[color:var(--text-secondary)] transition-colors duration-300 hover:text-[color:var(--accent)]"
@@ -211,24 +214,23 @@ export default function SiteChrome({
             >
               {t(content.nav.langLabel)}
             </Link>
+            <a href={`/${locale}#book`} className="btn btn-primary ml-1 text-sm">
+              {t(content.nav.cta)}
+            </a>
+          </div>
 
+          {/* Mobile bar: Language · Theme · Cart · Menu — order unchanged */}
+          <div className="flex items-center gap-0.5 sm:gap-1 lg:hidden">
+            <Link
+              href={otherPath}
+              className="inline-flex h-11 items-center rounded-full px-2 text-sm text-[color:var(--text-secondary)] transition-colors duration-300 hover:text-[color:var(--accent)]"
+              hrefLang={other}
+              prefetch={false}
+            >
+              {t(content.nav.langLabel)}
+            </Link>
             <ThemeToggle label={locale === "bn" ? "থিম" : "Theme"} />
-
-            {shopOn && (
-              <span className="hidden lg:inline-flex">
-                <AccountLink l={locale} />
-              </span>
-            )}
             {shopOn && <CartButton label={t(content.shop.labels.cart)} />}
-
-            {/* wrapped, not `hidden` on the <a>: .btn sets its own display and
-                beats the `hidden` utility depending on stylesheet order */}
-            <span className="ml-1 hidden lg:inline-flex">
-              <a href={`/${locale}#book`} className="btn btn-primary text-sm">
-                {t(content.nav.cta)}
-              </a>
-            </span>
-
             <MobileMenu
               locale={locale}
               items={navLinks.map((x) => ({ href: x.href, label: t(x.label) }))}

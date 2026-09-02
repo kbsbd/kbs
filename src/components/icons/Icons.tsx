@@ -45,10 +45,22 @@ export const CartIcon = (p: IconProps) => (
   </Svg>
 );
 
-export const HeartIcon = (p: IconProps) => (
-  <Svg {...p}>
-    <path d="M12 20.2s-7.4-4.6-7.4-9.6A4.3 4.3 0 0 1 12 8a4.3 4.3 0 0 1 7.4 2.6c0 5-7.4 9.6-7.4 9.6z" />
-  </Svg>
+/** Rounded heart, tuned to sit at the same weight as CartIcon. `filled` solidifies
+ *  it for a "saved" state. */
+export const HeartIcon = ({ className, strokeWidth = 1.6, filled = false }: IconProps & { filled?: boolean }) => (
+  <svg
+    viewBox="0 0 24 24"
+    className={className}
+    fill={filled ? "currentColor" : "none"}
+    stroke="currentColor"
+    strokeWidth={strokeWidth}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <path d="M12 20.3c-.28 0-.55-.1-.76-.3l-7-6.86A5.4 5.4 0 0 1 2.6 9.3C2.6 6.4 4.9 4.1 7.8 4.1c1.63 0 3.16.76 4.2 2.02a5.42 5.42 0 0 1 4.2-2.02c2.9 0 5.2 2.3 5.2 5.2 0 1.44-.6 2.83-1.64 3.84l-7 6.86c-.21.2-.48.3-.76.3z" />
+  </svg>
 );
 
 export const UserIcon = (p: IconProps) => (

@@ -32,7 +32,7 @@ export async function loadShopAdmin(supabase: SupabaseClient): Promise<{
     supabase.from("product_categories").select("*").order("sort", { ascending: true }),
     supabase
       .from("orders")
-      .select("*, order_items(name, qty, line_total)")
+      .select("*, order_items(name, qty, price, line_total)")
       .order("created_at", { ascending: false })
       .limit(200),
     supabase.from("quote_requests").select("*").order("created_at", { ascending: false }).limit(200),
@@ -81,6 +81,8 @@ export async function loadShopAdmin(supabase: SupabaseClient): Promise<{
     status: String(o.status ?? ""),
     payment_status: String(o.payment_status ?? ""),
     payment_method: String(o.payment_method ?? ""),
+    subtotal: Number(o.subtotal ?? 0),
+    shipping: Number(o.shipping ?? 0),
     total: Number(o.total ?? 0),
     customer_name: String(o.customer_name ?? ""),
     customer_phone: String(o.customer_phone ?? ""),
@@ -91,6 +93,7 @@ export async function loadShopAdmin(supabase: SupabaseClient): Promise<{
     items: ((o.order_items as Row[] | null) ?? []).map((i) => ({
       name: String(i.name ?? ""),
       qty: Number(i.qty ?? 0),
+      price: Number(i.price ?? 0),
       line_total: Number(i.line_total ?? 0),
     })),
   }));

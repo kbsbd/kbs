@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import type { EditableString } from "@/lib/editable";
 import { SITE_FIELDS, INTEGRATION_FIELDS } from "@/lib/editable";
 import ImageUpload from "@/components/admin/ImageUpload";
@@ -15,6 +15,8 @@ import ShopAdmin, {
 import CmsAdmin, { type AdminPage, type AdminMenuItem } from "@/components/admin/CmsAdmin";
 import MediaAdmin, { type MediaContent } from "@/components/admin/MediaAdmin";
 import { SOCIAL_PLATFORMS } from "@/components/icons/SocialIcons";
+import { MenuIcon, CloseIcon } from "@/components/icons/Icons";
+import ThemeToggle from "@/components/ThemeToggle";
 import {
   saveContent,
   setBookingStatus,
@@ -102,73 +104,128 @@ export default function Dashboard({
 }: Props) {
   const [tab, setTab] = useState<Tab>("Bookings");
   const [toast, setToast] = useState("");
+  const [drawer, setDrawer] = useState(true);
+
+  useEffect(() => {
+    // start collapsed on a phone
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (window.matchMedia("(max-width: 1023px)").matches) setDrawer(false);
+  }, []);
+
+  const newBookings = bookings.filter((b) => b.status === "new").length;
+  const pendingReviews = shop.reviews.filter((r) => r.status === "pending").length;
+  const badge = (t: Tab) =>
+    t === "Bookings" ? newBookings : t === "Shop" ? pendingReviews : 0;
 
   return (
-    <main className="relative z-[2] min-h-screen">
-      <header className="border-b border-[color:var(--panel-edge)] bg-[color:var(--canvas-deep)]">
-        <div className="mx-auto flex max-w-[80rem] flex-wrap items-center gap-4 px-5 py-4 sm:px-8">
+    <main
+      className="relative z-[2] min-h-screen"
+      data-drawer={drawer ? "open" : "closed"}
+    >
+      {/* scrim, phone only */}
+      <div
+        className={`fixed inset-0 z-30 bg-black/50 lg:hidden ${drawer ? "" : "pointer-events-none opacity-0"} transition-opacity`}
+        onClick={() => setDrawer(false)}
+        aria-hidden="true"
+      />
+
+      <aside
+        className={`fixed inset-y-0 left-0 z-40 flex w-60 flex-col border-r border-[color:var(--panel-edge)] bg-[color:var(--canvas-deep)] transition-transform duration-300 ${
+          drawer ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div className="flex items-center justify-between px-5 py-4">
           <span className="font-display text-lg">KBS admin</span>
-          <span className="text-xs text-[color:var(--text-quiet)]">{email}</span>
-          <div className="ml-auto flex items-center gap-4">
-            <a
-              href={`/${locale}`}
-              className="text-sm text-[color:var(--text-secondary)] transition-colors duration-300 hover:text-[color:var(--accent)]"
-            >
-              View site
-            </a>
-            <form action={signOut}>
-              <button className="text-sm text-[color:var(--text-secondary)] transition-colors duration-300 hover:text-[color:var(--accent)]">
-                Sign out
-              </button>
-            </form>
-          </div>
+          <button
+            type="button"
+            onClick={() => setDrawer(false)}
+            aria-label="Close menu"
+            className="text-[color:var(--text-quiet)] hover:text-[color:var(--text-primary)]"
+          >
+            <CloseIcon className="h-5 w-5" />
+          </button>
         </div>
-        <nav className="mx-auto flex max-w-[80rem] gap-1 overflow-x-auto px-5 sm:px-8">
+        <p className="truncate px-5 pb-3 text-xs text-[color:var(--text-quiet)]">{email}</p>
+
+        <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 pb-4">
           {TABS.map((t) => (
             <button
               key={t}
-              onClick={() => setTab(t)}
-              className={`whitespace-nowrap border-b-2 px-4 py-3 text-sm transition-colors duration-200 ${
+              onClick={() => {
+                setTab(t);
+                if (window.matchMedia("(max-width: 1023px)").matches) setDrawer(false);
+              }}
+              className={`flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm transition-colors duration-150 ${
                 tab === t
-                  ? "border-[color:var(--accent)] text-[color:var(--text-primary)]"
-                  : "border-transparent text-[color:var(--text-quiet)] hover:text-[color:var(--text-secondary)]"
+                  ? "bg-[color:var(--accent-muted)] text-[color:var(--text-primary)]"
+                  : "text-[color:var(--text-secondary)] hover:bg-[color:var(--panel)] hover:text-[color:var(--text-primary)]"
               }`}
             >
               {t}
-              {t === "Bookings" && bookings.filter((b) => b.status === "new").length > 0 && (
-                <span className="ml-2 rounded-full bg-[color:var(--accent)] px-1.5 py-0.5 text-[10px] font-semibold text-[#07101a]">
-                  {bookings.filter((b) => b.status === "new").length}
+              {badge(t) > 0 && (
+                <span className="ml-auto rounded-full bg-[color:var(--accent)] px-1.5 py-0.5 text-[10px] font-semibold text-[#07101a]">
+                  {badge(t)}
                 </span>
               )}
             </button>
           ))}
         </nav>
-      </header>
 
-      {toast && (
-        <div
-          role="status"
-          className="mx-auto mt-4 max-w-[80rem] px-5 sm:px-8"
-          onAnimationEnd={() => setToast("")}
-        >
-          <p className="rounded-lg border border-[color:var(--accent)] bg-[color:var(--accent-muted)] px-4 py-2 text-sm">
-            {toast}
-          </p>
+        <div className="flex items-center gap-2 border-t border-[color:var(--panel-edge)] px-4 py-3">
+          <ThemeToggle />
+          <a
+            href={`/${locale}`}
+            className="text-sm text-[color:var(--text-secondary)] hover:text-[color:var(--accent)]"
+          >
+            View site
+          </a>
+          <form action={signOut} className="ml-auto">
+            <button className="text-sm text-[color:var(--text-secondary)] hover:text-[color:var(--clay)]">
+              Sign out
+            </button>
+          </form>
         </div>
-      )}
+      </aside>
 
-      <div className="mx-auto max-w-[80rem] px-5 py-10 sm:px-8">
-        {tab === "Bookings" && <Bookings rows={bookings} notify={setToast} />}
-        {tab === "Shop" && <ShopAdmin {...shop} notify={setToast} />}
-        {tab === "Pages" && <CmsAdmin {...cms} notify={setToast} />}
-        {tab === "Media" && <MediaAdmin media={media} notify={setToast} />}
-        {tab === "Site details" && <SiteDetails site={site} groups={groups} notify={setToast} />}
-        {tab === "Text" && <TextEditor groups={groups} notify={setToast} />}
-        {tab === "Projects" && <Projects rows={projects} notify={setToast} />}
-        {tab === "Integrations" && (
-          <IntegrationsPanel data={integrations} notify={setToast} />
+      <div className={`transition-[padding] duration-300 ${drawer ? "lg:pl-60" : "lg:pl-0"}`}>
+        <div className="flex items-center gap-3 border-b border-[color:var(--panel-edge)] bg-[color:var(--canvas-deep)] px-4 py-3 sm:px-6">
+          <button
+            type="button"
+            onClick={() => setDrawer((v) => !v)}
+            aria-label={drawer ? "Hide menu" : "Show menu"}
+            aria-expanded={drawer}
+            className="text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)]"
+          >
+            <MenuIcon className="h-6 w-6" />
+          </button>
+          <span className="font-display text-base">{tab}</span>
+        </div>
+
+        {toast && (
+          <div
+            role="status"
+            className="mx-auto mt-4 max-w-[72rem] px-5 sm:px-8"
+            onAnimationEnd={() => setToast("")}
+          >
+            <p className="rounded-lg border border-[color:var(--accent)] bg-[color:var(--accent-muted)] px-4 py-2 text-sm">
+              {toast}
+            </p>
+          </div>
         )}
-        {tab === "Internal" && <Internal notes={notes} notify={setToast} />}
+
+        <div className="mx-auto max-w-[72rem] px-5 py-10 sm:px-8">
+          {tab === "Bookings" && <Bookings rows={bookings} notify={setToast} />}
+          {tab === "Shop" && <ShopAdmin {...shop} notify={setToast} />}
+          {tab === "Pages" && <CmsAdmin {...cms} notify={setToast} />}
+          {tab === "Media" && <MediaAdmin media={media} notify={setToast} />}
+          {tab === "Site details" && <SiteDetails site={site} groups={groups} notify={setToast} />}
+          {tab === "Text" && <TextEditor groups={groups} notify={setToast} />}
+          {tab === "Projects" && <Projects rows={projects} notify={setToast} />}
+          {tab === "Integrations" && (
+            <IntegrationsPanel data={integrations} notify={setToast} />
+          )}
+          {tab === "Internal" && <Internal notes={notes} notify={setToast} />}
+        </div>
       </div>
     </main>
   );

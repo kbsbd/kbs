@@ -9,6 +9,8 @@ import {
   saveCategory,
   deleteCategory,
   setOrderStatus,
+  saveOrder,
+  deleteOrderRow,
   setQuoteStatus,
   moderateReview,
   saveGateway,
@@ -36,12 +38,15 @@ export type AdminProduct = {
   images: Array<{ url: string; alt: string }>;
 };
 export type AdminCategory = { id: string; name: string; name_bn: string; sort: number };
+export type AdminOrderItem = { name: string; qty: number; price: number; line_total: number };
 export type AdminOrder = {
   id: string;
   order_number: string;
   status: string;
   payment_status: string;
   payment_method: string;
+  subtotal: number;
+  shipping: number;
   total: number;
   customer_name: string;
   customer_phone: string;
@@ -49,7 +54,7 @@ export type AdminOrder = {
   shipping_address: string;
   notes: string;
   created_at: string;
-  items: Array<{ name: string; qty: number; line_total: number }>;
+  items: AdminOrderItem[];
 };
 export type AdminQuote = {
   id: string;
@@ -128,7 +133,7 @@ export default function ShopAdmin({
         <ProductsPanel products={products} categories={categories} notify={notify} />
       )}
       {sub === "Categories" && <CategoriesPanel categories={categories} notify={notify} />}
-      {sub === "Orders" && <OrdersPanel orders={orders} notify={notify} />}
+      {sub === "Orders" && <OrdersPanel orders={orders} products={products} notify={notify} />}
       {sub === "Quotes" && <QuotesPanel quotes={quotes} notify={notify} />}
       {sub === "Reviews" && <ReviewsPanel reviews={reviews} notify={notify} />}
       {sub === "Payments" && <PaymentsPanel gateways={gateways} notify={notify} />}
@@ -520,81 +525,271 @@ function CategoriesPanel({
 
 const ORDER_STATUS = ["pending", "confirmed", "processing", "shipped", "completed", "cancelled"];
 const PAY_STATUS = ["unpaid", "paid", "refunded", "failed"];
+const PAY_METHOD = ["cod", "quote", "bkash", "nagad", "sslcommerz"];
 
-function OrdersPanel({ orders, notify }: { orders: AdminOrder[]; notify: (s: string) => void }) {
+type OrderDraft = {
+  id?: string;
+  status: string;
+  payment_status: string;
+  payment_method: string;
+  customer_name: string;
+  customer_phone: string;
+  customer_email: string;
+  shipping_address: string;
+  notes: string;
+  shipping: number;
+  items: Array<{ name: string; qty: number; price: number }>;
+};
+
+const emptyOrder = (): OrderDraft => ({
+  status: "pending",
+  payment_status: "unpaid",
+  payment_method: "cod",
+  customer_name: "",
+  customer_phone: "",
+  customer_email: "",
+  shipping_address: "",
+  notes: "",
+  shipping: 0,
+  items: [{ name: "", qty: 1, price: 0 }],
+});
+
+function OrdersPanel({
+  orders,
+  products,
+  notify,
+}: {
+  orders: AdminOrder[];
+  products: AdminProduct[];
+  notify: (s: string) => void;
+}) {
   const [, start] = useTransition();
-  if (orders.length === 0)
-    return <p className="text-sm text-[color:var(--text-quiet)]">No orders yet.</p>;
+  const [draft, setDraft] = useState<OrderDraft | null>(null);
+  const [pending, startSave] = useTransition();
+
+  const subtotal = draft ? draft.items.reduce((n, i) => n + i.qty * i.price, 0) : 0;
+
+  function editOrder(o: AdminOrder) {
+    setDraft({
+      id: o.id,
+      status: o.status,
+      payment_status: o.payment_status,
+      payment_method: o.payment_method,
+      customer_name: o.customer_name,
+      customer_phone: o.customer_phone,
+      customer_email: o.customer_email,
+      shipping_address: o.shipping_address,
+      notes: o.notes,
+      shipping: o.shipping,
+      items: o.items.length
+        ? o.items.map((i) => ({ name: i.name, qty: i.qty, price: i.price }))
+        : [{ name: "", qty: 1, price: 0 }],
+    });
+  }
+  const setItem = (i: number, patch: Partial<OrderDraft["items"][0]>) =>
+    setDraft((d) => (d ? { ...d, items: d.items.map((x, j) => (j === i ? { ...x, ...patch } : x)) } : d));
+
   return (
-    <div className="space-y-3">
-      {orders.map((o) => (
-        <details key={o.id} className="rounded-xl border border-[color:var(--panel-edge)] px-4 py-3">
-          <summary className="flex flex-wrap items-center gap-3">
-            <b>{o.order_number}</b>
-            <span className="text-sm">{o.customer_name}</span>
-            <span className="text-sm text-[color:var(--text-quiet)]">৳ {o.total}</span>
-            <span className="text-xs uppercase text-[color:var(--text-quiet)]">
-              {o.payment_method} · {o.status}
-            </span>
-            <span className="ml-auto text-xs text-[color:var(--text-quiet)]">
-              {new Date(o.created_at).toLocaleDateString()}
-            </span>
-          </summary>
-          <div className="mt-3 space-y-2 text-sm">
-            <p>
-              {o.customer_phone} · {o.customer_email || "no email"}
-            </p>
-            {o.shipping_address && <p className="text-[color:var(--text-secondary)]">{o.shipping_address}</p>}
-            {o.notes && <p className="text-[color:var(--text-quiet)]">Note: {o.notes}</p>}
-            <ul className="mt-2 border-t border-[color:var(--panel-edge)] pt-2">
-              {o.items.map((it, i) => (
-                <li key={i} className="flex justify-between py-0.5">
-                  <span>
-                    {it.qty} × {it.name}
-                  </span>
-                  <span>৳ {it.line_total}</span>
-                </li>
-              ))}
-            </ul>
-            <div className="flex flex-wrap gap-4 pt-2">
-              <label className="flex items-center gap-2">
-                Order
-                <select
-                  className={field}
-                  defaultValue={o.status}
-                  onChange={(e) =>
-                    start(async () => {
-                      const r = await setOrderStatus(o.id, "status", e.target.value);
-                      notify(r.ok ? "Updated." : r.error);
-                    })
-                  }
-                >
-                  {ORDER_STATUS.map((s) => (
-                    <option key={s}>{s}</option>
-                  ))}
-                </select>
-              </label>
-              <label className="flex items-center gap-2">
-                Payment
-                <select
-                  className={field}
-                  defaultValue={o.payment_status}
-                  onChange={(e) =>
-                    start(async () => {
-                      const r = await setOrderStatus(o.id, "payment_status", e.target.value);
-                      notify(r.ok ? "Updated." : r.error);
-                    })
-                  }
-                >
-                  {PAY_STATUS.map((s) => (
-                    <option key={s}>{s}</option>
-                  ))}
-                </select>
-              </label>
-            </div>
+    <div className="space-y-4">
+      <div className="flex items-center">
+        <p className="text-sm text-[color:var(--text-secondary)]">
+          Every order with its full customer and delivery details.
+        </p>
+        <button className="btn btn-primary ml-auto text-sm" onClick={() => setDraft(emptyOrder())}>
+          New order
+        </button>
+      </div>
+
+      {draft && (
+        <div className="max-w-3xl space-y-4 rounded-2xl border border-[color:var(--accent)] p-5">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <L label="Customer name">
+              <input className={field} value={draft.customer_name}
+                onChange={(e) => setDraft({ ...draft, customer_name: e.target.value })} />
+            </L>
+            <L label="Phone">
+              <input className={field} value={draft.customer_phone}
+                onChange={(e) => setDraft({ ...draft, customer_phone: e.target.value })} />
+            </L>
+            <L label="Email">
+              <input className={field} value={draft.customer_email}
+                onChange={(e) => setDraft({ ...draft, customer_email: e.target.value })} />
+            </L>
+            <L label="Payment method">
+              <select className={field} value={draft.payment_method}
+                onChange={(e) => setDraft({ ...draft, payment_method: e.target.value })}>
+                {PAY_METHOD.map((m) => <option key={m}>{m}</option>)}
+              </select>
+            </L>
           </div>
-        </details>
-      ))}
+          <L label="Delivery address">
+            <textarea rows={2} className={`${field} resize-y`} value={draft.shipping_address}
+              onChange={(e) => setDraft({ ...draft, shipping_address: e.target.value })} />
+          </L>
+          <L label="Internal note">
+            <input className={field} value={draft.notes}
+              onChange={(e) => setDraft({ ...draft, notes: e.target.value })} />
+          </L>
+
+          <div className="space-y-2">
+            <p className={lbl}>Items</p>
+            {draft.items.map((it, i) => (
+              <div key={i} className="flex flex-wrap items-center gap-2">
+                <input
+                  className={`${field} min-w-[10rem] flex-1`}
+                  placeholder="Item name"
+                  list="admin-products"
+                  value={it.name}
+                  onChange={(e) => {
+                    const p = products.find((x) => x.name === e.target.value);
+                    setItem(i, p ? { name: p.name, price: p.price } : { name: e.target.value });
+                  }}
+                />
+                <input type="number" className={`${field} w-16`} value={it.qty}
+                  onChange={(e) => setItem(i, { qty: Number(e.target.value) })} />
+                <input type="number" className={`${field} w-24`} value={it.price}
+                  placeholder="৳" onChange={(e) => setItem(i, { price: Number(e.target.value) })} />
+                <span className="w-20 text-right text-sm tabular-nums">৳ {it.qty * it.price}</span>
+                <button className="text-xs text-[color:var(--clay)]"
+                  onClick={() => setDraft({ ...draft, items: draft.items.filter((_, j) => j !== i) })}>
+                  ✕
+                </button>
+              </div>
+            ))}
+            <datalist id="admin-products">
+              {products.map((p) => <option key={p.id} value={p.name} />)}
+            </datalist>
+            <button className="btn btn-ghost text-xs"
+              onClick={() => setDraft({ ...draft, items: [...draft.items, { name: "", qty: 1, price: 0 }] })}>
+              Add item
+            </button>
+          </div>
+
+          <div className="flex flex-wrap items-end gap-4">
+            <L label="Order status">
+              <select className={field} value={draft.status}
+                onChange={(e) => setDraft({ ...draft, status: e.target.value })}>
+                {ORDER_STATUS.map((s) => <option key={s}>{s}</option>)}
+              </select>
+            </L>
+            <L label="Payment status">
+              <select className={field} value={draft.payment_status}
+                onChange={(e) => setDraft({ ...draft, payment_status: e.target.value })}>
+                {PAY_STATUS.map((s) => <option key={s}>{s}</option>)}
+              </select>
+            </L>
+            <L label="Delivery charge (৳)">
+              <input type="number" className={field} value={draft.shipping}
+                onChange={(e) => setDraft({ ...draft, shipping: Number(e.target.value) })} />
+            </L>
+            <p className="ml-auto text-sm">
+              Total <b className="tabular-nums">৳ {subtotal + Number(draft.shipping || 0)}</b>
+            </p>
+          </div>
+
+          <div className="flex gap-3">
+            <button
+              className="btn btn-primary text-sm"
+              disabled={pending}
+              onClick={() =>
+                startSave(async () => {
+                  const r = await saveOrder(draft);
+                  notify(r.ok ? "Order saved." : r.error);
+                  if (r.ok) setDraft(null);
+                })
+              }
+            >
+              {pending ? "Saving" : "Save order"}
+            </button>
+            <button className="btn btn-ghost text-sm" onClick={() => setDraft(null)}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {orders.length === 0 ? (
+        <p className="text-sm text-[color:var(--text-quiet)]">No orders yet.</p>
+      ) : (
+        <div className="space-y-3">
+          {orders.map((o) => (
+            <details key={o.id} className="rounded-xl border border-[color:var(--panel-edge)] px-4 py-3">
+              <summary className="flex flex-wrap items-center gap-3">
+                <b>{o.order_number}</b>
+                <span className="text-sm">{o.customer_name}</span>
+                <span className="text-sm text-[color:var(--text-quiet)]">৳ {o.total}</span>
+                <span className="text-xs uppercase text-[color:var(--text-quiet)]">
+                  {o.payment_method} · {o.status} · {o.payment_status}
+                </span>
+                <span className="ml-auto text-xs text-[color:var(--text-quiet)]">
+                  {new Date(o.created_at).toLocaleDateString()}
+                </span>
+              </summary>
+              <div className="mt-3 space-y-1.5 text-sm">
+                <p className="font-medium">Customer</p>
+                <p className="text-[color:var(--text-secondary)]">
+                  {o.customer_name}
+                  {o.customer_phone && <> · {o.customer_phone}</>}
+                  {o.customer_email && <> · {o.customer_email}</>}
+                </p>
+                <p className="font-medium pt-1">Delivery address</p>
+                <p className="whitespace-pre-line text-[color:var(--text-secondary)]">
+                  {o.shipping_address || "—"}
+                </p>
+                {o.notes && <p className="text-[color:var(--text-quiet)]">Note: {o.notes}</p>}
+                <ul className="mt-2 border-t border-[color:var(--panel-edge)] pt-2">
+                  {o.items.map((it, i) => (
+                    <li key={i} className="flex justify-between py-0.5">
+                      <span>{it.qty} × {it.name}</span>
+                      <span>৳ {it.line_total}</span>
+                    </li>
+                  ))}
+                  <li className="flex justify-between pt-1 text-[color:var(--text-quiet)]">
+                    <span>Subtotal / delivery</span>
+                    <span>৳ {o.subtotal} / ৳ {o.shipping}</span>
+                  </li>
+                </ul>
+
+                <div className="flex flex-wrap gap-3 pt-2">
+                  <label className="flex items-center gap-2">
+                    Order
+                    <select className={field} defaultValue={o.status}
+                      onChange={(e) => start(async () => {
+                        const r = await setOrderStatus(o.id, "status", e.target.value);
+                        notify(r.ok ? "Updated." : r.error);
+                      })}>
+                      {ORDER_STATUS.map((s) => <option key={s}>{s}</option>)}
+                    </select>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    Payment
+                    <select className={field} defaultValue={o.payment_status}
+                      onChange={(e) => start(async () => {
+                        const r = await setOrderStatus(o.id, "payment_status", e.target.value);
+                        notify(r.ok ? "Updated." : r.error);
+                      })}>
+                      {PAY_STATUS.map((s) => <option key={s}>{s}</option>)}
+                    </select>
+                  </label>
+                  <button className="text-sm hover:text-[color:var(--accent)]" onClick={() => editOrder(o)}>
+                    Edit
+                  </button>
+                  <button
+                    className="text-sm text-[color:var(--clay)] hover:underline"
+                    onClick={() => start(async () => {
+                      if (!confirm(`Delete order ${o.order_number}?`)) return;
+                      const r = await deleteOrderRow(o.id);
+                      notify(r.ok ? "Order deleted." : r.error);
+                    })}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </details>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
