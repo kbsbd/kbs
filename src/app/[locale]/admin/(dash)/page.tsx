@@ -74,6 +74,12 @@ export default async function AdminPage({
       projects={projectsRes.data ?? []}
       notes={notesRes.data ?? []}
       shop={shop}
+      storefront={{
+        enabled: content.shop.enabled,
+        hero: content.shop.hero,
+        featured: content.shop.featured,
+        search: content.shop.search,
+      }}
       cms={cms}
       media={{
         staticHero: { image: content.staticHero.image },

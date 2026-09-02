@@ -3,6 +3,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { useState, useTransition } from "react";
 import ImageUpload from "@/components/admin/ImageUpload";
+import { saveContent } from "@/app/[locale]/admin/actions";
 import {
   saveProduct,
   deleteProductRow,
@@ -16,6 +17,10 @@ import {
   saveGateway,
   type ProductInput,
 } from "@/app/[locale]/admin/shop-actions";
+
+type L = { en: string; bn: string };
+const rid = () => Math.random().toString(36).slice(2, 9);
+const emptyL = (): L => ({ en: "", bn: "" });
 
 export type AdminProduct = {
   id: string;
@@ -88,7 +93,26 @@ export type AdminGateway = {
 const field =
   "w-full rounded-lg border border-[color:var(--panel-edge)] bg-[color:var(--canvas)] px-3 py-2 text-sm outline-none focus:border-[color:var(--accent)]";
 const lbl = "font-mono-label text-[color:var(--text-quiet)]";
-const SUBTABS = ["Products", "Categories", "Orders", "Quotes", "Reviews", "Payments"] as const;
+const SUBTABS = ["Products", "Categories", "Orders", "Quotes", "Reviews", "Storefront", "Payments"] as const;
+
+export type StorefrontContent = {
+  enabled: boolean;
+  hero: {
+    enabled: boolean;
+    eyebrow: L;
+    title: L;
+    subtitle: L;
+    image: string;
+    ctaLabel: L;
+    ctaHref: string;
+  };
+  featured: {
+    enabled: boolean;
+    heading: L;
+    slides: Array<{ id: string; image: string; title: L; subtitle: L; href: string }>;
+  };
+  search: { enabled: boolean; placeholder: L };
+};
 
 export default function ShopAdmin({
   products,
@@ -97,6 +121,7 @@ export default function ShopAdmin({
   quotes,
   reviews,
   gateways,
+  storefront,
   isAdmin = true,
   notify,
 }: {
@@ -106,10 +131,13 @@ export default function ShopAdmin({
   quotes: AdminQuote[];
   reviews: AdminReview[];
   gateways: AdminGateway[];
+  storefront: StorefrontContent;
   isAdmin?: boolean;
   notify: (s: string) => void;
 }) {
-  const subtabs = isAdmin ? SUBTABS : SUBTABS.filter((s) => s !== "Payments");
+  const subtabs = isAdmin
+    ? SUBTABS
+    : SUBTABS.filter((s) => s !== "Payments" && s !== "Storefront");
   const [sub, setSub] = useState<(typeof SUBTABS)[number]>("Products");
   const pendingReviews = reviews.filter((r) => r.status === "pending").length;
 
@@ -148,7 +176,262 @@ export default function ShopAdmin({
       )}
       {sub === "Quotes" && <QuotesPanel quotes={quotes} notify={notify} />}
       {sub === "Reviews" && <ReviewsPanel reviews={reviews} isAdmin={isAdmin} notify={notify} />}
+      {sub === "Storefront" && isAdmin && (
+        <StorefrontPanel data={storefront} notify={notify} />
+      )}
       {sub === "Payments" && isAdmin && <PaymentsPanel gateways={gateways} notify={notify} />}
+    </div>
+  );
+}
+
+/* ================= Storefront ================= */
+
+function BiInput({
+  label,
+  value,
+  onChange,
+  textarea = false,
+}: {
+  label: string;
+  value: L;
+  onChange: (v: L) => void;
+  textarea?: boolean;
+}) {
+  const Tag = textarea ? "textarea" : "input";
+  return (
+    <div>
+      <span className={lbl}>{label}</span>
+      <div className="mt-1 grid gap-2 sm:grid-cols-2">
+        <Tag
+          className={field}
+          rows={textarea ? 2 : undefined}
+          placeholder="English"
+          value={value.en}
+          onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+            onChange({ ...value, en: e.target.value })
+          }
+        />
+        <Tag
+          className={field}
+          rows={textarea ? 2 : undefined}
+          placeholder="বাংলা"
+          value={value.bn}
+          onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+            onChange({ ...value, bn: e.target.value })
+          }
+        />
+      </div>
+    </div>
+  );
+}
+
+function Toggle({
+  checked,
+  onChange,
+  children,
+}: {
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <label className="flex items-center gap-2.5 text-sm font-medium">
+      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} />
+      {children}
+    </label>
+  );
+}
+
+function StorefrontPanel({
+  data,
+  notify,
+}: {
+  data: StorefrontContent;
+  notify: (s: string) => void;
+}) {
+  const [shopOn, setShopOn] = useState(data.enabled);
+  const [hero, setHero] = useState(data.hero);
+  const [featured, setFeatured] = useState(data.featured);
+  const [search, setSearch] = useState(data.search);
+  const [pending, start] = useTransition();
+
+  const save = (edits: Array<{ path: string; value: unknown }>, msg: string) =>
+    start(async () => {
+      const r = await saveContent(edits.map((e) => ({ root: "shop", ...e })));
+      notify(r.ok ? msg : r.error);
+    });
+
+  const setSlide = (i: number, patch: Partial<StorefrontContent["featured"]["slides"][number]>) =>
+    setFeatured((f) => ({
+      ...f,
+      slides: f.slides.map((s, j) => (j === i ? { ...s, ...patch } : s)),
+    }));
+  const moveSlide = (i: number, dir: -1 | 1) =>
+    setFeatured((f) => {
+      const j = i + dir;
+      if (j < 0 || j >= f.slides.length) return f;
+      const next = f.slides.slice();
+      [next[i], next[j]] = [next[j], next[i]];
+      return { ...f, slides: next };
+    });
+
+  return (
+    <div className="max-w-3xl space-y-10">
+      {/* visibility */}
+      <section className="rounded-2xl border border-[color:var(--panel-edge)] p-5">
+        <h3 className="font-display text-lg">Shop page</h3>
+        <p className="mt-1 text-xs text-[color:var(--text-quiet)]">
+          Off hides the Shop nav link and makes every /shop URL return “not found”.
+        </p>
+        <div className="mt-4 flex items-center gap-4">
+          <Toggle checked={shopOn} onChange={setShopOn}>
+            {shopOn ? "Shop is visible to the public" : "Shop is hidden"}
+          </Toggle>
+          <button
+            className="btn btn-primary ml-auto text-sm"
+            disabled={pending}
+            onClick={() => save([{ path: "enabled", value: shopOn }], shopOn ? "Shop is now live." : "Shop hidden.")}
+          >
+            {pending ? "Saving" : "Save"}
+          </button>
+        </div>
+      </section>
+
+      {/* hero */}
+      <section className="space-y-4 rounded-2xl border border-[color:var(--panel-edge)] p-5">
+        <div className="flex items-center">
+          <h3 className="font-display text-lg">Hero banner</h3>
+          <button
+            className="btn btn-primary ml-auto text-sm"
+            disabled={pending}
+            onClick={() => save([{ path: "hero", value: hero }], "Hero saved.")}
+          >
+            {pending ? "Saving" : "Save hero"}
+          </button>
+        </div>
+        <Toggle checked={hero.enabled} onChange={(v) => setHero({ ...hero, enabled: v })}>
+          Show the hero on /shop
+        </Toggle>
+        <ImageUpload
+          label="Background image"
+          value={hero.image}
+          onChange={(url) => setHero({ ...hero, image: url })}
+        />
+        <BiInput label="Eyebrow (small line above)" value={hero.eyebrow} onChange={(v) => setHero({ ...hero, eyebrow: v })} />
+        <BiInput label="Title" value={hero.title} onChange={(v) => setHero({ ...hero, title: v })} />
+        <BiInput label="Subtitle" value={hero.subtitle} onChange={(v) => setHero({ ...hero, subtitle: v })} textarea />
+        <div className="grid gap-3 sm:grid-cols-2">
+          <BiInput label="Button label" value={hero.ctaLabel} onChange={(v) => setHero({ ...hero, ctaLabel: v })} />
+          <label className="block">
+            <span className={lbl}>Button link</span>
+            <input
+              className={`${field} mt-1`}
+              placeholder="/contact or #book or https://…"
+              value={hero.ctaHref}
+              onChange={(e) => setHero({ ...hero, ctaHref: e.target.value })}
+            />
+          </label>
+        </div>
+      </section>
+
+      {/* featured carousel */}
+      <section className="space-y-4 rounded-2xl border border-[color:var(--panel-edge)] p-5">
+        <div className="flex items-center">
+          <h3 className="font-display text-lg">Featured carousel</h3>
+          <button
+            className="btn btn-primary ml-auto text-sm"
+            disabled={pending}
+            onClick={() => save([{ path: "featured", value: featured }], "Featured carousel saved.")}
+          >
+            {pending ? "Saving" : "Save carousel"}
+          </button>
+        </div>
+        <p className="text-xs text-[color:var(--text-quiet)]">
+          An auto-scrolling strip under the hero. Add slides below; with none it
+          falls back to products you tick “Featured” on the Products tab.
+        </p>
+        <Toggle
+          checked={featured.enabled}
+          onChange={(v) => setFeatured({ ...featured, enabled: v })}
+        >
+          Show the carousel
+        </Toggle>
+        <BiInput
+          label="Heading"
+          value={featured.heading}
+          onChange={(v) => setFeatured({ ...featured, heading: v })}
+        />
+
+        <div className="space-y-3">
+          {featured.slides.map((sl, i) => (
+            <div key={sl.id} className="rounded-xl border border-[color:var(--panel-edge)] p-3">
+              <div className="mb-2 flex items-center gap-2 text-xs text-[color:var(--text-quiet)]">
+                <span>Slide {i + 1}</span>
+                <div className="ml-auto flex gap-1.5">
+                  <button type="button" onClick={() => moveSlide(i, -1)} disabled={i === 0} aria-label="Move up" className="px-1 disabled:opacity-30">↑</button>
+                  <button type="button" onClick={() => moveSlide(i, 1)} disabled={i === featured.slides.length - 1} aria-label="Move down" className="px-1 disabled:opacity-30">↓</button>
+                  <button
+                    type="button"
+                    className="text-[color:var(--clay)] hover:underline"
+                    onClick={() =>
+                      setFeatured((f) => ({ ...f, slides: f.slides.filter((_, j) => j !== i) }))
+                    }
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+              <ImageUpload label="Image" value={sl.image} onChange={(url) => setSlide(i, { image: url })} />
+              <div className="mt-2 space-y-2">
+                <BiInput label="Title" value={sl.title} onChange={(v) => setSlide(i, { title: v })} />
+                <BiInput label="Subtitle" value={sl.subtitle} onChange={(v) => setSlide(i, { subtitle: v })} />
+                <label className="block">
+                  <span className={lbl}>Link</span>
+                  <input
+                    className={`${field} mt-1`}
+                    placeholder="/shop/some-product"
+                    value={sl.href}
+                    onChange={(e) => setSlide(i, { href: e.target.value })}
+                  />
+                </label>
+              </div>
+            </div>
+          ))}
+        </div>
+        <button
+          className="btn btn-ghost text-sm"
+          onClick={() =>
+            setFeatured((f) => ({
+              ...f,
+              slides: [...f.slides, { id: rid(), image: "", title: emptyL(), subtitle: emptyL(), href: "" }],
+            }))
+          }
+        >
+          Add slide
+        </button>
+      </section>
+
+      {/* search */}
+      <section className="space-y-4 rounded-2xl border border-[color:var(--panel-edge)] p-5">
+        <div className="flex items-center">
+          <h3 className="font-display text-lg">Search box</h3>
+          <button
+            className="btn btn-primary ml-auto text-sm"
+            disabled={pending}
+            onClick={() => save([{ path: "search", value: search }], "Search settings saved.")}
+          >
+            {pending ? "Saving" : "Save search"}
+          </button>
+        </div>
+        <Toggle checked={search.enabled} onChange={(v) => setSearch({ ...search, enabled: v })}>
+          Show the search box on /shop
+        </Toggle>
+        <BiInput
+          label="Placeholder text"
+          value={search.placeholder}
+          onChange={(v) => setSearch({ ...search, placeholder: v })}
+        />
+      </section>
     </div>
   );
 }

@@ -1078,6 +1078,134 @@ body.paused *::after {
   grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
 }
 
+/* ---- shop search ---- */
+.shop-search {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: min(100%, 22rem);
+  padding: 0.7rem 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--panel-edge);
+  background: color-mix(in srgb, var(--panel) 55%, transparent);
+  transition: border-color 0.2s var(--ease-out);
+}
+.shop-search:focus-within {
+  border-color: var(--accent);
+}
+.shop-search input::-webkit-search-cancel-button {
+  display: none;
+}
+
+/* ---- shop hero ---- */
+.shop-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px;
+  border: 1px solid var(--panel-edge);
+  min-height: clamp(15rem, 34vw, 22rem);
+  display: flex;
+  align-items: flex-end;
+  isolation: isolate;
+}
+.shop-hero > img {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.shop-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(0deg, rgba(7, 16, 26, 0.92) 0%, rgba(7, 16, 26, 0.5) 45%, rgba(7, 16, 26, 0.2) 100%);
+}
+.shop-hero-body {
+  padding: clamp(1.5rem, 4vw, 2.75rem);
+  color: #f4f1ea;
+  max-width: 44rem;
+}
+
+/* ---- featured marquee ---- */
+.feat-marquee {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+}
+.feat-track {
+  display: flex;
+  gap: 1rem;
+  width: max-content;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.feat-marquee[data-run="true"] .feat-track {
+  animation: feat-scroll 45s linear infinite;
+}
+.feat-marquee:hover .feat-track,
+.feat-marquee:focus-within .feat-track {
+  animation-play-state: paused;
+}
+@keyframes feat-scroll {
+  to {
+    transform: translateX(-50%);
+  }
+}
+.feat-card {
+  flex: 0 0 auto;
+  width: clamp(180px, 44vw, 236px);
+}
+.feat-card a {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border: 1px solid var(--panel-edge);
+  border-radius: 14px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--panel) 45%, transparent);
+  transition: border-color 0.25s var(--ease-out);
+  padding-bottom: 0.9rem;
+}
+.feat-card a:hover {
+  border-color: var(--accent);
+}
+.feat-media {
+  display: block;
+  aspect-ratio: 4 / 3;
+  background: var(--panel);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+.feat-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.feat-title {
+  padding: 0 0.9rem;
+  font-weight: 600;
+  font-size: 0.92rem;
+  line-height: 1.3;
+}
+.feat-sub {
+  padding: 0 0.9rem;
+  font-size: 0.8rem;
+  color: var(--text-quiet);
+}
+@media (prefers-reduced-motion: reduce) {
+  .feat-marquee {
+    overflow-x: auto;
+  }
+  .feat-marquee .feat-track {
+    animation: none;
+  }
+}
+
 .pcard {
   display: flex;
   flex-direction: column;

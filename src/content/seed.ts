@@ -705,6 +705,28 @@ export const shop = {
     "স্যানিটারি ওয়্যার, প্লাম্বিং ফিটিংস, পাম্প, সিপিভিসি পাইপ ও পানি পরিশোধন যন্ত্রপাতি — যেসব আমরা স্থাপন ও বিতরণ করি সেগুলোই।"
   ),
   emptyNote: bi("Products are being added here.", "পণ্য এখানে যুক্ত করা হচ্ছে।"),
+  /** Optional banner at the top of /shop. Ships off; admin turns it on. */
+  hero: {
+    enabled: false,
+    eyebrow: bi("", ""),
+    title: bi("", ""),
+    subtitle: bi("", ""),
+    image: "",
+    ctaLabel: bi("", ""),
+    ctaHref: "",
+  },
+  /** The auto-playing strip under the hero. Admin curates the slides; with
+      none it falls back to products marked "featured". */
+  featured: {
+    enabled: true,
+    heading: bi("Featured", "নির্বাচিত"),
+    slides: [] as Array<{ id: string; image: string; title: L; subtitle: L; href: string }>,
+  },
+  /** The search box on /shop. */
+  search: {
+    enabled: true,
+    placeholder: bi("Search products", "পণ্য খুঁজুন"),
+  },
   /** BDT throughout. Symbol is what shows next to a price. */
   currencySymbol: "৳",
   /** Flat delivery charge added at checkout; 0 hides the line. */

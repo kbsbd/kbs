@@ -180,6 +180,9 @@ export default function SiteChrome({
             href={`/${locale}`}
             className="mr-auto flex items-center gap-2.5"
             aria-label="KBS"
+            /* don't prefetch the home RSC from every page — it drags the hero
+               poster and static-hero image onto pages that never show them */
+            prefetch={false}
           >
             {logo ? (
               <img src={logo} alt="KBS" width={180} height={32} className="h-8 w-auto max-w-[180px] object-contain" />

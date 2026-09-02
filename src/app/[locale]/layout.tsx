@@ -31,19 +31,23 @@ const mono = IBM_Plex_Mono({
   weight: ["500"],
   variable: "--font-mono",
   display: "swap",
+  /* used only for small mono-labels; never the LCP, so don't spend a preload */
+  preload: false,
 });
 
 /* Bengali gets a real pairing, not a fallback. Anek Bangla carries a matching
-   width axis so the two scripts sit at the same visual weight. */
+   width axis so the two scripts sit at the same visual weight. Only the Bengali
+   subset is pulled (Latin glyphs fall through to the Latin stack), which keeps
+   the preload these still carry roughly 40% smaller. */
 const displayBn = Anek_Bangla({
-  subsets: ["bengali", "latin"],
+  subsets: ["bengali"],
   weight: "700",
   variable: "--font-display-bn",
   display: "swap",
 });
 
 const bodyBn = Hind_Siliguri({
-  subsets: ["bengali", "latin"],
+  subsets: ["bengali"],
   weight: ["400", "500", "600"],
   variable: "--font-body-bn",
   display: "swap",

@@ -11,6 +11,7 @@ import ShopAdmin, {
   type AdminQuote,
   type AdminReview,
   type AdminGateway,
+  type StorefrontContent,
 } from "@/components/admin/ShopAdmin";
 import CmsAdmin, { type AdminPage, type AdminMenuItem } from "@/components/admin/CmsAdmin";
 import MediaAdmin, { type MediaContent } from "@/components/admin/MediaAdmin";
@@ -73,6 +74,7 @@ type Props = {
     reviews: AdminReview[];
     gateways: AdminGateway[];
   };
+  storefront: StorefrontContent;
   cms: { pages: AdminPage[]; menu: AdminMenuItem[] };
   media: MediaContent;
   lists: Record<string, Array<Record<string, unknown> | { en: string; bn: string }>>;
@@ -112,6 +114,7 @@ export default function Dashboard({
   projects,
   notes,
   shop,
+  storefront,
   cms,
   media,
   lists,
@@ -243,7 +246,9 @@ export default function Dashboard({
             />
           )}
           {tab === "Bookings" && <Bookings rows={bookings} notify={setToast} />}
-          {tab === "Shop" && <ShopAdmin {...shop} isAdmin={isAdmin} notify={setToast} />}
+          {tab === "Shop" && (
+            <ShopAdmin {...shop} storefront={storefront} isAdmin={isAdmin} notify={setToast} />
+          )}
           {tab === "Pages" && <CmsAdmin {...cms} notify={setToast} />}
           {tab === "Media" && <MediaAdmin media={media} notify={setToast} />}
           {tab === "Site details" && <SiteDetails site={site} groups={groups} notify={setToast} />}
@@ -852,7 +857,13 @@ function TextEditor({
   /* the list editors own the repeatable arrays; the field editor below keeps
      only the section's own scalar strings (no `items.3.title` style paths). */
   const isListPath = (p: string) => /(^|\.)\d+(\.|$)/.test(p);
-  const scalarFields = (groups[open] ?? []).filter((s) => !isListPath(s.path));
+  /* the shop hero / featured / search strings have their own richer editor on
+     the Shop → Storefront tab, so keep them out of this generic field list */
+  const managedElsewhere = (root: string, p: string) =>
+    root === "shop" && /^(hero|featured|search)\./.test(p);
+  const scalarFields = (groups[open] ?? []).filter(
+    (s) => !isListPath(s.path) && !managedElsewhere(s.root, s.path)
+  );
   const sectionLists = CONTENT_LISTS[open] ?? [];
 
   function save() {

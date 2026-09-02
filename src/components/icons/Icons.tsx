@@ -105,3 +105,10 @@ export const ArrowIcon = (p: IconProps) => (
     <path d="M12.6 6.2L18.4 12l-5.8 5.8" />
   </Svg>
 );
+
+export const SearchIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <circle cx="10.5" cy="10.5" r="6" />
+    <path d="M15 15l4.5 4.5" />
+  </Svg>
+);

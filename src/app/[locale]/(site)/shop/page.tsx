@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import { LOCALES, type Locale } from "@/content/seed";
 import { getContent } from "@/lib/content";
 import { getProducts, getCategories, pick } from "@/lib/shop";
-import ProductCard from "@/components/shop/ProductCard";
+import ShopHero from "@/components/shop/ShopHero";
+import FeaturedCarousel, { type FeaturedSlide } from "@/components/shop/FeaturedCarousel";
+import ShopBrowser from "@/components/shop/ShopBrowser";
 
 export const revalidate = 60;
 export const metadata: Metadata = {
@@ -29,10 +30,34 @@ export default async function ShopPage({
   const s = c.shop;
   const t = (v: Record<Locale, string>) => v[l];
 
-  const [products, categories] = await Promise.all([
-    getProducts({ category }),
+  const [products, featured, categories] = await Promise.all([
+    getProducts(),
+    getProducts({ featured: true, limit: 12 }),
     getCategories(),
   ]);
+
+  // curated slides win; otherwise fall back to products flagged "featured"
+  const curated = s.featured.slides.filter((x) => x.image);
+  const slides: FeaturedSlide[] =
+    curated.length > 0
+      ? curated.map((x) => ({
+          id: x.id,
+          image: x.image,
+          title: pick(x.title.en, x.title.bn, l),
+          subtitle: pick(x.subtitle.en, x.subtitle.bn, l),
+          href: x.href
+            ? x.href.startsWith("http")
+              ? x.href
+              : `/${l}${x.href}`
+            : `/${l}/shop`,
+        }))
+      : featured.map((p) => ({
+          id: p.id,
+          image: p.image ?? "",
+          title: pick(p.name, p.name_bn, l),
+          subtitle: pick(p.summary, p.summary_bn, l),
+          href: `/${l}/shop/${p.slug}`,
+        }));
 
   return (
     <div className="page">
@@ -41,35 +66,22 @@ export default async function ShopPage({
         <h1 className="font-display mt-6 text-[clamp(2.2rem,6vw,3.6rem)]">{t(s.head)}</h1>
         <p className="page-lede mt-5">{t(s.body)}</p>
 
-        {categories.length > 0 && (
-          <div className="mt-8 flex flex-wrap gap-2">
-            <Link
-              href={`/${l}/shop`}
-              className={`btn text-sm ${!category ? "btn-primary" : "btn-ghost"}`}
-            >
-              {l === "bn" ? "সব" : "All"}
-            </Link>
-            {categories.map((cat) => (
-              <Link
-                key={cat.slug}
-                href={`/${l}/shop?category=${cat.slug}`}
-                className={`btn text-sm ${category === cat.slug ? "btn-primary" : "btn-ghost"}`}
-              >
-                {pick(cat.name, cat.name_bn, l)}
-              </Link>
-            ))}
-          </div>
+        <ShopHero hero={s.hero} l={l} />
+
+        {s.featured.enabled && slides.length > 0 && (
+          <FeaturedCarousel slides={slides} heading={t(s.featured.heading)} />
         )}
 
-        {products.length === 0 ? (
-          <p className="mt-14 text-[color:var(--text-quiet)]">{t(s.emptyNote)}</p>
-        ) : (
-          <div className="shop-grid mt-12">
-            {products.map((p, i) => (
-              <ProductCard key={p.id} p={p} l={l} symbol={s.currencySymbol} priority={i < 2} />
-            ))}
-          </div>
-        )}
+        <ShopBrowser
+          products={products}
+          categories={categories}
+          l={l}
+          symbol={s.currencySymbol}
+          initialCategory={category}
+          searchEnabled={s.search.enabled}
+          searchPlaceholder={t(s.search.placeholder)}
+          emptyNote={t(s.emptyNote)}
+        />
       </div>
     </div>
   );
