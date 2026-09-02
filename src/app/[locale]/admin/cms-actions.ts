@@ -8,7 +8,8 @@ type Result = { ok: true } | { ok: false; error: string };
 
 async function guard() {
   const session = await getAdminSession();
-  if (!session) return null;
+  // the CMS is full-admin only; managers never reach it
+  if (!session || session.role !== "admin") return null;
   const supabase = await createAuthClient();
   return supabase ? { session, supabase } : null;
 }

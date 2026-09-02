@@ -53,6 +53,7 @@ export default async function AdminPage({
     <Dashboard
       locale={locale}
       email={session.email}
+      role={session.role}
       groups={editableStrings(content)}
       site={content.site}
       integrations={content.integrations}

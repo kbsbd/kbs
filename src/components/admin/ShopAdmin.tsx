@@ -97,6 +97,7 @@ export default function ShopAdmin({
   quotes,
   reviews,
   gateways,
+  isAdmin = true,
   notify,
 }: {
   products: AdminProduct[];
@@ -105,15 +106,17 @@ export default function ShopAdmin({
   quotes: AdminQuote[];
   reviews: AdminReview[];
   gateways: AdminGateway[];
+  isAdmin?: boolean;
   notify: (s: string) => void;
 }) {
+  const subtabs = isAdmin ? SUBTABS : SUBTABS.filter((s) => s !== "Payments");
   const [sub, setSub] = useState<(typeof SUBTABS)[number]>("Products");
   const pendingReviews = reviews.filter((r) => r.status === "pending").length;
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap gap-2">
-        {SUBTABS.map((s) => (
+        {subtabs.map((s) => (
           <button
             key={s}
             onClick={() => setSub(s)}
@@ -130,13 +133,22 @@ export default function ShopAdmin({
       </div>
 
       {sub === "Products" && (
-        <ProductsPanel products={products} categories={categories} notify={notify} />
+        <ProductsPanel
+          products={products}
+          categories={categories}
+          isAdmin={isAdmin}
+          notify={notify}
+        />
       )}
-      {sub === "Categories" && <CategoriesPanel categories={categories} notify={notify} />}
-      {sub === "Orders" && <OrdersPanel orders={orders} products={products} notify={notify} />}
+      {sub === "Categories" && (
+        <CategoriesPanel categories={categories} isAdmin={isAdmin} notify={notify} />
+      )}
+      {sub === "Orders" && (
+        <OrdersPanel orders={orders} products={products} isAdmin={isAdmin} notify={notify} />
+      )}
       {sub === "Quotes" && <QuotesPanel quotes={quotes} notify={notify} />}
-      {sub === "Reviews" && <ReviewsPanel reviews={reviews} notify={notify} />}
-      {sub === "Payments" && <PaymentsPanel gateways={gateways} notify={notify} />}
+      {sub === "Reviews" && <ReviewsPanel reviews={reviews} isAdmin={isAdmin} notify={notify} />}
+      {sub === "Payments" && isAdmin && <PaymentsPanel gateways={gateways} notify={notify} />}
     </div>
   );
 }
@@ -166,10 +178,12 @@ const EMPTY_PRODUCT = (): ProductInput => ({
 function ProductsPanel({
   products,
   categories,
+  isAdmin,
   notify,
 }: {
   products: AdminProduct[];
   categories: AdminCategory[];
+  isAdmin: boolean;
   notify: (s: string) => void;
 }) {
   const [draft, setDraft] = useState<ProductInput | null>(null);
@@ -388,18 +402,20 @@ function ProductsPanel({
               <button className="hover:text-[color:var(--accent)]" onClick={() => edit(p)}>
                 Edit
               </button>
-              <button
-                className="text-[color:var(--clay)] hover:underline"
-                onClick={() =>
-                  start(async () => {
-                    if (!confirm(`Delete "${p.name}"?`)) return;
-                    const r = await deleteProductRow(p.id);
-                    notify(r.ok ? "Deleted." : r.error);
-                  })
-                }
-              >
-                Delete
-              </button>
+              {isAdmin && (
+                <button
+                  className="text-[color:var(--clay)] hover:underline"
+                  onClick={() =>
+                    start(async () => {
+                      if (!confirm(`Delete "${p.name}"?`)) return;
+                      const r = await deleteProductRow(p.id);
+                      notify(r.ok ? "Deleted." : r.error);
+                    })
+                  }
+                >
+                  Delete
+                </button>
+              )}
             </div>
           </div>
         ))}
@@ -432,9 +448,11 @@ function L({
 
 function CategoriesPanel({
   categories,
+  isAdmin,
   notify,
 }: {
   categories: AdminCategory[];
+  isAdmin: boolean;
   notify: (s: string) => void;
 }) {
   const [draft, setDraft] = useState<{ id?: string; name: string; name_bn: string; sort: number } | null>(
@@ -502,6 +520,7 @@ function CategoriesPanel({
               >
                 Edit
               </button>
+              {isAdmin && (
               <button
                 className="text-[color:var(--clay)] hover:underline"
                 onClick={() =>
@@ -513,6 +532,7 @@ function CategoriesPanel({
               >
                 Delete
               </button>
+              )}
             </div>
           </div>
         ))}
@@ -557,10 +577,12 @@ const emptyOrder = (): OrderDraft => ({
 function OrdersPanel({
   orders,
   products,
+  isAdmin,
   notify,
 }: {
   orders: AdminOrder[];
   products: AdminProduct[];
+  isAdmin: boolean;
   notify: (s: string) => void;
 }) {
   const [, start] = useTransition();
@@ -594,13 +616,16 @@ function OrdersPanel({
       <div className="flex items-center">
         <p className="text-sm text-[color:var(--text-secondary)]">
           Every order with its full customer and delivery details.
+          {!isAdmin && " You can change the status; only an admin can edit or delete an order."}
         </p>
-        <button className="btn btn-primary ml-auto text-sm" onClick={() => setDraft(emptyOrder())}>
-          New order
-        </button>
+        {isAdmin && (
+          <button className="btn btn-primary ml-auto text-sm" onClick={() => setDraft(emptyOrder())}>
+            New order
+          </button>
+        )}
       </div>
 
-      {draft && (
+      {isAdmin && draft && (
         <div className="max-w-3xl space-y-4 rounded-2xl border border-[color:var(--accent)] p-5">
           <div className="grid gap-3 sm:grid-cols-2">
             <L label="Customer name">
@@ -771,19 +796,23 @@ function OrdersPanel({
                       {PAY_STATUS.map((s) => <option key={s}>{s}</option>)}
                     </select>
                   </label>
-                  <button className="text-sm hover:text-[color:var(--accent)]" onClick={() => editOrder(o)}>
-                    Edit
-                  </button>
-                  <button
-                    className="text-sm text-[color:var(--clay)] hover:underline"
-                    onClick={() => start(async () => {
-                      if (!confirm(`Delete order ${o.order_number}?`)) return;
-                      const r = await deleteOrderRow(o.id);
-                      notify(r.ok ? "Order deleted." : r.error);
-                    })}
-                  >
-                    Delete
-                  </button>
+                  {isAdmin && (
+                    <>
+                      <button className="text-sm hover:text-[color:var(--accent)]" onClick={() => editOrder(o)}>
+                        Edit
+                      </button>
+                      <button
+                        className="text-sm text-[color:var(--clay)] hover:underline"
+                        onClick={() => start(async () => {
+                          if (!confirm(`Delete order ${o.order_number}?`)) return;
+                          const r = await deleteOrderRow(o.id);
+                          notify(r.ok ? "Order deleted." : r.error);
+                        })}
+                      >
+                        Delete
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             </details>
@@ -850,7 +879,15 @@ function QuotesPanel({ quotes, notify }: { quotes: AdminQuote[]; notify: (s: str
 
 /* ================= Reviews ================= */
 
-function ReviewsPanel({ reviews, notify }: { reviews: AdminReview[]; notify: (s: string) => void }) {
+function ReviewsPanel({
+  reviews,
+  isAdmin,
+  notify,
+}: {
+  reviews: AdminReview[];
+  isAdmin: boolean;
+  notify: (s: string) => void;
+}) {
   const [, start] = useTransition();
   if (reviews.length === 0)
     return <p className="text-sm text-[color:var(--text-quiet)]">No reviews yet.</p>;
@@ -903,17 +940,19 @@ function ReviewsPanel({ reviews, notify }: { reviews: AdminReview[]; notify: (s:
                 Reject
               </button>
             )}
-            <button
-              className="text-[color:var(--clay)] hover:underline"
-              onClick={() =>
-                start(async () => {
-                  const res = await moderateReview(r.id, "delete");
-                  notify(res.ok ? "Deleted." : res.error);
-                })
-              }
-            >
-              Delete
-            </button>
+            {isAdmin && (
+              <button
+                className="text-[color:var(--clay)] hover:underline"
+                onClick={() =>
+                  start(async () => {
+                    const res = await moderateReview(r.id, "delete");
+                    notify(res.ok ? "Deleted." : res.error);
+                  })
+                }
+              >
+                Delete
+              </button>
+            )}
           </div>
         </div>
       ))}

@@ -24,6 +24,10 @@ import {
   deleteProject,
   saveInternalNote,
   signOut,
+  listStaff,
+  addManager,
+  removeStaff,
+  type StaffMember,
 } from "@/app/[locale]/admin/actions";
 
 type Booking = {
@@ -53,6 +57,7 @@ type Project = {
 type Props = {
   locale: string;
   email: string;
+  role: "admin" | "manager";
   groups: Record<string, EditableString[]>;
   site: Record<string, unknown>;
   integrations: Record<string, unknown>;
@@ -84,6 +89,9 @@ const TABS = [
 ] as const;
 type Tab = (typeof TABS)[number];
 
+/** What a manager sees. Everything else is full-admin only. */
+const MANAGER_TABS: Tab[] = ["Bookings", "Shop"];
+
 const STATUSES = ["new", "contacted", "visit booked", "visited", "closed"];
 
 const field =
@@ -92,6 +100,7 @@ const field =
 export default function Dashboard({
   locale,
   email,
+  role,
   groups,
   site,
   integrations,
@@ -102,6 +111,8 @@ export default function Dashboard({
   cms,
   media,
 }: Props) {
+  const isAdmin = role === "admin";
+  const tabs = isAdmin ? TABS : MANAGER_TABS;
   const [tab, setTab] = useState<Tab>("Bookings");
   const [toast, setToast] = useState("");
   const [drawer, setDrawer] = useState(true);
@@ -145,10 +156,10 @@ export default function Dashboard({
             <CloseIcon className="h-5 w-5" />
           </button>
         </div>
-        <p className="truncate px-5 pb-3 text-xs text-[color:var(--text-quiet)]">{email}</p>
+        <p className="truncate px-5 pb-3 text-xs text-[color:var(--text-quiet)]">{email} · {isAdmin ? "Admin" : "Manager"}</p>
 
         <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 pb-4">
-          {TABS.map((t) => (
+          {tabs.map((t) => (
             <button
               key={t}
               onClick={() => {
@@ -215,7 +226,7 @@ export default function Dashboard({
 
         <div className="mx-auto max-w-[72rem] px-5 py-10 sm:px-8">
           {tab === "Bookings" && <Bookings rows={bookings} notify={setToast} />}
-          {tab === "Shop" && <ShopAdmin {...shop} notify={setToast} />}
+          {tab === "Shop" && <ShopAdmin {...shop} isAdmin={isAdmin} notify={setToast} />}
           {tab === "Pages" && <CmsAdmin {...cms} notify={setToast} />}
           {tab === "Media" && <MediaAdmin media={media} notify={setToast} />}
           {tab === "Site details" && <SiteDetails site={site} groups={groups} notify={setToast} />}
@@ -486,6 +497,135 @@ function SiteDetails({
       <button className="btn btn-primary" onClick={save} disabled={pending}>
         {pending ? "Saving" : "Save changes"}
       </button>
+
+      <TeamSection notify={notify} />
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+
+function TeamSection({ notify }: { notify: (s: string) => void }) {
+  const [staff, setStaff] = useState<StaffMember[] | null>(null);
+  const [email, setEmail] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [password, setPassword] = useState("");
+  const [pending, start] = useTransition();
+
+  const load = () =>
+    start(async () => {
+      const r = await listStaff();
+      if (r.ok) setStaff(r.staff);
+      else notify(r.error);
+    });
+
+  useEffect(() => {
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function add() {
+    if (!email.trim() || password.length < 8) {
+      notify("Enter an email and a password of at least 8 characters.");
+      return;
+    }
+    start(async () => {
+      const r = await addManager({ email, password, fullName });
+      if (r.ok) {
+        notify("Manager added. They can sign in with that email and password.");
+        setEmail("");
+        setFullName("");
+        setPassword("");
+        const list = await listStaff();
+        if (list.ok) setStaff(list.staff);
+      } else {
+        notify(r.error);
+      }
+    });
+  }
+
+  function remove(userId: string) {
+    start(async () => {
+      const r = await removeStaff(userId);
+      if (r.ok) {
+        notify("Manager removed.");
+        setStaff((s) => (s ? s.filter((m) => m.userId !== userId) : s));
+      } else {
+        notify(r.error);
+      }
+    });
+  }
+
+  return (
+    <div className="border-t border-[color:var(--panel-edge)] pt-8">
+      <h3 className="font-display text-lg">Team</h3>
+      <p className="mt-1 text-xs text-[color:var(--text-quiet)]">
+        A manager can check orders, change order status and add products. They cannot edit
+        or delete orders, delete products, or reach payments, integrations, pages or these
+        settings.
+      </p>
+
+      <div className="mt-4 space-y-2">
+        {staff === null && (
+          <p className="text-sm text-[color:var(--text-quiet)]">Loading…</p>
+        )}
+        {staff?.map((m) => (
+          <div
+            key={m.userId}
+            className="flex flex-wrap items-center gap-3 rounded-xl border border-[color:var(--panel-edge)] p-3 text-sm"
+          >
+            <span className="flex-1 break-all">{m.email}</span>
+            <span
+              className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+                m.role === "admin"
+                  ? "bg-[color:var(--accent-muted)] text-[color:var(--text-primary)]"
+                  : "bg-[color:var(--panel)] text-[color:var(--text-secondary)]"
+              }`}
+            >
+              {m.role === "admin" ? "Full admin" : "Manager"}
+            </span>
+            {m.role === "manager" && (
+              <button
+                type="button"
+                disabled={pending}
+                className="text-sm text-[color:var(--clay)] hover:underline disabled:opacity-50"
+                onClick={() => remove(m.userId)}
+              >
+                Remove
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-5 space-y-3 rounded-xl border border-[color:var(--panel-edge)] p-4">
+        <h4 className="font-mono-label text-[color:var(--text-quiet)]">Add a manager</h4>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <input
+            className={field}
+            type="email"
+            placeholder="manager@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <input
+            className={field}
+            placeholder="Full name (optional)"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+          />
+        </div>
+        <input
+          className={field}
+          type="text"
+          placeholder="Temporary password (min 8 characters)"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <button className="btn btn-primary" onClick={add} disabled={pending}>
+          {pending ? "Working…" : "Add manager"}
+        </button>
+      </div>
     </div>
   );
 }

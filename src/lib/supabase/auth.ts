@@ -33,17 +33,19 @@ export async function createAuthClient(): Promise<SupabaseClient | null> {
   });
 }
 
+export type StaffRole = "admin" | "manager";
 export type AdminSession = {
   userId: string;
   email: string;
+  role: StaffRole;
 };
 
 /**
  * The only gate into the dashboard.
  *
  * Being signed in is not enough on its own: the user must also have a row in
- * `admins`. That is what makes this admin-only with no public sign up, even if
- * someone were created in Auth by accident.
+ * `admins`. `role` splits staff into a full admin and a limited manager; the
+ * dashboard and the server actions both key off it.
  */
 export async function getAdminSession(): Promise<AdminSession | null> {
   const supabase = await createAuthClient();
@@ -56,10 +58,11 @@ export async function getAdminSession(): Promise<AdminSession | null> {
 
   const { data, error } = await supabase
     .from("admins")
-    .select("user_id, email")
+    .select("user_id, email, role")
     .eq("user_id", user.id)
     .maybeSingle();
 
   if (error || !data) return null;
-  return { userId: user.id, email: (data.email as string) ?? user.email ?? "" };
+  const role: StaffRole = data.role === "manager" ? "manager" : "admin";
+  return { userId: user.id, email: (data.email as string) ?? user.email ?? "", role };
 }
