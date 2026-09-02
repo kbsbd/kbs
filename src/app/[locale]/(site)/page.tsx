@@ -1,4 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
+import ReactDOM from "react-dom";
 import { notFound } from "next/navigation";
 import { LOCALES, type Locale } from "@/content/seed";
 import { getContent, getProjects } from "@/lib/content";
@@ -28,6 +29,12 @@ export default async function Home({
   const [c, projectItems] = await Promise.all([getContent(), getProjects()]);
   const t = (v: Record<Locale, string>) => v[l];
 
+  /* The hero poster is painted by the client after hydration, so the preload
+     scanner never sees it. Declaring it here makes it the LCP image the browser
+     fetches first, in parallel with the JS bundle rather than after it. */
+  const posterUrl = img("hero-poster", 1600);
+  ReactDOM.preload(posterUrl, { as: "image", fetchPriority: "high" });
+
   return (
     <>
       <StructuredData c={c} l={l} />
@@ -38,7 +45,7 @@ export default async function Home({
           h264: { url: heroSources.h264.url(), bytes: heroSources.h264.bytes },
           vp9: { url: heroSources.vp9.url(), bytes: heroSources.vp9.bytes },
         }}
-        posterUrl={img("hero-poster", 1600)}
+        posterUrl={posterUrl}
         ctaHref="#book"
         scrollLabel={l === "bn" ? "স্ক্রল করুন" : "Scroll"}
       />

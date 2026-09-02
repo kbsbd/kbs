@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { LOCALES, type Locale } from "@/content/seed";
 import { getContent } from "@/lib/content";
 import { img } from "@/lib/media";
+import ClientCarousel from "@/components/ClientCarousel";
 
 export const metadata: Metadata = {
   title: "Clients — KBS / Kanchan Builders",
@@ -30,6 +31,15 @@ export default async function ClientsPage({
         <h1 className="font-display mt-6 text-[clamp(2.2rem,6vw,3.6rem)]">{t(p.head)}</h1>
         <p className="page-lede mt-5">{t(p.body)}</p>
 
+        {p.projects.length > 0 && (
+          <section className="mt-12">
+            <h2 className="font-display text-[clamp(1.4rem,3.5vw,2rem)]">{t(p.projectsHead)}</h2>
+            <div className="mt-6">
+              <ClientCarousel slides={p.projects} />
+            </div>
+          </section>
+        )}
+
         {p.logos.length === 0 ? (
           <p className="mt-12 text-[color:var(--text-quiet)]">{t(p.empty)}</p>
         ) : (
@@ -41,6 +51,8 @@ export default async function ClientsPage({
                     <img
                       src={img(logo.image, 480)}
                       alt={logo.name}
+                      width={240}
+                      height={160}
                       className="max-h-full max-w-full object-contain"
                       loading="lazy"
                     />

@@ -123,7 +123,7 @@ export default function MobileMenu({
         >
           <div className="flex items-center px-5 py-3.5 sm:px-8">
             {logo ? (
-              <img src={logo} alt="KBS" className="mr-auto h-8 w-auto max-w-[160px] object-contain" />
+              <img src={logo} alt="KBS" width={160} height={32} className="mr-auto h-8 w-auto max-w-[160px] object-contain" />
             ) : (
               <span className="mr-auto font-display text-lg tracking-tight">KBS</span>
             )}

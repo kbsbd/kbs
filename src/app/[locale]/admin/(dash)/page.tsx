@@ -69,7 +69,10 @@ export default async function AdminPage({
         amenities: { items: content.amenities.items },
         servicesPage: { items: content.servicesPage.items },
         kbHomes: { gallery: content.kbHomes.gallery },
-        clientsPage: { logos: content.clientsPage.logos },
+        clientsPage: {
+          logos: content.clientsPage.logos,
+          projects: content.clientsPage.projects ?? [],
+        },
       }}
     />
   );

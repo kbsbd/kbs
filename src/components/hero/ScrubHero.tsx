@@ -302,13 +302,28 @@ export default function ScrubHero({
     function startBlobFetch() {
       if (started) return;
       started = true;
-      loadHeroBlob();
+      /* The poster is the LCP. Hold the multi-MB footage back until the main
+         thread is idle — past hydration and first paint — so it never delays
+         that. requestIdleCallback's own 3s timeout is the hard cap. */
+      let kicked = false;
+      const kick = () => {
+        if (kicked) return;
+        kicked = true;
+        loadHeroBlob();
+      };
+      const ric = (window as typeof window & {
+        requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => void;
+      }).requestIdleCallback;
+      if (ric) ric(kick, { timeout: 3000 });
+      else window.setTimeout(kick, 1200);
     }
 
     function initHeroOnce() {
       if (initialised) return;
       initialised = true;
-      poster!.style.backgroundImage = `url('${posterUrl}')`;
+      // the poster itself is server-rendered as <img class="poster-img">, so it
+      // is already on screen here; we only need to know when it has decoded
+      // before letting the footage start.
       const img = new Image();
       img.onload = startBlobFetch;
       img.onerror = startBlobFetch;
@@ -410,7 +425,21 @@ export default function ScrubHero({
   return (
     <div ref={heroRef} className="hero">
       <div ref={stageRef} className="stage">
-        <div ref={posterRef} className="poster" aria-hidden="true" />
+        <div ref={posterRef} className="poster" aria-hidden="true">
+          {/* Server-rendered so the first frame is a real, preload-discoverable
+              image and the LCP does not wait on hydration. The video fades in
+              on top of it. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={posterUrl}
+            alt=""
+            className="poster-img"
+            fetchPriority="high"
+            decoding="async"
+            width={1600}
+            height={2000}
+          />
+        </div>
 
         {/* decorative: the journey is told by the captions, not the footage */}
         <video

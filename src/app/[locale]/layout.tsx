@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import ReactDOM from "react-dom";
 import Script from "next/script";
 import { notFound } from "next/navigation";
 import { Archivo, Hanken_Grotesk, IBM_Plex_Mono, Anek_Bangla, Hind_Siliguri } from "next/font/google";
@@ -139,6 +140,10 @@ export default async function LocaleLayout({
   const l = locale as Locale;
   const content = await getContent();
   const { gtmId } = resolveIntegrations(content);
+
+  /* Cloudinary serves every image and the hero footage. Opening the connection
+     during HTML parse shaves a full RTT off the LCP image on a cold visit. */
+  ReactDOM.preconnect("https://res.cloudinary.com", { crossOrigin: "anonymous" });
 
   const fontVars = [
     display.variable,

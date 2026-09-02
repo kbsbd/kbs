@@ -25,7 +25,8 @@
 
   --text-primary: #f1eee7;
   --text-secondary: #a3b4c6;
-  --text-quiet: #6f8299;
+  /* WCAG AA (>=4.5:1) against --panel, --canvas and --canvas-deep */
+  --text-quiet: #8194a8;
 
   /* three-layer shadow that keeps light type readable over live footage */
   --tshadow: 0 1px 2px rgba(5, 5, 10, 0.95), 0 3px 12px rgba(5, 5, 10, 0.78),
@@ -65,7 +66,8 @@
 
   --text-primary: #1b2530;
   --text-secondary: #4c5b6a;
-  --text-quiet: #75808b;
+  /* WCAG AA (>=4.5:1) against --panel, --canvas and --canvas-deep */
+  --text-quiet: #5c6773;
 
   color-scheme: light;
 }
@@ -290,6 +292,13 @@ html[lang="bn"] .font-mono-label {
   background-size: cover;
   background-position: center;
   transform: scale(1.02);
+}
+.poster-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 /* 1. the global base scrim: no frame is ever raw behind the page */
@@ -530,6 +539,11 @@ html[lang="bn"] .font-mono-label {
 .btn-primary:hover {
   background: var(--accent-hover);
   transform: translateY(-1px);
+}
+/* The light-theme accent is dark enough that black label text falls below the
+   4.5:1 AA line; white clears it (4.9:1). */
+:root[data-theme="light"] .btn-primary {
+  color: #ffffff;
 }
 
 .btn-ghost {

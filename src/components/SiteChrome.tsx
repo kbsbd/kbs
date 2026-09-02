@@ -180,7 +180,7 @@ export default function SiteChrome({
             aria-label="KBS"
           >
             {logo ? (
-              <img src={logo} alt="KBS" className="h-8 w-auto max-w-[180px] object-contain" />
+              <img src={logo} alt="KBS" width={180} height={32} className="h-8 w-auto max-w-[180px] object-contain" />
             ) : (
               <>
                 <Mark />
@@ -259,7 +259,7 @@ export default function SiteChrome({
           <div>
             <div className="flex items-center gap-2.5">
               {logo ? (
-                <img src={logo} alt="KBS" className="h-9 w-auto max-w-[200px] object-contain" />
+                <img src={logo} alt="KBS" width={200} height={36} className="h-9 w-auto max-w-[200px] object-contain" />
               ) : (
                 <>
                   <Mark />

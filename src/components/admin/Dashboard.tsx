@@ -77,6 +77,7 @@ type Props = {
 };
 
 const TABS = [
+  "Dashboard",
   "Bookings",
   "Shop",
   "Pages",
@@ -84,6 +85,7 @@ const TABS = [
   "Site details",
   "Text",
   "Projects",
+  "Team",
   "Integrations",
   "Internal",
 ] as const;
@@ -113,7 +115,7 @@ export default function Dashboard({
 }: Props) {
   const isAdmin = role === "admin";
   const tabs = isAdmin ? TABS : MANAGER_TABS;
-  const [tab, setTab] = useState<Tab>("Bookings");
+  const [tab, setTab] = useState<Tab>(isAdmin ? "Dashboard" : "Bookings");
   const [toast, setToast] = useState("");
   const [drawer, setDrawer] = useState(true);
 
@@ -225,6 +227,18 @@ export default function Dashboard({
         )}
 
         <div className="mx-auto max-w-[72rem] px-5 py-10 sm:px-8">
+          {tab === "Dashboard" && (
+            <Overview
+              go={setTab}
+              locale={locale}
+              site={site}
+              integrations={integrations}
+              bookings={bookings}
+              projects={projects}
+              shop={shop}
+              cms={cms}
+            />
+          )}
           {tab === "Bookings" && <Bookings rows={bookings} notify={setToast} />}
           {tab === "Shop" && <ShopAdmin {...shop} isAdmin={isAdmin} notify={setToast} />}
           {tab === "Pages" && <CmsAdmin {...cms} notify={setToast} />}
@@ -232,6 +246,7 @@ export default function Dashboard({
           {tab === "Site details" && <SiteDetails site={site} groups={groups} notify={setToast} />}
           {tab === "Text" && <TextEditor groups={groups} notify={setToast} />}
           {tab === "Projects" && <Projects rows={projects} notify={setToast} />}
+          {tab === "Team" && <TeamSection notify={setToast} />}
           {tab === "Integrations" && (
             <IntegrationsPanel data={integrations} notify={setToast} />
           )}
@@ -239,6 +254,187 @@ export default function Dashboard({
         </div>
       </div>
     </main>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+
+function StatCard({
+  label,
+  value,
+  sub,
+  onClick,
+}: {
+  label: string;
+  value: string | number;
+  sub?: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex flex-col items-start rounded-2xl border border-[color:var(--panel-edge)] bg-[color:var(--canvas-deep)] p-4 text-left transition-colors duration-150 hover:border-[color:var(--accent)]"
+    >
+      <span className="font-mono-label text-[color:var(--text-quiet)]">{label}</span>
+      <span className="mt-2 font-display text-2xl">{value}</span>
+      <span className="mt-1 text-xs text-[color:var(--text-quiet)]">
+        {sub ?? "View details →"}
+      </span>
+    </button>
+  );
+}
+
+function Overview({
+  go,
+  locale,
+  site,
+  integrations,
+  bookings,
+  projects,
+  shop,
+  cms,
+}: {
+  go: (t: Tab) => void;
+  locale: string;
+  site: Record<string, unknown>;
+  integrations: Record<string, unknown>;
+  bookings: Booking[];
+  projects: Project[];
+  shop: Props["shop"];
+  cms: Props["cms"];
+}) {
+  const [staffCount, setStaffCount] = useState<number | null>(null);
+  useEffect(() => {
+    listStaff().then((r) => {
+      if (r.ok) setStaffCount(r.staff.length);
+    });
+  }, []);
+
+  const newBookings = bookings.filter((b) => b.status === "new").length;
+  const pendingOrders = shop.orders.filter((o) => o.status === "pending").length;
+  const unpaidOrders = shop.orders.filter((o) => o.payment_status === "unpaid").length;
+  const activeProducts = shop.products.filter((p) => p.status === "active").length;
+  const lowStock = shop.products.filter(
+    (p) => p.track_stock && Number(p.stock) <= 3
+  ).length;
+  const pendingReviews = shop.reviews.filter((r) => r.status === "pending").length;
+  const newQuotes = shop.quotes.filter((q) => q.status === "new").length;
+  const publishedPages = cms.pages.filter((p) => p.status === "published").length;
+  const publishedProjects = projects.filter((p) => p.published).length;
+  const integrationsSet = INTEGRATION_FIELDS.filter((f) =>
+    String(integrations[f.key] ?? "").trim()
+  ).length;
+
+  const s = (k: string) => String(site[k] ?? "").trim();
+  const siteRows: Array<[string, string]> = [
+    ["Business name", s("name") || "—"],
+    ["Founded", s("founded") || "—"],
+    ["Phone", s("phone") || "not set"],
+    ["WhatsApp", s("whatsapp") || "not set"],
+    ["Email", s("email") || "not set"],
+    ["Logo", s("logo") ? "uploaded" : "not set"],
+    ["Favicon", s("favicon") ? "uploaded" : "not set"],
+    ["Map embed", s("mapEmbed") ? "set" : "not set"],
+  ];
+
+  return (
+    <div className="space-y-10">
+      <div>
+        <p className="text-sm text-[color:var(--text-secondary)]">
+          Everything at a glance. Tap any card to open that section.
+        </p>
+        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          <StatCard
+            label="Site visit requests"
+            value={bookings.length}
+            sub={newBookings ? `${newBookings} new →` : "View details →"}
+            onClick={() => go("Bookings")}
+          />
+          <StatCard
+            label="Orders"
+            value={shop.orders.length}
+            sub={
+              pendingOrders || unpaidOrders
+                ? `${pendingOrders} pending · ${unpaidOrders} unpaid →`
+                : "View details →"
+            }
+            onClick={() => go("Shop")}
+          />
+          <StatCard
+            label="Products"
+            value={shop.products.length}
+            sub={`${activeProducts} active${lowStock ? ` · ${lowStock} low stock` : ""} →`}
+            onClick={() => go("Shop")}
+          />
+          <StatCard
+            label="Reviews to moderate"
+            value={pendingReviews}
+            sub={pendingReviews ? "Needs attention →" : "All clear →"}
+            onClick={() => go("Shop")}
+          />
+          <StatCard
+            label="Quote requests"
+            value={shop.quotes.length}
+            sub={newQuotes ? `${newQuotes} new →` : "View details →"}
+            onClick={() => go("Shop")}
+          />
+          <StatCard
+            label="Pages"
+            value={cms.pages.length}
+            sub={`${publishedPages} published →`}
+            onClick={() => go("Pages")}
+          />
+          <StatCard
+            label="Projects"
+            value={projects.length}
+            sub={`${publishedProjects} published →`}
+            onClick={() => go("Projects")}
+          />
+          <StatCard
+            label="Team"
+            value={staffCount ?? "—"}
+            sub="Manage access →"
+            onClick={() => go("Team")}
+          />
+          <StatCard
+            label="Integrations"
+            value={`${integrationsSet}/${INTEGRATION_FIELDS.length}`}
+            sub="Analytics & verification →"
+            onClick={() => go("Integrations")}
+          />
+        </div>
+      </div>
+
+      <div>
+        <div className="flex items-center">
+          <h3 className="font-display text-lg">Site information</h3>
+          <button
+            type="button"
+            className="btn btn-ghost ml-auto text-xs"
+            onClick={() => go("Site details")}
+          >
+            Edit
+          </button>
+        </div>
+        <dl className="mt-4 grid gap-x-8 gap-y-3 rounded-2xl border border-[color:var(--panel-edge)] p-5 sm:grid-cols-2">
+          {siteRows.map(([k, v]) => (
+            <div key={k} className="flex items-baseline justify-between gap-4">
+              <dt className="font-mono-label text-[color:var(--text-quiet)]">{k}</dt>
+              <dd className="truncate text-sm">{v}</dd>
+            </div>
+          ))}
+        </dl>
+        <a
+          href={`/${locale}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-3 inline-block text-sm text-[color:var(--text-secondary)] hover:text-[color:var(--accent)]"
+        >
+          Open the public site ↗
+        </a>
+      </div>
+    </div>
   );
 }
 
@@ -497,8 +693,6 @@ function SiteDetails({
       <button className="btn btn-primary" onClick={save} disabled={pending}>
         {pending ? "Saving" : "Save changes"}
       </button>
-
-      <TeamSection notify={notify} />
     </div>
   );
 }
@@ -557,12 +751,12 @@ function TeamSection({ notify }: { notify: (s: string) => void }) {
   }
 
   return (
-    <div className="border-t border-[color:var(--panel-edge)] pt-8">
+    <div className="max-w-3xl">
       <h3 className="font-display text-lg">Team</h3>
-      <p className="mt-1 text-xs text-[color:var(--text-quiet)]">
+      <p className="mt-1 text-sm text-[color:var(--text-secondary)]">
         A manager can check orders, change order status and add products. They cannot edit
-        or delete orders, delete products, or reach payments, integrations, pages or these
-        settings.
+        or delete orders, delete products, or reach payments, integrations, pages or the
+        site settings.
       </p>
 
       <div className="mt-4 space-y-2">

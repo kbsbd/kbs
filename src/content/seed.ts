@@ -614,6 +614,9 @@ export const clientsPage = {
   empty: bi("Client logos are being added here.", "ক্লায়েন্টদের লোগো এখানে যুক্ত করা হচ্ছে।"),
   /** Admin adds rows; ships empty and the grid shows the note above. */
   logos: [] as Array<{ id: string; name: string; image: string; href: string }>,
+  projectsHead: bi("Projects we have delivered", "আমাদের সম্পন্ন প্রকল্প"),
+  /** Client project photos. Admin uploads image + name; shown as an autoplaying carousel. */
+  projects: [] as Array<{ id: string; name: string; image: string }>,
 };
 
 export const kbHomes = {

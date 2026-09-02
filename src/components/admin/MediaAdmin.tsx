@@ -18,6 +18,7 @@ type L = { en: string; bn: string };
 type Item = { id: string; image: string; title?: L; body?: L };
 type GalleryItem = { id: string; image: string; caption: L };
 type Logo = { id: string; name: string; image: string; href: string };
+type ClientProject = { id: string; name: string; image: string };
 
 export type MediaContent = {
   staticHero: { image: string };
@@ -26,7 +27,7 @@ export type MediaContent = {
   amenities: { items: Item[] };
   servicesPage: { items: Item[] };
   kbHomes: { gallery: GalleryItem[] };
-  clientsPage: { logos: Logo[] };
+  clientsPage: { logos: Logo[]; projects: ClientProject[] };
 };
 
 const lbl = "font-mono-label text-[color:var(--text-quiet)]";
@@ -54,6 +55,9 @@ export default function MediaAdmin({
   const [services, setServices] = useState<Item[]>(media.servicesPage.items);
   const [gallery, setGallery] = useState<GalleryItem[]>(media.kbHomes.gallery);
   const [logos, setLogos] = useState<Logo[]>(media.clientsPage.logos);
+  const [clientProjects, setClientProjects] = useState<ClientProject[]>(
+    media.clientsPage.projects ?? []
+  );
 
   function save(edits: Array<{ root: string; path: string; value: unknown }>, msg: string) {
     start(async () => {
@@ -212,6 +216,70 @@ export default function MediaAdmin({
           onClick={() => save([{ root: "clientsPage", path: "logos", value: logos }], "Logos saved.")}
         >
           Save logos
+        </button>
+      </section>
+
+      {/* client projects — public autoplay carousel */}
+      <section className="space-y-4">
+        <div className="flex items-center">
+          <h3 className="font-display text-lg">Client projects carousel</h3>
+          <button
+            className="btn btn-ghost ml-auto text-xs"
+            onClick={() => setClientProjects((l) => [...l, { id: rid(), name: "", image: "" }])}
+          >
+            Add project
+          </button>
+        </div>
+        <p className="text-xs text-[color:var(--text-quiet)]">
+          Each project shows on the Clients page as a slide in an auto-playing carousel.
+          Upload a wide photo and give it a name.
+        </p>
+        {clientProjects.map((pr, i) => (
+          <div key={pr.id} className="rounded-xl border border-[color:var(--panel-edge)] p-3">
+            <label className="block">
+              <span className={lbl}>Project name</span>
+              <input
+                className={`${field} mt-1`}
+                value={pr.name}
+                onChange={(e) =>
+                  setClientProjects((list) =>
+                    list.map((x, j) => (j === i ? { ...x, name: e.target.value } : x))
+                  )
+                }
+              />
+            </label>
+            <div className="mt-2">
+              <ImageUpload
+                label="Project photo"
+                value={pr.image}
+                onChange={(url) =>
+                  setClientProjects((list) =>
+                    url
+                      ? list.map((x, j) => (j === i ? { ...x, image: url } : x))
+                      : list.filter((_, j) => j !== i)
+                  )
+                }
+              />
+            </div>
+            <button
+              className="mt-2 text-xs text-[color:var(--clay)] hover:underline"
+              onClick={() => setClientProjects((list) => list.filter((_, j) => j !== i))}
+            >
+              Remove project
+            </button>
+          </div>
+        ))}
+        <button
+          className="btn btn-primary text-sm"
+          disabled={pending}
+          onClick={() =>
+            save(
+              [{ root: "clientsPage", path: "projects", value: clientProjects.filter((p) => p.image) }],
+              "Client projects saved."
+            )
+          }
+        >
+          Save projects
         </button>
       </section>
     </div>
