@@ -117,17 +117,18 @@ export function Amenities({ c, l }: { c: SiteContent; l: Locale }) {
                 className="h-full min-h-[22rem] w-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.03]"
               />
               <figcaption
-                className="absolute inset-x-0 bottom-0 p-8"
+                className="absolute inset-x-0 bottom-0 p-8 text-white"
                 style={{
                   // the lead card carries two lines of body copy over bright
                   // pergola and sky, so it needs a deeper, taller gradient than
-                  // the title-only cards beside it
+                  // the title-only cards beside it. The gradient is dark in both
+                  // themes, so the text is pinned light, not theme-following.
                   background:
                     "linear-gradient(0deg, rgba(7,16,26,.96) 0%, rgba(7,16,26,.82) 38%, rgba(7,16,26,.42) 68%, transparent 100%)",
                 }}
               >
                 <h3 className="font-display text-2xl">{pick(lead.title, l)}</h3>
-                <p className="mt-2 max-w-[38ch] text-sm leading-relaxed text-[color:var(--text-secondary)]">
+                <p className="mt-2 max-w-[38ch] text-sm leading-relaxed text-white/80">
                   {pick(lead.body, l)}
                 </p>
               </figcaption>
@@ -147,7 +148,7 @@ export function Amenities({ c, l }: { c: SiteContent; l: Locale }) {
                   className="h-56 w-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.03]"
                 />
                 <figcaption
-                  className="absolute inset-x-0 bottom-0 p-6"
+                  className="absolute inset-x-0 bottom-0 p-6 text-white"
                   style={{
                     background:
                       "linear-gradient(0deg, rgba(7,16,26,.94) 0%, rgba(7,16,26,.5) 55%, transparent 100%)",
@@ -173,14 +174,14 @@ export function Amenities({ c, l }: { c: SiteContent; l: Locale }) {
                 className="h-64 w-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.03]"
               />
               <figcaption
-                className="absolute inset-x-0 bottom-0 p-6"
+                className="absolute inset-x-0 bottom-0 p-6 text-white"
                 style={{
                   background:
                     "linear-gradient(0deg, rgba(7,16,26,.96) 0%, rgba(7,16,26,.78) 42%, rgba(7,16,26,.36) 72%, transparent 100%)",
                 }}
               >
                 <h3 className="font-display text-lg">{pick(a.title, l)}</h3>
-                <p className="mt-1.5 max-w-[40ch] text-sm leading-relaxed text-[color:var(--text-secondary)]">
+                <p className="mt-1.5 max-w-[40ch] text-sm leading-relaxed text-white/80">
                   {pick(a.body, l)}
                 </p>
               </figcaption>
