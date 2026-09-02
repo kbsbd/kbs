@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { Locale } from "@/content/seed";
 import { browserClient } from "@/lib/supabase/browser";
+import { UserIcon } from "@/components/icons/Icons";
 
 /** Header link: "Sign in" when logged out, a person icon → /account when in. */
 export default function AccountLink({ l }: { l: Locale }) {
@@ -27,15 +28,12 @@ export default function AccountLink({ l }: { l: Locale }) {
     <Link
       href={authed ? `/${l}/account` : `/${l}/login`}
       aria-label={authed ? "My account" : "Sign in"}
-      className="text-[color:var(--text-secondary)] transition-colors duration-300 hover:text-[color:var(--text-primary)]"
+      className="inline-flex h-11 items-center justify-center rounded-full text-[color:var(--text-secondary)] transition-colors duration-300 hover:text-[color:var(--text-primary)]"
     >
       {authed ? (
-        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <circle cx="12" cy="8" r="3.5" stroke="currentColor" strokeWidth="1.6" />
-          <path d="M5 20c0-3.3 3.1-6 7-6s7 2.7 7 6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-        </svg>
+        <UserIcon className="h-[22px] w-[22px]" />
       ) : (
-        <span className="text-sm">{l === "bn" ? "সাইন ইন" : "Sign in"}</span>
+        <span className="px-1 text-sm">{l === "bn" ? "সাইন ইন" : "Sign in"}</span>
       )}
     </Link>
   );

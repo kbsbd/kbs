@@ -8,6 +8,7 @@ import type { MenuItem } from "@/lib/cms";
 import FixedActions from "@/components/FixedActions";
 import CartButton from "@/components/shop/CartButton";
 import AccountLink from "@/components/auth/AccountLink";
+import MobileMenu from "@/components/MobileMenu";
 
 /**
  * Everything that wraps the page: the nav, the footer, the living line, the
@@ -30,7 +31,6 @@ export default function SiteChrome({
   children: React.ReactNode;
 }) {
   const [navSolid, setNavSolid] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
   const spineRef = useRef<SVGSVGElement>(null);
   const pathname = usePathname();
   const other: Locale = locale === "en" ? "bn" : "en";
@@ -44,7 +44,6 @@ export default function SiteChrome({
           .filter((m) => !m.parentId)
           .map((m) => ({ href: m.href, label: { en: m.label, bn: m.label_bn || m.label } }))
       : seedLinks;
-  const closeMenu = () => setMenuOpen(false);
 
   /* section entrances, and retiring the stagger when they finish */
   useEffect(() => {
@@ -167,13 +166,17 @@ export default function SiteChrome({
               "linear-gradient(180deg, rgba(7,16,26,.72) 0%, rgba(7,16,26,.38) 52%, transparent 100%)",
           }}
         />
-        <nav className="relative mx-auto flex max-w-[86rem] items-center gap-6 px-5 py-4 sm:px-8">
-          <Link href={`/${locale}`} className="flex items-center gap-2.5" aria-label="KBS">
+        <nav className="relative mx-auto flex max-w-[86rem] items-center gap-3 px-4 py-3 sm:gap-4 sm:px-8">
+          <Link
+            href={`/${locale}`}
+            className="mr-auto flex items-center gap-2.5"
+            aria-label="KBS"
+          >
             <Mark />
             <span className="font-display text-lg tracking-tight">KBS</span>
           </Link>
 
-          <div className="ml-auto hidden items-center gap-7 lg:flex">
+          <div className="hidden items-center gap-7 lg:flex">
             {navLinks.map((link) => (
               <a
                 key={link.href}
@@ -185,66 +188,46 @@ export default function SiteChrome({
             ))}
           </div>
 
-          <div className="ml-auto flex items-center gap-5 lg:ml-0 lg:gap-6">
+          <div className="flex items-center gap-0.5 sm:gap-1 lg:ml-4 lg:gap-2">
             <Link
               href={otherPath}
-              className="text-sm text-[color:var(--text-secondary)] transition-colors duration-300 hover:text-[color:var(--accent)]"
+              className="inline-flex h-11 items-center rounded-full px-2 text-sm text-[color:var(--text-secondary)] transition-colors duration-300 hover:text-[color:var(--accent)]"
               hrefLang={other}
+              prefetch={false}
             >
               {t(content.nav.langLabel)}
             </Link>
 
-            {shopOn && <AccountLink l={locale} />}
+            {shopOn && (
+              <span className="hidden lg:inline-flex">
+                <AccountLink l={locale} />
+              </span>
+            )}
             {shopOn && <CartButton label={t(content.shop.labels.cart)} />}
 
             <a
               href={`/${locale}#book`}
-              className="btn btn-primary hidden text-sm sm:inline-flex"
+              className="btn btn-primary ml-1 hidden text-sm lg:inline-flex"
             >
               {t(content.nav.cta)}
             </a>
 
-            <button
-              type="button"
-              className="lg:hidden text-[color:var(--text-secondary)]"
-              aria-label="Menu"
-              aria-expanded={menuOpen}
-              onClick={() => setMenuOpen((v) => !v)}
-            >
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                {menuOpen ? (
-                  <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-                ) : (
-                  <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-                )}
-              </svg>
-            </button>
+            <MobileMenu
+              locale={locale}
+              items={navLinks.map((x) => ({ href: x.href, label: t(x.label) }))}
+              ctaLabel={t(content.nav.cta)}
+              ctaHref="#book"
+              phone={content.site.phone}
+              accountHref={shopOn ? `/${locale}/account` : undefined}
+              labels={{
+                open: locale === "bn" ? "মেনু" : "Menu",
+                close: locale === "bn" ? "মেনু বন্ধ করুন" : "Close menu",
+                account: locale === "bn" ? "অ্যাকাউন্ট" : "Account",
+                call: locale === "bn" ? "অফিসে ফোন করুন" : "Call the office",
+              }}
+            />
           </div>
         </nav>
-
-        {menuOpen && (
-          <div className="relative border-t border-[color:var(--panel-edge)] bg-[color:var(--canvas)]/95 backdrop-blur-xl lg:hidden">
-            <div className="mx-auto flex max-w-[86rem] flex-col px-5 py-3 sm:px-8">
-              {navLinks.map((link) => (
-                <a
-                  key={link.href}
-                  href={navHref(link.href)}
-                  onClick={closeMenu}
-                  className="border-b border-[color:var(--panel-edge)] py-3 text-[color:var(--text-secondary)] last:border-0 hover:text-[color:var(--text-primary)]"
-                >
-                  {t(link.label)}
-                </a>
-              ))}
-              <a
-                href={`/${locale}#book`}
-                onClick={closeMenu}
-                className="btn btn-primary mt-3 self-start text-sm"
-              >
-                {t(content.nav.cta)}
-              </a>
-            </div>
-          </div>
-        )}
       </header>
 
       <main id="main" tabIndex={-1}>
