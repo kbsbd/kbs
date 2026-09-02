@@ -72,10 +72,18 @@ account, keeping the file names exactly as they are, then set
 `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` in `.env.local`. The site switches over on the
 next build.
 
-**Do not let Cloudinary re-encode `hero-scrub.mp4` or `hero-scrub.webm`.** They were
-encoded with a keyframe every 8 frames, which is the only reason the scroll scrub is
-smooth rather than stuttery, and a transformation would throw that away. They are
-requested untransformed on purpose.
+**On desktop, do not let Cloudinary re-encode `hero-scrub.mp4` or `hero-scrub.webm`.**
+They were encoded with a keyframe every 8 frames, which is the only reason the
+scroll scrub is smooth rather than stuttery, and a transformation would throw that
+away. The desktop hero requests them untransformed on purpose.
+
+On screens ≤ 900px `ScrubHero.tsx` deliberately asks Cloudinary for a lighter
+derivative (`q_auto:eco,w_1000`, ~1/3 the size). The scrub there is a touch less
+frame-precise, but the full master would not stream in before the visitor has
+scrolled past the hero, which looked like the effect was broken on phones.
+
+The VP9 encode is stored on Cloudinary as `hero-scrub-vp9` (not `hero-scrub`)
+because one public id holds one original — see `videoUrl()` in `src/lib/media.ts`.
 
 ---
 
