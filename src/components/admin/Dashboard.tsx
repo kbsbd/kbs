@@ -4,6 +4,14 @@ import { useMemo, useState, useTransition } from "react";
 import type { EditableString } from "@/lib/editable";
 import { SITE_FIELDS, INTEGRATION_FIELDS } from "@/lib/editable";
 import ImageUpload from "@/components/admin/ImageUpload";
+import ShopAdmin, {
+  type AdminProduct,
+  type AdminCategory,
+  type AdminOrder,
+  type AdminQuote,
+  type AdminReview,
+  type AdminGateway,
+} from "@/components/admin/ShopAdmin";
 import {
   saveContent,
   setBookingStatus,
@@ -46,10 +54,19 @@ type Props = {
   bookings: Booking[];
   projects: Project[];
   notes: Array<{ key: string; value: string }>;
+  shop: {
+    products: AdminProduct[];
+    categories: AdminCategory[];
+    orders: AdminOrder[];
+    quotes: AdminQuote[];
+    reviews: AdminReview[];
+    gateways: AdminGateway[];
+  };
 };
 
 const TABS = [
   "Bookings",
+  "Shop",
   "Site details",
   "Text",
   "Projects",
@@ -72,6 +89,7 @@ export default function Dashboard({
   bookings,
   projects,
   notes,
+  shop,
 }: Props) {
   const [tab, setTab] = useState<Tab>("Bookings");
   const [toast, setToast] = useState("");
@@ -132,6 +150,7 @@ export default function Dashboard({
 
       <div className="mx-auto max-w-[80rem] px-5 py-10 sm:px-8">
         {tab === "Bookings" && <Bookings rows={bookings} notify={setToast} />}
+        {tab === "Shop" && <ShopAdmin {...shop} notify={setToast} />}
         {tab === "Site details" && <SiteDetails site={site} groups={groups} notify={setToast} />}
         {tab === "Text" && <TextEditor groups={groups} notify={setToast} />}
         {tab === "Projects" && <Projects rows={projects} notify={setToast} />}

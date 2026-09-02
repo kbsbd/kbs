@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getAdminSession, createAuthClient } from "@/lib/supabase/auth";
 import { getContent } from "@/lib/content";
 import { editableStrings } from "@/lib/editable";
+import { loadShopAdmin } from "@/lib/shop-admin";
 import Dashboard from "@/components/admin/Dashboard";
 
 export const dynamic = "force-dynamic";
@@ -19,22 +20,24 @@ export default async function AdminPage({
   if (!session || !supabase) redirect(`/${locale}/admin/login`);
   const content = await getContent();
 
-  const [bookingsRes, projectsRes, notesRes] = await Promise.all([
-    supabase!.from("bookings").select("*").order("created_at", { ascending: false }).limit(300),
-    supabase!.from("projects").select("*").order("sort", { ascending: true }),
-    supabase!.from("internal_notes").select("key, value"),
+  const [bookingsRes, projectsRes, notesRes, shop] = await Promise.all([
+    supabase.from("bookings").select("*").order("created_at", { ascending: false }).limit(300),
+    supabase.from("projects").select("*").order("sort", { ascending: true }),
+    supabase.from("internal_notes").select("key, value"),
+    loadShopAdmin(supabase),
   ]);
 
   return (
     <Dashboard
       locale={locale}
-      email={session!.email}
+      email={session.email}
       groups={editableStrings(content)}
       site={content.site}
       integrations={content.integrations}
       bookings={bookingsRes.data ?? []}
       projects={projectsRes.data ?? []}
       notes={notesRes.data ?? []}
+      shop={shop}
     />
   );
 }
