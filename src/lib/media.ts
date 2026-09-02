@@ -31,14 +31,20 @@ export function img(name: string, width = 1920): string {
  * frames, which is the reason scrubbing is smooth, and a CDN transform would
  * re-encode and throw that away.
  */
-function videoUrl(file: string): string {
-  if (!CLOUD) return `/media/${file}`;
-  return `https://res.cloudinary.com/${CLOUD}/video/upload/${FOLDER}/${file}`;
+/**
+ * `local` is the /public/media filename; `remote` is the Cloudinary public id
+ * plus format. They differ for the VP9 encode: Cloudinary keeps one original per
+ * public id, so the two encodes are stored under separate ids to stop it
+ * transcoding (and losing the 8-frame keyframe spacing) on delivery.
+ */
+function videoUrl(local: string, remote: string): string {
+  if (!CLOUD) return `/media/${local}`;
+  return `https://res.cloudinary.com/${CLOUD}/video/upload/${FOLDER}/${remote}`;
 }
 
 export const heroSources = {
-  h264: { url: () => videoUrl("hero-scrub.mp4"), bytes: 14861694 },
-  vp9: { url: () => videoUrl("hero-scrub.webm"), bytes: 17869065 },
+  h264: { url: () => videoUrl("hero-scrub.mp4", "hero-scrub.mp4"), bytes: 14861694 },
+  vp9: { url: () => videoUrl("hero-scrub.webm", "hero-scrub-vp9.webm"), bytes: 17869065 },
 };
 
 /** Real byte sizes: the fallback when a CDN omits Content-Length. */
