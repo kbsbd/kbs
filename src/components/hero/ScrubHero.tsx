@@ -560,7 +560,7 @@ function Band({
 
         {sub && (
           <p
-            className={`sub-line mt-6 max-w-[46ch] text-[clamp(1rem,1.55vw,1.28rem)] leading-relaxed text-[color:var(--text-primary)]/90 ${
+            className={`sub-line mt-6 max-w-[46ch] text-[clamp(1rem,1.55vw,1.28rem)] leading-relaxed ${
               band.entrance === "staged-settle" ? "" : "opacity-[inherit]"
             }`}
           >

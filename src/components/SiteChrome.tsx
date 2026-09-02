@@ -156,6 +156,8 @@ export default function SiteChrome({
       </div>
 
       <header
+        data-nav-solid={navSolid ? "true" : "false"}
+        data-nav-over-hero={isHome && !navSolid ? "true" : "false"}
         className={`fixed inset-x-0 top-0 z-50 transition-[background-color,backdrop-filter,border-color] duration-500 ${
           navSolid
             ? "border-b border-[color:var(--panel-edge)] bg-[color:var(--canvas)]/85 backdrop-blur-xl"

@@ -267,6 +267,31 @@ html[lang="bn"] .font-mono-label {
   background: #07101a; /* the hero is always dark, whatever the theme */
 }
 
+/* The hero footage and the static-hero composition are dark in BOTH themes, so
+   their type is pinned light here rather than following --text-primary (which
+   would turn the headings near-black in light mode). */
+.stage,
+.static-hero {
+  color: #f1eee7;
+}
+.stage .sub-line,
+.static-hero .sub-line {
+  color: rgba(241, 238, 231, 0.92);
+}
+
+/* Before it scrolls to a solid background, the header floats on the hero's dark
+   scrim — dark in both themes — so its links and icon buttons are pinned light
+   here instead of following --text-secondary. The "Book a visit" button keeps
+   its own colours. */
+header[data-nav-over-hero="true"] a:not(.btn),
+header[data-nav-over-hero="true"] button:not(.btn) {
+  color: #eef1f4;
+}
+header[data-nav-over-hero="true"] a:not(.btn):hover,
+header[data-nav-over-hero="true"] button:not(.btn):hover {
+  color: #ffffff;
+}
+
 .stage video {
   position: absolute;
   inset: 0;
@@ -417,7 +442,10 @@ html[lang="bn"] .font-mono-label {
   text-shadow: none;
 }
 
-/* 4. chip scrim for small labels over footage */
+/* 4. chip scrim for small labels over footage.
+   The default is a dark glass pill with light text — correct over the hero and
+   in dark mode. On a standalone light page it becomes a light pill so it does
+   not read as a dark hole. */
 .chip {
   display: inline-block;
   background: rgba(8, 10, 18, 0.55);
@@ -426,7 +454,13 @@ html[lang="bn"] .font-mono-label {
   padding: 0.4rem 0.7rem;
   backdrop-filter: blur(10px);
   text-shadow: 0 1px 3px rgba(5, 5, 10, 0.85);
+  color: #cdd8e4;
+}
+:root[data-theme="light"] .page .chip {
+  background: rgba(255, 255, 255, 0.72);
+  border-color: var(--panel-edge);
   color: var(--text-secondary);
+  text-shadow: none;
 }
 
 /* ============================================================

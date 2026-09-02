@@ -72,7 +72,7 @@ export default async function Home({
           <h1 className="font-display mt-6 max-w-[16ch] text-[clamp(2.4rem,9vw,4rem)]">
             {t(c.staticHero.head)}
           </h1>
-          <p className="mt-5 max-w-[38ch] leading-relaxed text-[color:var(--text-primary)]/90">
+          <p className="sub-line mt-5 max-w-[38ch] leading-relaxed">
             {t(c.staticHero.sub)}
           </p>
           <div className="mt-8">
