@@ -65,8 +65,8 @@ export default async function ShopPage({
           <p className="mt-14 text-[color:var(--text-quiet)]">{t(s.emptyNote)}</p>
         ) : (
           <div className="shop-grid mt-12">
-            {products.map((p) => (
-              <ProductCard key={p.id} p={p} l={l} symbol={s.currencySymbol} />
+            {products.map((p, i) => (
+              <ProductCard key={p.id} p={p} l={l} symbol={s.currencySymbol} priority={i < 2} />
             ))}
           </div>
         )}

@@ -7,10 +7,13 @@ export default function ProductCard({
   p,
   l,
   symbol,
+  priority = false,
 }: {
   p: P;
   l: Locale;
   symbol: string;
+  /** The first card is above the fold and is usually the LCP — load it eagerly. */
+  priority?: boolean;
 }) {
   const name = pick(p.name, p.name_bn, l);
   const sub = pick(p.summary, p.summary_bn, l);
@@ -18,7 +21,7 @@ export default function ProductCard({
 
   return (
     <Link href={`/${l}/shop/${p.slug}`} className="pcard">
-      <MediaSlot name={p.image ?? ""} alt={name} label="Product" ratio="1 / 1" width={600} />
+      <MediaSlot name={p.image ?? ""} alt={name} label="Product" ratio="1 / 1" width={600} priority={priority} />
       <div className="pcard-body">
         <span className="pcard-name">{name}</span>
         {sub && <span className="pcard-sub">{sub}</span>}
