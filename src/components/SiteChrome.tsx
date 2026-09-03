@@ -43,19 +43,22 @@ export default function SiteChrome({
   const otherPath = pathname.replace(/^\/(en|bn)/, `/${other}`) || `/${other}`;
   const shopOn = content.shop.enabled;
   const logo = content.site.logo;
-  const seedLinks = content.nav.links.filter((x) => x.href !== "/shop" || shopOn);
+  /* When the shop is off, every path into it disappears from the chrome. */
+  const pointsAtShop = (href: string) => /^(\/(en|bn))?\/shop(\/|$|\?|#)/.test(href);
+  const isShopLink = (href: string) => !shopOn && pointsAtShop(href);
+  const seedLinks = content.nav.links.filter((x) => !isShopLink(x.href));
   /* Admin-built menu items, split by where they live. Header items are appended
      to the nav (page links added from the Pages tab); footer items are grouped
      into their own columns. */
   const navLinks = [
     ...seedLinks,
     ...menu
-      .filter((m) => m.placement === "header" && !m.parentId)
+      .filter((m) => m.placement === "header" && !m.parentId && !isShopLink(m.href))
       .map((m) => ({ href: m.href, label: { en: m.label, bn: m.label_bn || m.label } })),
   ];
 
   const footerGroups: Array<{ name: string; links: Array<{ href: string; label: string }> }> = [];
-  for (const m of menu.filter((x) => x.placement === "footer")) {
+  for (const m of menu.filter((x) => x.placement === "footer" && !isShopLink(x.href))) {
     const label = (locale === "bn" && m.label_bn) || m.label;
     const g = footerGroups.find((x) => x.name === m.footerGroup);
     if (g) g.links.push({ href: m.href, label });

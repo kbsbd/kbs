@@ -1,8 +1,9 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { createAuthClient, getAdminSession, can } from "@/lib/supabase/auth";
 import { createAdminClient } from "@/lib/supabase/server";
+import { SITE_CONTENT_TAG } from "@/lib/content";
 import { setPath } from "@/lib/editable";
 import { isPermKey } from "@/lib/permissions";
 
@@ -32,8 +33,11 @@ const NOT_ALLOWED: Result = { ok: false, error: "You do not have access to this.
 const NOT_SIGNED_IN: Result = { ok: false, error: "Not signed in as staff." };
 
 function refresh() {
-  /* site.logo / site.favicon / nav / socials live in the shared chrome, so
-     revalidate the whole locale tree rather than a fixed page list. */
+  /* site.logo / site.favicon / nav / socials / shop.enabled live in the shared
+     chrome. updateTag expires the content cache immediately (read-your-own-writes
+     from a server action), so even fully static pages pick the change up on the
+     next request; revalidatePath covers the dynamic tree. */
+  updateTag(SITE_CONTENT_TAG);
   for (const l of ["/en", "/bn"]) revalidatePath(l, "layout");
 }
 

@@ -9,8 +9,14 @@
  * the site renders perfectly. Content must never be able to take the page down.
  */
 
+import { unstable_cache } from "next/cache";
 import { seed, type SiteContent } from "@/content/seed";
 import { createServerClient } from "./supabase/server";
+
+/** Bumping this tag from `saveContent` refreshes every route that reads content
+ *  — statically-generated ones included — so a Storefront / nav / logo change is
+ *  live on the next request without a redeploy. */
+export const SITE_CONTENT_TAG = "site-content";
 
 /** Deep merge where an override value replaces the seed value at that key. */
 function merge<T>(base: T, patch: unknown): T {
@@ -24,30 +30,34 @@ function merge<T>(base: T, patch: unknown): T {
   return out as T;
 }
 
-export async function getContent(): Promise<SiteContent> {
-  const supabase = createServerClient();
-  if (!supabase) return seed;
+export const getContent = unstable_cache(
+  async (): Promise<SiteContent> => {
+    const supabase = createServerClient();
+    if (!supabase) return seed;
 
-  try {
-    const { data, error } = await supabase.from("site_content").select("key, value");
-    if (error || !data) return seed;
+    try {
+      const { data, error } = await supabase.from("site_content").select("key, value");
+      if (error || !data) return seed;
 
-    let out: SiteContent = seed;
-    for (const row of data as Array<{ key: string; value: unknown }>) {
-      if (!(row.key in (out as unknown as Record<string, unknown>))) continue;
-      out = {
-        ...out,
-        [row.key]: merge(
-          (out as unknown as Record<string, unknown>)[row.key],
-          row.value
-        ),
-      };
+      let out: SiteContent = seed;
+      for (const row of data as Array<{ key: string; value: unknown }>) {
+        if (!(row.key in (out as unknown as Record<string, unknown>))) continue;
+        out = {
+          ...out,
+          [row.key]: merge(
+            (out as unknown as Record<string, unknown>)[row.key],
+            row.value
+          ),
+        };
+      }
+      return out;
+    } catch {
+      return seed;
     }
-    return out;
-  } catch {
-    return seed;
-  }
-}
+  },
+  ["site-content"],
+  { tags: [SITE_CONTENT_TAG], revalidate: 3600 }
+);
 
 /** Projects live in their own table so the client can add rows, not edit JSON. */
 export async function getProjects() {
