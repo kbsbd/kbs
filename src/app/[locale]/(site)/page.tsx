@@ -17,6 +17,10 @@ import {
   Projects,
 } from "@/components/sections/Sections";
 
+/* ISR so admin content and menu edits reach the landing page without a
+   redeploy (the CMS menu also invalidates via its own cache tag). */
+export const revalidate = 600;
+
 export default async function Home({
   params,
 }: {
