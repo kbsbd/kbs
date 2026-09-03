@@ -19,6 +19,8 @@ export default async function AdminPage({
      rather than strictly before it, so guard here too before the non-null uses. */
   if (!session || !supabase) redirect(`/${locale}/login?next=/${locale}/admin`);
   const content = await getContent();
+  const { data: authUser } = await supabase.auth.getUser();
+  const fullName = String(authUser.user?.user_metadata?.full_name ?? "");
 
   const [bookingsRes, projectsRes, notesRes, shop, pagesRes, menuRes] = await Promise.all([
     supabase.from("bookings").select("*").order("created_at", { ascending: false }).limit(300),
@@ -53,6 +55,7 @@ export default async function AdminPage({
     <Dashboard
       locale={locale}
       email={session.email}
+      fullName={fullName}
       role={session.role}
       groups={editableStrings(content)}
       lists={{

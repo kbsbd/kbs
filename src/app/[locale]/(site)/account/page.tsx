@@ -34,7 +34,7 @@ export default async function AccountPage({
       .order("created_at", { ascending: false }),
     supabase
       .from("wishlists")
-      .select("product_id, products(slug, name, price, product_images(url, sort))")
+      .select("product_id, products(slug, name, name_bn, price, product_images(url, sort))")
       .order("created_at", { ascending: false }),
   ]);
 
@@ -62,7 +62,7 @@ export default async function AccountPage({
       return {
         productId: String(w.product_id),
         slug: String(p.slug),
-        name: String(p.name),
+        name: l === "bn" && p.name_bn ? String(p.name_bn) : String(p.name),
         price: Number(p.price),
         image: imgs[0] ? String(imgs[0].url) : null,
       };

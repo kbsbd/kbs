@@ -19,6 +19,7 @@ import ListEditor, { CONTENT_LISTS } from "@/components/admin/ContentLists";
 import { SOCIAL_PLATFORMS } from "@/components/icons/SocialIcons";
 import { MenuIcon, CloseIcon } from "@/components/icons/Icons";
 import ThemeToggle from "@/components/ThemeToggle";
+import { browserClient } from "@/lib/supabase/browser";
 import {
   saveContent,
   setBookingStatus,
@@ -59,6 +60,7 @@ type Project = {
 type Props = {
   locale: string;
   email: string;
+  fullName: string;
   role: "admin" | "manager";
   groups: Record<string, EditableString[]>;
   site: Record<string, unknown>;
@@ -92,11 +94,12 @@ const TABS = [
   "Team",
   "Integrations",
   "Internal",
+  "My profile",
 ] as const;
 type Tab = (typeof TABS)[number];
 
 /** What a manager sees. Everything else is full-admin only. */
-const MANAGER_TABS: Tab[] = ["Bookings", "Shop"];
+const MANAGER_TABS: Tab[] = ["Bookings", "Shop", "My profile"];
 
 const STATUSES = ["new", "contacted", "visit booked", "visited", "closed"];
 
@@ -106,6 +109,7 @@ const field =
 export default function Dashboard({
   locale,
   email,
+  fullName,
   role,
   groups,
   site,
@@ -259,6 +263,9 @@ export default function Dashboard({
             <IntegrationsPanel data={integrations} notify={setToast} />
           )}
           {tab === "Internal" && <Internal notes={notes} notify={setToast} />}
+          {tab === "My profile" && (
+            <AdminProfile email={email} fullName={fullName} role={role} notify={setToast} />
+          )}
         </div>
       </div>
     </main>
@@ -1254,6 +1261,109 @@ function Internal({
       >
         {pending ? "Saving" : "Save note"}
       </button>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+
+function AdminProfile({
+  email,
+  fullName,
+  role,
+  notify,
+}: {
+  email: string;
+  fullName: string;
+  role: "admin" | "manager";
+  notify: (s: string) => void;
+}) {
+  const [name, setName] = useState(fullName);
+  const [pw, setPw] = useState("");
+  const [busy, setBusy] = useState<"" | "name" | "pw">("");
+
+  async function saveName() {
+    setBusy("name");
+    try {
+      const sb = browserClient();
+      if (!sb) throw new Error();
+      const { data } = await sb.auth.getUser();
+      const { error } = await sb.auth.updateUser({ data: { full_name: name.trim() } });
+      if (error) throw error;
+      if (data.user) {
+        await sb.from("profiles").upsert({ user_id: data.user.id, full_name: name.trim() });
+      }
+      notify("Name updated.");
+    } catch {
+      notify("Could not update the name.");
+    } finally {
+      setBusy("");
+    }
+  }
+
+  async function changePw() {
+    if (pw.length < 8) return;
+    setBusy("pw");
+    try {
+      const sb = browserClient();
+      if (!sb) throw new Error();
+      const { error } = await sb.auth.updateUser({ password: pw });
+      if (error) throw error;
+      setPw("");
+      notify("Password updated.");
+    } catch {
+      notify("Could not update the password.");
+    } finally {
+      setBusy("");
+    }
+  }
+
+  return (
+    <div className="max-w-md space-y-8">
+      <div className="rounded-2xl border border-[color:var(--panel-edge)] p-5">
+        <h3 className="font-display text-lg">Your details</h3>
+        <p className="mt-1 text-xs text-[color:var(--text-quiet)]">
+          Signed in as <b>{email}</b> · {role === "admin" ? "Full admin" : "Manager"}
+        </p>
+        <label className="mt-4 block">
+          <span className="font-mono-label text-[color:var(--text-quiet)]">Full name</span>
+          <input
+            className={`${field} mt-1.5`}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+        </label>
+        <button
+          className="btn btn-primary mt-4 text-sm"
+          onClick={saveName}
+          disabled={busy === "name" || !name.trim()}
+        >
+          {busy === "name" ? "Saving…" : "Save name"}
+        </button>
+      </div>
+
+      <div className="rounded-2xl border border-[color:var(--panel-edge)] p-5">
+        <h3 className="font-display text-lg">Change password</h3>
+        <label className="mt-4 block">
+          <span className="font-mono-label text-[color:var(--text-quiet)]">
+            New password (min 8 characters)
+          </span>
+          <input
+            className={`${field} mt-1.5`}
+            type="password"
+            autoComplete="new-password"
+            value={pw}
+            onChange={(e) => setPw(e.target.value)}
+          />
+        </label>
+        <button
+          className="btn btn-ghost mt-4 text-sm"
+          onClick={changePw}
+          disabled={busy === "pw" || pw.length < 8}
+        >
+          {busy === "pw" ? "Saving…" : "Update password"}
+        </button>
+      </div>
     </div>
   );
 }
