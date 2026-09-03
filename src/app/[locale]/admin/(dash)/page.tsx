@@ -48,6 +48,9 @@ export default async function AdminPage({
       href: String(m.href ?? ""),
       sort: Number(m.sort ?? 0),
       visible: Boolean(m.visible),
+      placement: (m.placement === "footer" ? "footer" : "header") as "header" | "footer",
+      footerGroup: String(m.footer_group ?? ""),
+      pageSlug: String(m.page_slug ?? ""),
     })),
   };
 

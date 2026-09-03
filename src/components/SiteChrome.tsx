@@ -44,13 +44,23 @@ export default function SiteChrome({
   const shopOn = content.shop.enabled;
   const logo = content.site.logo;
   const seedLinks = content.nav.links.filter((x) => x.href !== "/shop" || shopOn);
-  /* An admin-built menu (cms_menu_items) replaces the seed nav wholesale. */
-  const navLinks =
-    menu.length > 0
-      ? menu
-          .filter((m) => !m.parentId)
-          .map((m) => ({ href: m.href, label: { en: m.label, bn: m.label_bn || m.label } }))
-      : seedLinks;
+  /* Admin-built menu items, split by where they live. Header items are appended
+     to the nav (page links added from the Pages tab); footer items are grouped
+     into their own columns. */
+  const navLinks = [
+    ...seedLinks,
+    ...menu
+      .filter((m) => m.placement === "header" && !m.parentId)
+      .map((m) => ({ href: m.href, label: { en: m.label, bn: m.label_bn || m.label } })),
+  ];
+
+  const footerGroups: Array<{ name: string; links: Array<{ href: string; label: string }> }> = [];
+  for (const m of menu.filter((x) => x.placement === "footer")) {
+    const label = (locale === "bn" && m.label_bn) || m.label;
+    const g = footerGroups.find((x) => x.name === m.footerGroup);
+    if (g) g.links.push({ href: m.href, label });
+    else footerGroups.push({ name: m.footerGroup, links: [{ href: m.href, label }] });
+  }
 
   /* section entrances, and retiring the stagger when they finish */
   useEffect(() => {
@@ -260,7 +270,11 @@ export default function SiteChrome({
       </main>
 
       <footer className="relative z-[2] border-t border-[color:var(--panel-edge)] bg-[color:var(--canvas-deep)]">
-        <div className="mx-auto grid max-w-[86rem] gap-10 px-5 py-16 sm:px-8 md:grid-cols-3">
+        <div
+          className={`mx-auto grid max-w-[86rem] gap-10 px-5 py-16 sm:grid-cols-2 sm:px-8 ${
+            footerGroups.length > 0 ? "lg:grid-cols-4" : "md:grid-cols-3"
+          }`}
+        >
           <div>
             <div className="flex items-center gap-2.5">
               {logo ? (
@@ -338,6 +352,26 @@ export default function SiteChrome({
               {t(content.site.address) || t(content.footer.addressMissing)}
             </p>
           </div>
+
+          {footerGroups.map((g) => (
+            <div key={g.name || "__links"}>
+              <h2 className="font-mono-label text-[color:var(--text-quiet)]">
+                {g.name || (locale === "bn" ? "লিংক" : "Links")}
+              </h2>
+              <ul className="mt-4 space-y-2 text-sm">
+                {g.links.map((link) => (
+                  <li key={`${link.href}-${link.label}`}>
+                    <a
+                      href={navHref(link.href)}
+                      className="text-[color:var(--text-secondary)] transition-colors duration-300 hover:text-[color:var(--accent)]"
+                    >
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
 
         <div className="border-t border-[color:var(--panel-edge)]">

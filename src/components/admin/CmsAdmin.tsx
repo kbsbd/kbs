@@ -27,6 +27,9 @@ export type AdminMenuItem = {
   href: string;
   sort: number;
   visible: boolean;
+  placement: "header" | "footer";
+  footerGroup: string;
+  pageSlug: string;
 };
 
 const field =
@@ -61,7 +64,7 @@ export default function CmsAdmin({
       {sub === "Pages" ? (
         <PagesPanel pages={pages} notify={notify} />
       ) : (
-        <MenuPanel menu={menu} notify={notify} />
+        <MenuPanel menu={menu} pages={pages} notify={notify} />
       )}
     </div>
   );
@@ -315,87 +318,276 @@ function PagesPanel({ pages, notify }: { pages: AdminPage[]; notify: (s: string)
 
 /* ================= Menu ================= */
 
-function MenuPanel({ menu, notify }: { menu: AdminMenuItem[]; notify: (s: string) => void }) {
-  const [items, setItems] = useState(menu);
-  const [draft, setDraft] = useState<Partial<AdminMenuItem> | null>(null);
+type MenuDraft = {
+  id?: string;
+  source: "page" | "custom";
+  pageSlug: string;
+  label: string;
+  label_bn: string;
+  href: string;
+  placement: "header" | "footer";
+  footerGroup: string;
+  visible: boolean;
+  sort: number;
+};
+
+function MenuPanel({
+  menu,
+  pages,
+  notify,
+}: {
+  menu: AdminMenuItem[];
+  pages: AdminPage[];
+  notify: (s: string) => void;
+}) {
+  /* `menu` is re-supplied by the server after every save / delete / reorder
+     revalidates, so it is the single source of truth — no local mirror. */
+  const items = menu;
+  const [draft, setDraft] = useState<MenuDraft | null>(null);
   const [pending, start] = useTransition();
 
-  function move(i: number, dir: -1 | 1) {
+  const published = pages.filter((p) => p.status === "published");
+
+  const toDraft = (m: AdminMenuItem): MenuDraft => ({
+    id: m.id,
+    source: m.pageSlug ? "page" : "custom",
+    pageSlug: m.pageSlug,
+    label: m.label,
+    label_bn: m.label_bn,
+    href: m.href,
+    placement: m.placement,
+    footerGroup: m.footerGroup,
+    visible: m.visible,
+    sort: m.sort,
+  });
+
+  function newDraft() {
+    setDraft({
+      source: published.length > 0 ? "page" : "custom",
+      pageSlug: published[0]?.slug ?? "",
+      label: published[0]?.title ?? "",
+      label_bn: published[0]?.title_bn ?? "",
+      href: published[0] ? `/p/${published[0].slug}` : "",
+      placement: "header",
+      footerGroup: "",
+      visible: true,
+      sort: items.length,
+    });
+  }
+
+  function pickPage(slug: string) {
+    const p = published.find((x) => x.slug === slug);
+    if (!p || !draft) return;
+    setDraft({
+      ...draft,
+      pageSlug: slug,
+      label: p.title,
+      label_bn: p.title_bn,
+      href: `/p/${slug}`,
+    });
+  }
+
+  async function save() {
+    if (!draft) return;
+    start(async () => {
+      const r = await saveMenuItem({
+        id: draft.id,
+        label: draft.label,
+        label_bn: draft.label_bn,
+        href: draft.href,
+        sort: draft.sort,
+        visible: draft.visible,
+        placement: draft.placement,
+        footerGroup: draft.placement === "footer" ? draft.footerGroup : "",
+        pageSlug: draft.source === "page" ? draft.pageSlug : "",
+      });
+      notify(r.ok ? "Menu updated." : r.error);
+      if (r.ok) setDraft(null);
+    });
+  }
+
+  function move(list: AdminMenuItem[], i: number, dir: -1 | 1) {
     const j = i + dir;
-    if (j < 0 || j >= items.length) return;
-    const next = [...items];
+    if (j < 0 || j >= list.length) return;
+    const next = [...list];
     [next[i], next[j]] = [next[j], next[i]];
-    setItems(next);
     start(async () => {
       const r = await reorderMenu(next.map((x) => x.id));
       notify(r.ok ? "Reordered." : r.error);
     });
   }
 
+  const header = items.filter((m) => m.placement === "header").sort((a, b) => a.sort - b.sort);
+  const footer = items.filter((m) => m.placement === "footer");
+  const footerGroups = [...new Set(footer.map((m) => m.footerGroup))];
+
+  const renderRow = (m: AdminMenuItem, list: AdminMenuItem[], i: number) => (
+    <div
+      key={m.id}
+      className="flex flex-wrap items-center gap-3 rounded-xl border border-[color:var(--panel-edge)] px-4 py-2.5"
+    >
+      <button onClick={() => move(list, i, -1)} aria-label="Up" className="text-[color:var(--text-quiet)] disabled:opacity-30" disabled={i === 0}>
+        ↑
+      </button>
+      <button onClick={() => move(list, i, 1)} aria-label="Down" className="text-[color:var(--text-quiet)] disabled:opacity-30" disabled={i === list.length - 1}>
+        ↓
+      </button>
+      <span className="font-medium">{m.label}</span>
+      <code className="text-xs text-[color:var(--text-quiet)]">{m.href}</code>
+      {m.pageSlug && <span className="text-[10px] uppercase text-[color:var(--text-quiet)]">page</span>}
+      {!m.visible && <span className="text-xs text-[color:var(--text-quiet)]">hidden</span>}
+      <div className="ml-auto flex gap-3 text-sm">
+        <button className="hover:text-[color:var(--accent)]" onClick={() => setDraft(toDraft(m))}>
+          Edit
+        </button>
+        <button
+          className="text-[color:var(--clay)] hover:underline"
+          onClick={() =>
+            start(async () => {
+              const r = await deleteMenuItem(m.id);
+              notify(r.ok ? "Removed." : r.error);
+            })
+          }
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+  );
+
   return (
-    <div className="max-w-2xl space-y-4">
+    <div className="max-w-2xl space-y-6">
       <p className="text-sm text-[color:var(--text-secondary)]">
-        When this list has any items it <b>replaces</b> the built-in menu. Links can be{" "}
-        <code>/en/shop</code>, <code>/en/p/warranty</code>, <code>#faq</code> or a full URL.
-        Empty = the default menu stays.
+        Add links to the header navigation or the footer. Pick a published page and its
+        title and link fill in automatically. Header links are added after the main menu
+        (edit that on the Text tab); footer links are grouped into their own columns.
       </p>
-      <button
-        className="btn btn-primary text-sm"
-        onClick={() => setDraft({ label: "", label_bn: "", href: "", sort: items.length, visible: true })}
-      >
-        New menu item
+      <button className="btn btn-primary text-sm" onClick={newDraft}>
+        Add menu link
       </button>
 
       {draft && (
         <div className="space-y-3 rounded-xl border border-[color:var(--accent)] p-4">
-          <div className="grid gap-3 sm:grid-cols-2">
-            <input
-              className={field}
-              placeholder="Label"
-              value={draft.label ?? ""}
-              onChange={(e) => setDraft({ ...draft, label: e.target.value })}
-            />
-            <input
-              className={field}
-              placeholder="Label (বাংলা) — optional"
-              value={draft.label_bn ?? ""}
-              onChange={(e) => setDraft({ ...draft, label_bn: e.target.value })}
-            />
+          <div className="flex gap-4 text-sm">
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                checked={draft.source === "page"}
+                disabled={published.length === 0}
+                onChange={() => {
+                  const p = published[0];
+                  setDraft({
+                    ...draft,
+                    source: "page",
+                    pageSlug: p?.slug ?? "",
+                    label: p?.title ?? draft.label,
+                    label_bn: p?.title_bn ?? draft.label_bn,
+                    href: p ? `/p/${p.slug}` : draft.href,
+                  });
+                }}
+              />
+              A published page
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                checked={draft.source === "custom"}
+                onChange={() => setDraft({ ...draft, source: "custom", pageSlug: "" })}
+              />
+              A custom link
+            </label>
           </div>
-          <input
-            className={field}
-            placeholder="Link"
-            value={draft.href ?? ""}
-            onChange={(e) => setDraft({ ...draft, href: e.target.value })}
-          />
+
+          {draft.source === "page" ? (
+            <label className="block">
+              <span className={lbl}>Page</span>
+              {published.length === 0 ? (
+                <p className="mt-1 text-sm text-[color:var(--text-quiet)]">
+                  No published pages yet — publish one on the Pages tab first.
+                </p>
+              ) : (
+                <select
+                  className={`${field} mt-1`}
+                  value={draft.pageSlug}
+                  onChange={(e) => pickPage(e.target.value)}
+                >
+                  {published.map((p) => (
+                    <option key={p.slug} value={p.slug}>
+                      {p.title} — /p/{p.slug}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </label>
+          ) : (
+            <>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <input
+                  className={field}
+                  placeholder="Label"
+                  value={draft.label}
+                  onChange={(e) => setDraft({ ...draft, label: e.target.value })}
+                />
+                <input
+                  className={field}
+                  placeholder="Label (বাংলা) — optional"
+                  value={draft.label_bn}
+                  onChange={(e) => setDraft({ ...draft, label_bn: e.target.value })}
+                />
+              </div>
+              <input
+                className={field}
+                placeholder="Link — /shop, /p/warranty, #faq or a full URL"
+                value={draft.href}
+                onChange={(e) => setDraft({ ...draft, href: e.target.value })}
+              />
+            </>
+          )}
+
+          <label className="block">
+            <span className={lbl}>Show in</span>
+            <select
+              className={`${field} mt-1`}
+              value={draft.placement}
+              onChange={(e) =>
+                setDraft({ ...draft, placement: e.target.value as "header" | "footer" })
+              }
+            >
+              <option value="header">Header navigation</option>
+              <option value="footer">Footer</option>
+            </select>
+          </label>
+
+          {draft.placement === "footer" && (
+            <label className="block">
+              <span className={lbl}>Footer column heading</span>
+              <input
+                className={`${field} mt-1`}
+                placeholder="e.g. Company, Legal, Help — blank groups under “Links”"
+                list="footer-groups"
+                value={draft.footerGroup}
+                onChange={(e) => setDraft({ ...draft, footerGroup: e.target.value })}
+              />
+              <datalist id="footer-groups">
+                {footerGroups.filter(Boolean).map((g) => (
+                  <option key={g} value={g} />
+                ))}
+              </datalist>
+            </label>
+          )}
+
           <label className="flex items-center gap-2 text-sm">
             <input
               type="checkbox"
-              checked={draft.visible ?? true}
+              checked={draft.visible}
               onChange={(e) => setDraft({ ...draft, visible: e.target.checked })}
             />
             Visible
           </label>
+
           <div className="flex gap-3">
-            <button
-              className="btn btn-primary text-sm"
-              disabled={pending}
-              onClick={() =>
-                start(async () => {
-                  const r = await saveMenuItem({
-                    id: draft.id,
-                    label: draft.label ?? "",
-                    label_bn: draft.label_bn ?? "",
-                    href: draft.href ?? "",
-                    sort: draft.sort ?? items.length,
-                    visible: draft.visible ?? true,
-                  });
-                  notify(r.ok ? "Saved." : r.error);
-                  if (r.ok) setDraft(null);
-                })
-              }
-            >
-              Save
+            <button className="btn btn-primary text-sm" disabled={pending || !draft.href} onClick={save}>
+              {pending ? "Saving" : "Save"}
             </button>
             <button className="btn btn-ghost text-sm" onClick={() => setDraft(null)}>
               Cancel
@@ -404,40 +596,32 @@ function MenuPanel({ menu, notify }: { menu: AdminMenuItem[]; notify: (s: string
         </div>
       )}
 
-      <div className="grid gap-2">
-        {items.map((m, i) => (
-          <div
-            key={m.id}
-            className="flex flex-wrap items-center gap-3 rounded-xl border border-[color:var(--panel-edge)] px-4 py-2.5"
-          >
-            <button onClick={() => move(i, -1)} aria-label="Up" className="text-[color:var(--text-quiet)]">
-              ↑
-            </button>
-            <button onClick={() => move(i, 1)} aria-label="Down" className="text-[color:var(--text-quiet)]">
-              ↓
-            </button>
-            <span>{m.label}</span>
-            <code className="text-xs text-[color:var(--text-quiet)]">{m.href}</code>
-            {!m.visible && <span className="text-xs text-[color:var(--text-quiet)]">hidden</span>}
-            <div className="ml-auto flex gap-3 text-sm">
-              <button className="hover:text-[color:var(--accent)]" onClick={() => setDraft(m)}>
-                Edit
-              </button>
-              <button
-                className="text-[color:var(--clay)] hover:underline"
-                onClick={() =>
-                  start(async () => {
-                    const r = await deleteMenuItem(m.id);
-                    if (r.ok) setItems((x) => x.filter((y) => y.id !== m.id));
-                    notify(r.ok ? "Deleted." : r.error);
-                  })
-                }
-              >
-                Delete
-              </button>
-            </div>
+      <div className="space-y-4">
+        <div>
+          <p className={lbl}>Header navigation</p>
+          <div className="mt-2 grid gap-2">
+            {header.length === 0 && (
+              <p className="text-sm text-[color:var(--text-quiet)]">
+                No extra header links yet.
+              </p>
+            )}
+            {header.map((m, i) => renderRow(m, header, i))}
           </div>
-        ))}
+        </div>
+
+        {footerGroups.map((g) => {
+          const list = footer
+            .filter((m) => m.footerGroup === g)
+            .sort((a, b) => a.sort - b.sort);
+          return (
+            <div key={g || "__none"}>
+              <p className={lbl}>Footer · {g || "Links"}</p>
+              <div className="mt-2 grid gap-2">
+                {list.map((m, i) => renderRow(m, list, i))}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

@@ -34,6 +34,8 @@ export type MenuItem = {
   href: string;
   parentId: string | null;
   sort: number;
+  placement: "header" | "footer";
+  footerGroup: string;
 };
 
 type Row = Record<string, unknown>;
@@ -81,7 +83,7 @@ export async function getMenu(): Promise<MenuItem[]> {
   try {
     const { data, error } = await supabase
       .from("cms_menu_items")
-      .select("id, label, label_bn, href, parent_id, sort")
+      .select("id, label, label_bn, href, parent_id, sort, placement, footer_group")
       .eq("visible", true)
       .order("sort", { ascending: true });
     if (error || !data) return [];
@@ -92,6 +94,8 @@ export async function getMenu(): Promise<MenuItem[]> {
       href: String(m.href ?? ""),
       parentId: m.parent_id ? String(m.parent_id) : null,
       sort: Number(m.sort ?? 0),
+      placement: m.placement === "footer" ? "footer" : "header",
+      footerGroup: String(m.footer_group ?? ""),
     }));
   } catch {
     return [];

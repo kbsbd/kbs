@@ -82,17 +82,24 @@ export async function saveMenuItem(input: {
   href: string;
   sort: number;
   visible: boolean;
+  placement: "header" | "footer";
+  footerGroup: string;
+  pageSlug: string;
 }): Promise<Result> {
   const ctx = await guard();
   if (!ctx) return { ok: false, error: "Not signed in as an admin." };
+  const placement = input.placement === "footer" ? "footer" : "header";
   const row = {
     label: input.label.trim(),
     label_bn: input.label_bn.trim(),
     href: input.href.trim(),
     sort: input.sort | 0,
     visible: input.visible,
+    placement,
+    footer_group: placement === "footer" ? input.footerGroup.trim().slice(0, 40) : "",
+    page_slug: input.pageSlug.trim(),
   };
-  if (!row.label || !row.href) return { ok: false, error: "Label and link are required." };
+  if (!row.label || !row.href) return { ok: false, error: "Pick a page or enter a label and link." };
   const { error } = input.id
     ? await ctx.supabase.from("cms_menu_items").update(row).eq("id", input.id)
     : await ctx.supabase.from("cms_menu_items").insert(row);
