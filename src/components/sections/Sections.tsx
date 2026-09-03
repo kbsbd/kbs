@@ -8,7 +8,9 @@ import { img } from "@/lib/media";
  */
 
 type T = Record<Locale, string>;
-const pick = (v: T, l: Locale) => v[l];
+/* fall back to English when a bilingual string has no Bengali yet, so a
+   half-translated admin edit never renders as a blank line */
+const pick = (v: T, l: Locale) => v[l] || v.en;
 
 const Wrap = ({ children }: { children: React.ReactNode }) => (
   <div className="mx-auto max-w-[86rem] px-5 sm:px-8">{children}</div>

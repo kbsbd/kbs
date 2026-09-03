@@ -4,6 +4,8 @@ import { LOCALES, type Locale } from "@/content/seed";
 import { getContent } from "@/lib/content";
 import MediaSlot from "@/components/MediaSlot";
 
+export const revalidate = 600;
+
 export const metadata: Metadata = {
   title: "KB Homes — KBS / Kanchan Builders",
   description:
@@ -20,7 +22,7 @@ export default async function KbHomesPage({
   const l = locale as Locale;
   const c = await getContent();
   const k = c.kbHomes;
-  const t = (v: Record<Locale, string>) => v[l];
+  const t = (v: Record<Locale, string>) => v[l] || v.en;
 
   return (
     <div className="page">

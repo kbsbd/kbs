@@ -104,6 +104,7 @@ export async function loadShopAdmin(supabase: SupabaseClient): Promise<{
     email: String(q.email ?? ""),
     phone: String(q.phone ?? ""),
     company: String(q.company ?? ""),
+    address: String(q.address ?? ""),
     message: String(q.message ?? ""),
     status: String(q.status ?? "new"),
     created_at: String(q.created_at ?? ""),

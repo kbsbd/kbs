@@ -61,7 +61,7 @@ export default async function ProductPage({
   ]);
   const summary = ratingSummary(reviews);
   const s = c.shop;
-  const t = (v: Record<Locale, string>) => v[l];
+  const t = (v: Record<Locale, string>) => v[l] || v.en;
   const name = pick(product.name, product.name_bn, l);
   const description = pick(product.description, product.description_bn, l);
   const off =

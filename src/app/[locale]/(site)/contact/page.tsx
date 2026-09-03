@@ -7,6 +7,8 @@ import ContactForm from "@/components/sections/ContactForm";
 import ChannelIcon from "@/components/ChannelIcon";
 import JsonLd from "@/components/JsonLd";
 
+export const revalidate = 600;
+
 export const metadata: Metadata = {
   title: "Reach us — KBS / Kanchan Builders",
   description: "Contact KBS / Kanchan Builders about a project, a product or a general enquiry.",
@@ -22,7 +24,7 @@ export default async function ContactPage({
   const l = locale as Locale;
   const c = await getContent();
   const ct = c.contact;
-  const t = (v: Record<Locale, string>) => v[l];
+  const t = (v: Record<Locale, string>) => v[l] || v.en;
   const base = siteUrl();
 
   const ld = [

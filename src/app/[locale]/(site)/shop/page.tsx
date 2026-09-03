@@ -28,7 +28,7 @@ export default async function ShopPage({
   const c = await getContent();
   if (!c.shop.enabled) notFound();
   const s = c.shop;
-  const t = (v: Record<Locale, string>) => v[l];
+  const t = (v: Record<Locale, string>) => v[l] || v.en;
 
   const [products, featured, categories] = await Promise.all([
     getProducts(),

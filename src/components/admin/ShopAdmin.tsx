@@ -67,6 +67,7 @@ export type AdminQuote = {
   email: string;
   phone: string;
   company: string;
+  address: string;
   message: string;
   status: string;
   created_at: string;
@@ -1128,6 +1129,13 @@ function QuotesPanel({ quotes, notify }: { quotes: AdminQuote[]; notify: (s: str
             <p>
               {q.phone} · {q.email || "no email"}
             </p>
+            {q.address && (
+              <p className="whitespace-pre-line">
+                <span className={lbl}>Address</span>
+                <br />
+                {q.address}
+              </p>
+            )}
             {q.message && <p className="text-[color:var(--text-quiet)]">{q.message}</p>}
             <ul className="border-t border-[color:var(--panel-edge)] pt-2">
               {q.items.map((it, i) => (

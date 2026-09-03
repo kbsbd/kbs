@@ -6,6 +6,8 @@ import { getContent } from "@/lib/content";
 import { img } from "@/lib/media";
 import ClientCarousel from "@/components/ClientCarousel";
 
+export const revalidate = 600;
+
 export const metadata: Metadata = {
   title: "Clients — KBS / Kanchan Builders",
   description:
@@ -22,7 +24,7 @@ export default async function ClientsPage({
   const l = locale as Locale;
   const c = await getContent();
   const p = c.clientsPage;
-  const t = (v: Record<Locale, string>) => v[l];
+  const t = (v: Record<Locale, string>) => v[l] || v.en;
 
   return (
     <div className="page">

@@ -164,11 +164,15 @@ create table if not exists public.quote_requests (
   email text not null default '',
   phone text not null default '',
   company text not null default '',
+  address text not null default '',
   message text not null default '',
   items jsonb not null default '[]'::jsonb,
   status text not null default 'new' check (status in ('new', 'quoted', 'won', 'lost')),
   created_at timestamptz not null default now()
 );
+
+-- widen an already-created table
+alter table public.quote_requests add column if not exists address text not null default '';
 
 create index if not exists quote_requests_created_idx on public.quote_requests (created_at desc);
 

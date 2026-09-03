@@ -66,6 +66,9 @@ export default function CheckoutView({
   const shipping = mode === "cod" ? shippingFor(subtotal, flatShipping, freeOver) : 0;
   const total = subtotal + shipping;
   const isQuote = mode === "quote";
+  /* every route needs somewhere to deliver to — required for an order,
+     optional for a quote (it just helps us estimate delivery). */
+  const addressRequired = !isQuote;
 
   const t = {
     title: l === "bn" ? "চেকআউট" : "Checkout",
@@ -76,7 +79,13 @@ export default function CheckoutView({
     email: l === "bn" ? "ইমেইল" : "Email",
     phone: l === "bn" ? "ফোন" : "Phone",
     company: l === "bn" ? "প্রতিষ্ঠান (ঐচ্ছিক)" : "Company (optional)",
-    address: l === "bn" ? "ডেলিভারি ঠিকানা" : "Delivery address",
+    address: addressRequired
+      ? l === "bn" ? "ডেলিভারি ঠিকানা" : "Delivery address"
+      : l === "bn" ? "ডেলিভারি ঠিকানা (ঐচ্ছিক)" : "Delivery address (optional)",
+    addressHint:
+      l === "bn"
+        ? "বাড়ি/ফ্ল্যাট, রাস্তা, এলাকা, শহর — কুরিয়ার যেন খুঁজে পায়।"
+        : "House / flat, road, area, city — enough for the courier to find you.",
     notes: l === "bn" ? "নোট (ঐচ্ছিক)" : "Notes (optional)",
     place: isQuote
       ? l === "bn" ? "কোটেশন রিকোয়েস্ট পাঠান" : "Send quote request"
@@ -230,19 +239,18 @@ export default function CheckoutView({
             </div>
           </div>
 
-          {mode === "cod" && (
-            <div>
-              <label className={lbl} htmlFor="co-address">{t.address}</label>
-              <textarea
-                id="co-address"
-                rows={3}
-                className={`${field} mt-2 resize-y`}
-                required
-                value={f.address}
-                onChange={(e) => setF({ ...f, address: e.target.value })}
-              />
-            </div>
-          )}
+          <div>
+            <label className={lbl} htmlFor="co-address">{t.address}</label>
+            <textarea
+              id="co-address"
+              rows={3}
+              className={`${field} mt-2 resize-y`}
+              required={addressRequired}
+              placeholder={t.addressHint}
+              value={f.address}
+              onChange={(e) => setF({ ...f, address: e.target.value })}
+            />
+          </div>
 
           <div>
             <label className={lbl} htmlFor="co-notes">{t.notes}</label>

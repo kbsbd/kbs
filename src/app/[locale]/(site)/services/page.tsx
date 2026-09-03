@@ -7,6 +7,8 @@ import MediaSlot from "@/components/MediaSlot";
 import ChannelIcon from "@/components/ChannelIcon";
 import JsonLd from "@/components/JsonLd";
 
+export const revalidate = 600;
+
 export const metadata: Metadata = {
   title: "Services — KBS / Kanchan Builders",
   description:
@@ -23,7 +25,9 @@ export default async function ServicesPage({
   const l = locale as Locale;
   const c = await getContent();
   const s = c.servicesPage;
-  const t = (v: Record<Locale, string>) => v[l];
+  /* fall back to English if a card was added with no Bengali yet, so a
+     half-translated item never renders blank */
+  const t = (v: Record<Locale, string>) => v[l] || v.en;
   const base = siteUrl();
 
   const ld = [

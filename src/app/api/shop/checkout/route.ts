@@ -6,11 +6,11 @@ import { seed } from "@/content/seed";
 import { shippingFor } from "@/components/shop/checkout-math";
 
 /**
- * Turns a cart into either an order (Cash on delivery) or a quote request.
- * Prices, names and stock are read fresh from the database here — the client
- * only sends product ids and quantities. Online gateways (bKash / Nagad /
- * SSLCommerz) are recognised but not yet wired; they return 501 until keys are
- * entered in the dashboard.
+ * Turns a cart into either an order or a quote request. Prices, names and stock
+ * are read fresh from the database here — the client only sends product ids and
+ * quantities. The online gateways (bKash / Nagad / SSLCommerz) are not wired to
+ * charge yet: the order is placed unpaid/pending and the team follows up with
+ * payment details, so every order still collects a delivery address.
  */
 
 export const runtime = "nodejs";
@@ -40,8 +40,10 @@ export async function POST(req: Request) {
   if (name.length < 2) return NextResponse.json({ error: "name required" }, { status: 422 });
   if (!/^[+\d][\d\s\-()]{6,}$/.test(phone))
     return NextResponse.json({ error: "phone required" }, { status: 422 });
-  if (mode === "cod" && address.length < 8)
-    return NextResponse.json({ error: "address required" }, { status: 422 });
+  // every order gets physically delivered, so all of them need an address;
+  // a quote is only an enquiry, so there it is optional
+  if (mode !== "quote" && address.length < 8)
+    return NextResponse.json({ error: "A delivery address is required." }, { status: 422 });
 
   const wanted = new Map<string, number>();
   for (const it of rawItems) {
@@ -121,6 +123,7 @@ export async function POST(req: Request) {
         email,
         phone,
         company,
+        address,
         message: notes,
         items: lines.map((l) => ({ product_id: l.product_id, name: l.name, qty: l.qty, price: l.price })),
       })
@@ -138,6 +141,7 @@ export async function POST(req: Request) {
         `Company: ${company || "—"}`,
         `Email:   ${email || "—"}`,
         `Phone:   ${phone}`,
+        `Address: ${address || "—"}`,
         "",
         "Items:",
         itemLines,

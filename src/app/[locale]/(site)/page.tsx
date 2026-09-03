@@ -27,7 +27,7 @@ export default async function Home({
   const l = locale as Locale;
 
   const [c, projectItems] = await Promise.all([getContent(), getProjects()]);
-  const t = (v: Record<Locale, string>) => v[l];
+  const t = (v: Record<Locale, string>) => v[l] || v.en;
 
   /* The hero poster is painted by the client after hydration, so the preload
      scanner never sees it. Declaring it here makes it the LCP image the browser
