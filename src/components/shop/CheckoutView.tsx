@@ -52,13 +52,19 @@ export default function CheckoutView({
 
   useEffect(() => {
     const sb = browserClient();
-    sb?.auth.getUser().then(({ data }) => {
-      if (!data.user) return;
+    sb?.auth.getUser().then(async ({ data }) => {
+      if (!data.user || !sb) return;
+      const { data: prof } = await sb
+        .from("profiles")
+        .select("full_name, phone, address")
+        .eq("user_id", data.user.id)
+        .maybeSingle();
       setF((p) => ({
         ...p,
         email: data.user!.email ?? p.email,
-        name: (data.user!.user_metadata?.full_name as string) || p.name,
-        phone: (data.user!.user_metadata?.phone as string) || p.phone,
+        name: (prof?.full_name as string) || (data.user!.user_metadata?.full_name as string) || p.name,
+        phone: (prof?.phone as string) || (data.user!.user_metadata?.phone as string) || p.phone,
+        address: (prof?.address as string) || p.address,
       }));
     });
   }, []);

@@ -38,14 +38,17 @@ export type AdminSession = {
   userId: string;
   email: string;
   role: StaffRole;
+  /** granted permission keys; empty for a manager with no access yet */
+  permissions: string[];
 };
 
 /**
  * The only gate into the dashboard.
  *
  * Being signed in is not enough on its own: the user must also have a row in
- * `admins`. `role` splits staff into a full admin and a limited manager; the
- * dashboard and the server actions both key off it.
+ * `admins`. `role` splits staff into a full admin and a limited manager, and a
+ * manager's `permissions` say exactly which sections they can touch. The
+ * dashboard, the server actions and the RLS policies all key off the same keys.
  */
 export async function getAdminSession(): Promise<AdminSession | null> {
   const supabase = await createAuthClient();
@@ -58,11 +61,22 @@ export async function getAdminSession(): Promise<AdminSession | null> {
 
   const { data, error } = await supabase
     .from("admins")
-    .select("user_id, email, role")
+    .select("user_id, email, role, permissions")
     .eq("user_id", user.id)
     .maybeSingle();
 
   if (error || !data) return null;
   const role: StaffRole = data.role === "manager" ? "manager" : "admin";
-  return { userId: user.id, email: (data.email as string) ?? user.email ?? "", role };
+  const permissions = Array.isArray(data.permissions) ? (data.permissions as string[]) : [];
+  return {
+    userId: user.id,
+    email: (data.email as string) ?? user.email ?? "",
+    role,
+    permissions,
+  };
+}
+
+/** Does this session grant `key`? A full admin always does. */
+export function can(session: AdminSession, key: string): boolean {
+  return session.role === "admin" || session.permissions.includes(key);
 }

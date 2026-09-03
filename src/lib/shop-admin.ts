@@ -11,6 +11,7 @@ import type {
   AdminQuote,
   AdminReview,
   AdminGateway,
+  AdminDeliveryPartner,
 } from "@/components/admin/ShopAdmin";
 
 type Row = Record<string, unknown>;
@@ -22,8 +23,9 @@ export async function loadShopAdmin(supabase: SupabaseClient): Promise<{
   quotes: AdminQuote[];
   reviews: AdminReview[];
   gateways: AdminGateway[];
+  delivery: AdminDeliveryPartner[];
 }> {
-  const [prodRes, catRes, orderRes, quoteRes, reviewRes, gwRes] = await Promise.all([
+  const [prodRes, catRes, orderRes, quoteRes, reviewRes, gwRes, delRes] = await Promise.all([
     supabase
       .from("products")
       .select("*, product_images(url, alt, sort)")
@@ -42,6 +44,7 @@ export async function loadShopAdmin(supabase: SupabaseClient): Promise<{
       .order("created_at", { ascending: false })
       .limit(200),
     supabase.from("payment_gateways").select("*"),
+    supabase.from("delivery_partners").select("*"),
   ]);
 
   const products: AdminProduct[] = ((prodRes.data as Row[]) ?? []).map((p) => ({
@@ -140,5 +143,17 @@ export async function loadShopAdmin(supabase: SupabaseClient): Promise<{
     };
   });
 
-  return { products, categories, orders, quotes, reviews, gateways };
+  const delById = new Map(((delRes.data as Row[]) ?? []).map((d) => [String(d.id), d]));
+  const delivery: AdminDeliveryPartner[] = (
+    ["steadfast", "pathao", "redx", "sundarban", "sa-paribahan"] as const
+  ).map((id) => {
+    const d = delById.get(id);
+    return {
+      id,
+      enabled: Boolean(d?.enabled),
+      config: (d?.config as Record<string, string>) ?? {},
+    };
+  });
+
+  return { products, categories, orders, quotes, reviews, gateways, delivery };
 }

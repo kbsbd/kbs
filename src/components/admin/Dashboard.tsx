@@ -11,11 +11,13 @@ import ShopAdmin, {
   type AdminQuote,
   type AdminReview,
   type AdminGateway,
+  type AdminDeliveryPartner,
   type StorefrontContent,
 } from "@/components/admin/ShopAdmin";
 import CmsAdmin, { type AdminPage, type AdminMenuItem } from "@/components/admin/CmsAdmin";
 import MediaAdmin, { type MediaContent } from "@/components/admin/MediaAdmin";
 import ListEditor, { CONTENT_LISTS } from "@/components/admin/ContentLists";
+import { PERMISSIONS, SHOP_PERM_KEYS } from "@/lib/permissions";
 import { SOCIAL_PLATFORMS } from "@/components/icons/SocialIcons";
 import { MenuIcon, CloseIcon } from "@/components/icons/Icons";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -30,6 +32,7 @@ import {
   listStaff,
   addManager,
   removeStaff,
+  setManagerPermissions,
   type StaffMember,
 } from "@/app/[locale]/admin/actions";
 
@@ -62,6 +65,7 @@ type Props = {
   email: string;
   fullName: string;
   role: "admin" | "manager";
+  permissions: string[];
   groups: Record<string, EditableString[]>;
   site: Record<string, unknown>;
   integrations: Record<string, unknown>;
@@ -75,6 +79,7 @@ type Props = {
     quotes: AdminQuote[];
     reviews: AdminReview[];
     gateways: AdminGateway[];
+    delivery: AdminDeliveryPartner[];
   };
   storefront: StorefrontContent;
   cms: { pages: AdminPage[]; menu: AdminMenuItem[] };
@@ -98,8 +103,21 @@ const TABS = [
 ] as const;
 type Tab = (typeof TABS)[number];
 
-/** What a manager sees. Everything else is full-admin only. */
-const MANAGER_TABS: Tab[] = ["Bookings", "Shop", "My profile"];
+/** Which permission a tab needs. null = everyone; "shop" = any shop.* key. */
+const TAB_PERM: Record<Tab, string | null> = {
+  Dashboard: null,
+  "My profile": null,
+  Bookings: "bookings",
+  Shop: "shop",
+  Pages: "pages",
+  Media: "content",
+  "Site details": "content",
+  Text: "content",
+  Projects: "projects",
+  Team: "team",
+  Integrations: "integrations",
+  Internal: "internal",
+};
 
 const STATUSES = ["new", "contacted", "visit booked", "visited", "closed"];
 
@@ -122,10 +140,20 @@ export default function Dashboard({
   cms,
   media,
   lists,
+  permissions,
 }: Props) {
   const isAdmin = role === "admin";
-  const tabs = isAdmin ? TABS : MANAGER_TABS;
-  const [tab, setTab] = useState<Tab>(isAdmin ? "Dashboard" : "Bookings");
+  const can = (key: string) => isAdmin || permissions.includes(key);
+  const hasShop = isAdmin || SHOP_PERM_KEYS.some((k) => permissions.includes(k));
+  const tabs = TABS.filter((t) => {
+    const need = TAB_PERM[t];
+    if (need === null) return true;
+    if (need === "shop") return hasShop;
+    return can(need);
+  });
+  const [tab, setTab] = useState<Tab>(
+    tabs.includes("Dashboard") ? "Dashboard" : tabs[0] ?? "My profile"
+  );
   const [toast, setToast] = useState("");
   const [drawer, setDrawer] = useState(true);
 
@@ -240,6 +268,7 @@ export default function Dashboard({
           {tab === "Dashboard" && (
             <Overview
               go={setTab}
+              visible={tabs}
               locale={locale}
               site={site}
               integrations={integrations}
@@ -251,7 +280,12 @@ export default function Dashboard({
           )}
           {tab === "Bookings" && <Bookings rows={bookings} notify={setToast} />}
           {tab === "Shop" && (
-            <ShopAdmin {...shop} storefront={storefront} isAdmin={isAdmin} notify={setToast} />
+            <ShopAdmin
+              {...shop}
+              storefront={storefront}
+              can={can}
+              notify={setToast}
+            />
           )}
           {tab === "Pages" && <CmsAdmin {...cms} notify={setToast} />}
           {tab === "Media" && <MediaAdmin media={media} notify={setToast} />}
@@ -302,6 +336,7 @@ function StatCard({
 
 function Overview({
   go,
+  visible,
   locale,
   site,
   integrations,
@@ -311,6 +346,7 @@ function Overview({
   cms,
 }: {
   go: (t: Tab) => void;
+  visible: readonly Tab[];
   locale: string;
   site: Record<string, unknown>;
   integrations: Record<string, unknown>;
@@ -319,12 +355,14 @@ function Overview({
   shop: Props["shop"];
   cms: Props["cms"];
 }) {
+  const showTeam = visible.includes("Team");
   const [staffCount, setStaffCount] = useState<number | null>(null);
   useEffect(() => {
+    if (!showTeam) return;
     listStaff().then((r) => {
       if (r.ok) setStaffCount(r.staff.length);
     });
-  }, []);
+  }, [showTeam]);
 
   const newBookings = bookings.filter((b) => b.status === "new").length;
   const pendingOrders = shop.orders.filter((o) => o.status === "pending").length;
@@ -360,67 +398,82 @@ function Overview({
           Everything at a glance. Tap any card to open that section.
         </p>
         <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          <StatCard
-            label="Site visit requests"
-            value={bookings.length}
-            sub={newBookings ? `${newBookings} new →` : "View details →"}
-            onClick={() => go("Bookings")}
-          />
-          <StatCard
-            label="Orders"
-            value={shop.orders.length}
-            sub={
-              pendingOrders || unpaidOrders
-                ? `${pendingOrders} pending · ${unpaidOrders} unpaid →`
-                : "View details →"
-            }
-            onClick={() => go("Shop")}
-          />
-          <StatCard
-            label="Products"
-            value={shop.products.length}
-            sub={`${activeProducts} active${lowStock ? ` · ${lowStock} low stock` : ""} →`}
-            onClick={() => go("Shop")}
-          />
-          <StatCard
-            label="Reviews to moderate"
-            value={pendingReviews}
-            sub={pendingReviews ? "Needs attention →" : "All clear →"}
-            onClick={() => go("Shop")}
-          />
-          <StatCard
-            label="Quote requests"
-            value={shop.quotes.length}
-            sub={newQuotes ? `${newQuotes} new →` : "View details →"}
-            onClick={() => go("Shop")}
-          />
-          <StatCard
-            label="Pages"
-            value={cms.pages.length}
-            sub={`${publishedPages} published →`}
-            onClick={() => go("Pages")}
-          />
-          <StatCard
-            label="Projects"
-            value={projects.length}
-            sub={`${publishedProjects} published →`}
-            onClick={() => go("Projects")}
-          />
-          <StatCard
-            label="Team"
-            value={staffCount ?? "—"}
-            sub="Manage access →"
-            onClick={() => go("Team")}
-          />
-          <StatCard
-            label="Integrations"
-            value={`${integrationsSet}/${INTEGRATION_FIELDS.length}`}
-            sub="Analytics & verification →"
-            onClick={() => go("Integrations")}
-          />
+          {visible.includes("Bookings") && (
+            <StatCard
+              label="Site visit requests"
+              value={bookings.length}
+              sub={newBookings ? `${newBookings} new →` : "View details →"}
+              onClick={() => go("Bookings")}
+            />
+          )}
+          {visible.includes("Shop") && (
+            <>
+              <StatCard
+                label="Orders"
+                value={shop.orders.length}
+                sub={
+                  pendingOrders || unpaidOrders
+                    ? `${pendingOrders} pending · ${unpaidOrders} unpaid →`
+                    : "View details →"
+                }
+                onClick={() => go("Shop")}
+              />
+              <StatCard
+                label="Products"
+                value={shop.products.length}
+                sub={`${activeProducts} active${lowStock ? ` · ${lowStock} low stock` : ""} →`}
+                onClick={() => go("Shop")}
+              />
+              <StatCard
+                label="Reviews to moderate"
+                value={pendingReviews}
+                sub={pendingReviews ? "Needs attention →" : "All clear →"}
+                onClick={() => go("Shop")}
+              />
+              <StatCard
+                label="Quote requests"
+                value={shop.quotes.length}
+                sub={newQuotes ? `${newQuotes} new →` : "View details →"}
+                onClick={() => go("Shop")}
+              />
+            </>
+          )}
+          {visible.includes("Pages") && (
+            <StatCard
+              label="Pages"
+              value={cms.pages.length}
+              sub={`${publishedPages} published →`}
+              onClick={() => go("Pages")}
+            />
+          )}
+          {visible.includes("Projects") && (
+            <StatCard
+              label="Projects"
+              value={projects.length}
+              sub={`${publishedProjects} published →`}
+              onClick={() => go("Projects")}
+            />
+          )}
+          {showTeam && (
+            <StatCard
+              label="Team"
+              value={staffCount ?? "—"}
+              sub="Manage access →"
+              onClick={() => go("Team")}
+            />
+          )}
+          {visible.includes("Integrations") && (
+            <StatCard
+              label="Integrations"
+              value={`${integrationsSet}/${INTEGRATION_FIELDS.length}`}
+              sub="Analytics & verification →"
+              onClick={() => go("Integrations")}
+            />
+          )}
         </div>
       </div>
 
+      {visible.includes("Site details") && (
       <div>
         <div className="flex items-center">
           <h3 className="font-display text-lg">Site information</h3>
@@ -449,6 +502,7 @@ function Overview({
           Open the public site ↗
         </a>
       </div>
+      )}
     </div>
   );
 }
@@ -714,22 +768,127 @@ function SiteDetails({
 
 /* ------------------------------------------------------------------ */
 
+function PermissionPicker({
+  value,
+  onChange,
+}: {
+  value: string[];
+  onChange: (next: string[]) => void;
+}) {
+  const toggle = (key: string, on: boolean) =>
+    onChange(on ? [...new Set([...value, key])] : value.filter((k) => k !== key));
+  const groups = ["Shop", "Site"] as const;
+  return (
+    <div className="grid gap-4 sm:grid-cols-2">
+      {groups.map((g) => (
+        <div key={g}>
+          <p className="font-mono-label text-[color:var(--text-quiet)]">{g}</p>
+          <div className="mt-2 space-y-1.5">
+            {PERMISSIONS.filter((p) => p.group === g).map((p) => (
+              <label key={p.key} className="flex items-start gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  className="mt-0.5"
+                  checked={value.includes(p.key)}
+                  onChange={(e) => toggle(p.key, e.target.checked)}
+                />
+                <span>{p.label}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ManagerRow({
+  m,
+  onSaved,
+  onRemoved,
+  notify,
+}: {
+  m: StaffMember;
+  onSaved: (userId: string, perms: string[]) => void;
+  onRemoved: (userId: string) => void;
+  notify: (s: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [perms, setPerms] = useState<string[]>(m.permissions);
+  const [pending, start] = useTransition();
+  const dirty = JSON.stringify([...perms].sort()) !== JSON.stringify([...m.permissions].sort());
+
+  function save() {
+    start(async () => {
+      const r = await setManagerPermissions(m.userId, perms);
+      if (r.ok) {
+        notify("Permissions updated.");
+        onSaved(m.userId, perms);
+      } else notify(r.error);
+    });
+  }
+  function remove() {
+    start(async () => {
+      const r = await removeStaff(m.userId);
+      if (r.ok) {
+        notify("Manager removed.");
+        onRemoved(m.userId);
+      } else notify(r.error);
+    });
+  }
+
+  return (
+    <div className="rounded-xl border border-[color:var(--panel-edge)]">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full flex-wrap items-center gap-3 p-3 text-left text-sm"
+      >
+        <span className="flex-1 break-all font-medium">{m.email}</span>
+        <span className="rounded-full bg-[color:var(--panel)] px-2 py-0.5 text-[11px] text-[color:var(--text-secondary)]">
+          {m.permissions.length} permission{m.permissions.length === 1 ? "" : "s"}
+        </span>
+        <span className="text-[color:var(--text-quiet)]">{open ? "▲" : "▼"}</span>
+      </button>
+      {open && (
+        <div className="space-y-4 border-t border-[color:var(--panel-edge)] p-4">
+          <PermissionPicker value={perms} onChange={setPerms} />
+          <div className="flex items-center gap-3">
+            <button
+              className="btn btn-primary text-sm"
+              onClick={save}
+              disabled={!dirty || pending}
+            >
+              {pending ? "Saving" : "Save permissions"}
+            </button>
+            <button
+              type="button"
+              onClick={remove}
+              disabled={pending}
+              className="ml-auto text-sm text-[color:var(--clay)] hover:underline disabled:opacity-50"
+            >
+              Remove manager
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function TeamSection({ notify }: { notify: (s: string) => void }) {
   const [staff, setStaff] = useState<StaffMember[] | null>(null);
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
   const [password, setPassword] = useState("");
+  const [newPerms, setNewPerms] = useState<string[]>([]);
   const [pending, start] = useTransition();
 
-  const load = () =>
-    start(async () => {
-      const r = await listStaff();
+  useEffect(() => {
+    listStaff().then((r) => {
       if (r.ok) setStaff(r.staff);
       else notify(r.error);
     });
-
-  useEffect(() => {
-    load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -739,12 +898,13 @@ function TeamSection({ notify }: { notify: (s: string) => void }) {
       return;
     }
     start(async () => {
-      const r = await addManager({ email, password, fullName });
+      const r = await addManager({ email, password, fullName, permissions: newPerms });
       if (r.ok) {
         notify("Manager added. They can sign in with that email and password.");
         setEmail("");
         setFullName("");
         setPassword("");
+        setNewPerms([]);
         const list = await listStaff();
         if (list.ok) setStaff(list.staff);
       } else {
@@ -753,61 +913,57 @@ function TeamSection({ notify }: { notify: (s: string) => void }) {
     });
   }
 
-  function remove(userId: string) {
-    start(async () => {
-      const r = await removeStaff(userId);
-      if (r.ok) {
-        notify("Manager removed.");
-        setStaff((s) => (s ? s.filter((m) => m.userId !== userId) : s));
-      } else {
-        notify(r.error);
-      }
-    });
-  }
+  const managers = staff?.filter((m) => m.role === "manager") ?? [];
+  const admins = staff?.filter((m) => m.role === "admin") ?? [];
 
   return (
-    <div className="max-w-3xl">
-      <h3 className="font-display text-lg">Team</h3>
-      <p className="mt-1 text-sm text-[color:var(--text-secondary)]">
-        A manager can check orders, change order status and add products. They cannot edit
-        or delete orders, delete products, or reach payments, integrations, pages or the
-        site settings.
-      </p>
-
-      <div className="mt-4 space-y-2">
-        {staff === null && (
-          <p className="text-sm text-[color:var(--text-quiet)]">Loading…</p>
-        )}
-        {staff?.map((m) => (
-          <div
-            key={m.userId}
-            className="flex flex-wrap items-center gap-3 rounded-xl border border-[color:var(--panel-edge)] p-3 text-sm"
-          >
-            <span className="flex-1 break-all">{m.email}</span>
-            <span
-              className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${
-                m.role === "admin"
-                  ? "bg-[color:var(--accent-muted)] text-[color:var(--text-primary)]"
-                  : "bg-[color:var(--panel)] text-[color:var(--text-secondary)]"
-              }`}
-            >
-              {m.role === "admin" ? "Full admin" : "Manager"}
-            </span>
-            {m.role === "manager" && (
-              <button
-                type="button"
-                disabled={pending}
-                className="text-sm text-[color:var(--clay)] hover:underline disabled:opacity-50"
-                onClick={() => remove(m.userId)}
-              >
-                Remove
-              </button>
-            )}
-          </div>
-        ))}
+    <div className="max-w-3xl space-y-8">
+      <div>
+        <h3 className="font-display text-lg">Team</h3>
+        <p className="mt-1 text-sm text-[color:var(--text-secondary)]">
+          A manager sees only the sections you tick below. Click a manager to change
+          what they can do; untick to take access away, tick to grant it, then save.
+        </p>
       </div>
 
-      <div className="mt-5 space-y-3 rounded-xl border border-[color:var(--panel-edge)] p-4">
+      {staff === null && <p className="text-sm text-[color:var(--text-quiet)]">Loading…</p>}
+
+      {admins.length > 0 && (
+        <div className="space-y-2">
+          {admins.map((m) => (
+            <div
+              key={m.userId}
+              className="flex flex-wrap items-center gap-3 rounded-xl border border-[color:var(--panel-edge)] p-3 text-sm"
+            >
+              <span className="flex-1 break-all font-medium">{m.email}</span>
+              <span className="rounded-full bg-[color:var(--accent-muted)] px-2 py-0.5 text-[11px] font-semibold text-[color:var(--text-primary)]">
+                Full access
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {managers.length > 0 && (
+        <div className="space-y-2">
+          <h4 className="font-mono-label text-[color:var(--text-quiet)]">Managers</h4>
+          {managers.map((m) => (
+            <ManagerRow
+              key={m.userId}
+              m={m}
+              notify={notify}
+              onSaved={(id, perms) =>
+                setStaff((s) =>
+                  s ? s.map((x) => (x.userId === id ? { ...x, permissions: perms } : x)) : s
+                )
+              }
+              onRemoved={(id) => setStaff((s) => (s ? s.filter((x) => x.userId !== id) : s))}
+            />
+          ))}
+        </div>
+      )}
+
+      <div className="space-y-4 rounded-xl border border-[color:var(--panel-edge)] p-4">
         <h4 className="font-mono-label text-[color:var(--text-quiet)]">Add a manager</h4>
         <div className="grid gap-3 sm:grid-cols-2">
           <input
@@ -831,6 +987,10 @@ function TeamSection({ notify }: { notify: (s: string) => void }) {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
+        <div>
+          <p className="mb-2 text-sm font-medium">What can this manager do?</p>
+          <PermissionPicker value={newPerms} onChange={setNewPerms} />
+        </div>
         <button className="btn btn-primary" onClick={add} disabled={pending}>
           {pending ? "Working…" : "Add manager"}
         </button>

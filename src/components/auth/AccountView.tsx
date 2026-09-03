@@ -32,7 +32,7 @@ export default function AccountView({
   l: Locale;
   symbol: string;
   email: string;
-  profile: { fullName: string; phone: string };
+  profile: { fullName: string; phone: string; address: string };
   orders: Order[];
   wishlist: Wish[];
 }) {
@@ -286,10 +286,11 @@ function Profile({
 }: {
   l: Locale;
   email: string;
-  profile: { fullName: string; phone: string };
+  profile: { fullName: string; phone: string; address: string };
 }) {
   const [name, setName] = useState(profile.fullName);
   const [phone, setPhone] = useState(profile.phone);
+  const [address, setAddress] = useState(profile.address);
   const [pw, setPw] = useState("");
   const [busy, setBusy] = useState<"" | "profile" | "pw">("");
   const [msg, setMsg] = useState("");
@@ -298,6 +299,11 @@ function Profile({
   const c = {
     name: l === "bn" ? "পুরো নাম" : "Full name",
     phone: l === "bn" ? "ফোন" : "Phone",
+    address: l === "bn" ? "ডেলিভারি ঠিকানা" : "Delivery address",
+    addressNote:
+      l === "bn"
+        ? "চেকআউটে এটি স্বয়ংক্রিয়ভাবে বসে যাবে।"
+        : "Used to pre-fill checkout — house / flat, road, area, city.",
     email: l === "bn" ? "ইমেইল" : "Email",
     emailNote: l === "bn" ? "ইমেইল পরিবর্তন করতে সহায়তার সাথে যোগাযোগ করুন।" : "Contact us to change your email.",
     save: l === "bn" ? "সেভ করুন" : "Save changes",
@@ -323,9 +329,12 @@ function Profile({
       const sb = browserClient();
       const { data } = (await sb?.auth.getUser()) ?? { data: { user: null } };
       if (!sb || !data.user) throw new Error();
-      const { error } = await sb
-        .from("profiles")
-        .upsert({ user_id: data.user.id, full_name: name.trim(), phone: phone.trim() });
+      const { error } = await sb.from("profiles").upsert({
+        user_id: data.user.id,
+        full_name: name.trim(),
+        phone: phone.trim(),
+        address: address.trim(),
+      });
       if (error) throw error;
       await sb.auth.updateUser({ data: { full_name: name.trim(), phone: phone.trim() } });
       setMsg(c.saved);
@@ -366,6 +375,16 @@ function Profile({
         <label className="block">
           <span className={lbl}>{c.phone}</span>
           <input className={field} type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
+        </label>
+        <label className="block">
+          <span className={lbl}>{c.address}</span>
+          <textarea
+            className={`${field} resize-y`}
+            rows={3}
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+          />
+          <span className="mt-1 block text-xs text-[color:var(--text-quiet)]">{c.addressNote}</span>
         </label>
         <label className="block">
           <span className={lbl}>{c.email}</span>

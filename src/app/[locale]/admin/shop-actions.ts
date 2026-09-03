@@ -1,32 +1,27 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createAuthClient, getAdminSession } from "@/lib/supabase/auth";
+import { createAuthClient, getAdminSession, can } from "@/lib/supabase/auth";
 
 /**
- * Shop admin writes. Every one re-checks the admin session and goes through the
- * cookie-bound client, so RLS ("writable by admins") is the real gate — a
- * server action is a public endpoint.
+ * Shop admin writes. Every one re-checks the session and goes through the
+ * cookie-bound client, so RLS (`has_perm('key')`) is the real gate — a server
+ * action is a public endpoint.
  */
 
 type Result<T = unknown> = ({ ok: true } & T) | { ok: false; error: string };
 
-/** Any signed-in staff member (admin or manager). RLS still has the last word. */
-async function guard() {
+const DENIED_MSG = "You do not have access to this.";
+const DENIED = { ok: false as const, error: DENIED_MSG };
+const NOT_SIGNED_IN = { ok: false as const, error: "Not signed in as staff." };
+
+/** Requires a permission (a full admin always passes). */
+async function guardPerm(key: string) {
   const session = await getAdminSession();
   if (!session) return null;
+  if (!can(session, key)) return "denied" as const;
   const supabase = await createAuthClient();
   return supabase ? { session, supabase } : null;
-}
-
-const DENIED: Result = { ok: false, error: "Managers cannot do this. Ask an admin." };
-
-/** A full admin only. */
-async function guardFull() {
-  const ctx = await guard();
-  if (!ctx) return null;
-  if (ctx.session.role !== "admin") return "denied" as const;
-  return ctx;
 }
 
 function refreshShop(slug?: string) {
@@ -54,8 +49,9 @@ export async function saveCategory(input: {
   name_bn: string;
   sort: number;
 }): Promise<Result> {
-  const ctx = await guard();
-  if (!ctx) return { ok: false, error: "Not signed in as an admin." };
+  const ctx = await guardPerm("shop.products");
+  if (ctx === "denied") return DENIED;
+  if (!ctx) return NOT_SIGNED_IN;
   const row = {
     name: input.name.trim(),
     name_bn: input.name_bn.trim(),
@@ -72,9 +68,9 @@ export async function saveCategory(input: {
 }
 
 export async function deleteCategory(id: string): Promise<Result> {
-  const ctx = await guardFull();
+  const ctx = await guardPerm("shop.products.delete");
   if (ctx === "denied") return DENIED;
-  if (!ctx) return { ok: false, error: "Not signed in as an admin." };
+  if (!ctx) return NOT_SIGNED_IN;
   const { error } = await ctx.supabase.from("product_categories").delete().eq("id", id);
   if (error) return { ok: false, error: error.message };
   refreshShop();
@@ -105,8 +101,9 @@ export type ProductInput = {
 };
 
 export async function saveProduct(p: ProductInput): Promise<Result<{ id: string }>> {
-  const ctx = await guard();
-  if (!ctx) return { ok: false, error: "Not signed in as an admin." };
+  const ctx = await guardPerm("shop.products");
+  if (ctx === "denied") return DENIED;
+  if (!ctx) return NOT_SIGNED_IN;
 
   const name = p.name.trim();
   if (!name) return { ok: false, error: "Product name is required." };
@@ -152,9 +149,9 @@ export async function saveProduct(p: ProductInput): Promise<Result<{ id: string 
 }
 
 export async function deleteProductRow(id: string): Promise<Result> {
-  const ctx = await guardFull();
+  const ctx = await guardPerm("shop.products.delete");
   if (ctx === "denied") return DENIED;
-  if (!ctx) return { ok: false, error: "Not signed in as an admin." };
+  if (!ctx) return NOT_SIGNED_IN;
   const { error } = await ctx.supabase.from("products").delete().eq("id", id);
   if (error) return { ok: false, error: error.message };
   refreshShop();
@@ -168,8 +165,9 @@ export async function setOrderStatus(
   field: "status" | "payment_status",
   value: string
 ): Promise<Result> {
-  const ctx = await guard();
-  if (!ctx) return { ok: false, error: "Not signed in as an admin." };
+  const ctx = await guardPerm("shop.orders");
+  if (ctx === "denied") return DENIED;
+  if (!ctx) return NOT_SIGNED_IN;
   const allowed = {
     status: ["pending", "confirmed", "processing", "shipped", "completed", "cancelled"],
     payment_status: ["unpaid", "paid", "refunded", "failed"],
@@ -200,9 +198,9 @@ const PAY_STATUSES = ["unpaid", "paid", "refunded", "failed"];
 const PAY_METHODS = ["cod", "quote", "bkash", "nagad", "sslcommerz"];
 
 export async function saveOrder(input: OrderInput): Promise<Result<{ id: string }>> {
-  const ctx = await guardFull();
-  if (ctx === "denied") return { ok: false, error: "Managers cannot add or edit orders." };
-  if (!ctx) return { ok: false, error: "Not signed in as an admin." };
+  const ctx = await guardPerm("shop.orders.manage");
+  if (ctx === "denied") return { ok: false, error: "You cannot add or edit orders." };
+  if (!ctx) return NOT_SIGNED_IN;
   if (input.customer_name.trim().length < 2)
     return { ok: false, error: "Customer name is required." };
   if (!ORDER_STATUSES.includes(input.status) || !PAY_STATUSES.includes(input.payment_status))
@@ -253,9 +251,9 @@ export async function saveOrder(input: OrderInput): Promise<Result<{ id: string 
 }
 
 export async function deleteOrderRow(id: string): Promise<Result> {
-  const ctx = await guardFull();
-  if (ctx === "denied") return { ok: false, error: "Managers cannot delete orders." };
-  if (!ctx) return { ok: false, error: "Not signed in as an admin." };
+  const ctx = await guardPerm("shop.orders.manage");
+  if (ctx === "denied") return { ok: false, error: "You cannot delete orders." };
+  if (!ctx) return NOT_SIGNED_IN;
   const { error } = await ctx.supabase.from("orders").delete().eq("id", id);
   if (error) return { ok: false, error: error.message };
   revalidatePath("/en/admin");
@@ -263,8 +261,9 @@ export async function deleteOrderRow(id: string): Promise<Result> {
 }
 
 export async function setQuoteStatus(id: string, value: string): Promise<Result> {
-  const ctx = await guard();
-  if (!ctx) return { ok: false, error: "Not signed in as an admin." };
+  const ctx = await guardPerm("shop.quotes");
+  if (ctx === "denied") return DENIED;
+  if (!ctx) return NOT_SIGNED_IN;
   if (!["new", "quoted", "won", "lost"].includes(value))
     return { ok: false, error: "Unknown value." };
   const { error } = await ctx.supabase.from("quote_requests").update({ status: value }).eq("id", id);
@@ -279,10 +278,16 @@ export async function moderateReview(
   id: string,
   action: "published" | "rejected" | "delete"
 ): Promise<Result> {
-  const ctx = await guard();
-  if (!ctx) return { ok: false, error: "Not signed in as an admin." };
-  if (action === "delete" && ctx.session.role !== "admin")
-    return { ok: false, error: "Managers cannot delete reviews — reject it instead." };
+  const ctx = await guardPerm(action === "delete" ? "shop.reviews.delete" : "shop.reviews");
+  if (ctx === "denied")
+    return {
+      ok: false,
+      error:
+        action === "delete"
+          ? "You cannot delete reviews — reject it instead."
+          : DENIED_MSG,
+    };
+  if (!ctx) return NOT_SIGNED_IN;
   const { error } =
     action === "delete"
       ? await ctx.supabase.from("product_reviews").delete().eq("id", id)
@@ -300,15 +305,43 @@ export async function saveGateway(input: {
   mode: "sandbox" | "live";
   config: Record<string, string>;
 }): Promise<Result> {
-  const ctx = await guardFull();
+  const ctx = await guardPerm("shop.payments");
   if (ctx === "denied") return DENIED;
-  if (!ctx) return { ok: false, error: "Not signed in as an admin." };
+  if (!ctx) return NOT_SIGNED_IN;
   if (!["cod", "quote", "bkash", "nagad", "sslcommerz"].includes(input.id))
     return { ok: false, error: "Unknown payment method." };
   const { error } = await ctx.supabase
     .from("payment_gateways")
     .upsert(
       { id: input.id, enabled: input.enabled, mode: input.mode, config: input.config },
+      { onConflict: "id" }
+    );
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/en/admin");
+  return { ok: true };
+}
+
+/* ---------------- delivery partners ---------------- */
+
+const DELIVERY_IDS = ["steadfast", "pathao", "redx", "sundarban", "sa-paribahan"];
+
+export async function saveDeliveryPartner(input: {
+  id: string;
+  enabled: boolean;
+  config: Record<string, string>;
+}): Promise<Result> {
+  const ctx = await guardPerm("shop.delivery");
+  if (ctx === "denied") return DENIED;
+  if (!ctx) return NOT_SIGNED_IN;
+  if (!DELIVERY_IDS.includes(input.id))
+    return { ok: false, error: "Unknown delivery partner." };
+  const config = Object.fromEntries(
+    Object.entries(input.config || {}).map(([k, v]) => [k, String(v).trim()])
+  );
+  const { error } = await ctx.supabase
+    .from("delivery_partners")
+    .upsert(
+      { id: input.id, enabled: input.enabled, config, updated_at: new Date().toISOString() },
       { onConflict: "id" }
     );
   if (error) return { ok: false, error: error.message };

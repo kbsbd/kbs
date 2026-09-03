@@ -1,14 +1,15 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createAuthClient, getAdminSession } from "@/lib/supabase/auth";
+import { createAuthClient, getAdminSession, can } from "@/lib/supabase/auth";
 import { createAdminClient } from "@/lib/supabase/server";
 import { setPath } from "@/lib/editable";
+import { isPermKey } from "@/lib/permissions";
 
 /**
  * Every write goes through here, and every one of them re-checks the session.
  * A server action is a public endpoint; trusting the page that rendered the
- * form would be the mistake. RLS ("full admin" vs "staff") is the real gate.
+ * form would be the mistake. RLS (`has_perm('key')`) is the real gate.
  */
 
 type Result = { ok: true } | { ok: false; error: string };
@@ -20,13 +21,15 @@ async function guard() {
   return supabase ? { session, supabase } : null;
 }
 
-/** Site content, projects and the team: full admin only. */
-async function guardFull() {
+/** Requires a specific permission (a full admin always passes). */
+async function guardPerm(key: string) {
   const ctx = await guard();
-  if (!ctx || ctx.session.role !== "admin") return null;
+  if (!ctx) return null;
+  if (!can(ctx.session, key)) return "denied" as const;
   return ctx;
 }
-const NOT_ADMIN: Result = { ok: false, error: "Only a full admin can do this." };
+const NOT_ALLOWED: Result = { ok: false, error: "You do not have access to this." };
+const NOT_SIGNED_IN: Result = { ok: false, error: "Not signed in as staff." };
 
 function refresh() {
   /* site.logo / site.favicon / nav / socials live in the shared chrome, so
@@ -42,8 +45,9 @@ function refresh() {
 export async function saveContent(
   edits: Array<{ root: string; path: string; value: unknown }>
 ): Promise<Result> {
-  const ctx = await guardFull();
-  if (!ctx) return NOT_ADMIN;
+  const ctx = await guardPerm("content");
+  if (ctx === "denied") return NOT_ALLOWED;
+  if (!ctx) return NOT_SIGNED_IN;
   if (!edits.length) return { ok: true };
 
   const byRoot = new Map<string, Array<{ path: string; value: unknown }>>();
@@ -79,8 +83,9 @@ export async function saveContent(
 }
 
 export async function setBookingStatus(id: string, status: string): Promise<Result> {
-  const ctx = await guard();
-  if (!ctx) return { ok: false, error: "Not signed in as an admin." };
+  const ctx = await guardPerm("bookings");
+  if (ctx === "denied") return NOT_ALLOWED;
+  if (!ctx) return NOT_SIGNED_IN;
   const allowed = ["new", "contacted", "visit booked", "visited", "closed"];
   if (!allowed.includes(status)) return { ok: false, error: "Unknown status." };
 
@@ -103,8 +108,9 @@ export async function saveProject(project: {
   sort: number;
   published: boolean;
 }): Promise<Result> {
-  const ctx = await guardFull();
-  if (!ctx) return NOT_ADMIN;
+  const ctx = await guardPerm("projects");
+  if (ctx === "denied") return NOT_ALLOWED;
+  if (!ctx) return NOT_SIGNED_IN;
 
   const row = { ...project };
   const { error } = project.id
@@ -117,8 +123,9 @@ export async function saveProject(project: {
 }
 
 export async function deleteProject(id: string): Promise<Result> {
-  const ctx = await guardFull();
-  if (!ctx) return NOT_ADMIN;
+  const ctx = await guardPerm("projects");
+  if (ctx === "denied") return NOT_ALLOWED;
+  if (!ctx) return NOT_SIGNED_IN;
   const { error } = await ctx.supabase.from("projects").delete().eq("id", id);
   if (error) return { ok: false, error: error.message };
   refresh();
@@ -127,8 +134,9 @@ export async function deleteProject(id: string): Promise<Result> {
 
 /** Internal notes. Stored apart from site_content so they cannot be rendered. */
 export async function saveInternalNote(key: string, value: string): Promise<Result> {
-  const ctx = await guardFull();
-  if (!ctx) return NOT_ADMIN;
+  const ctx = await guardPerm("internal");
+  if (ctx === "denied") return NOT_ALLOWED;
+  if (!ctx) return NOT_SIGNED_IN;
   const { error } = await ctx.supabase
     .from("internal_notes")
     .upsert({ key, value }, { onConflict: "key" });
@@ -142,18 +150,26 @@ export async function signOut(): Promise<void> {
   await supabase?.auth.signOut();
 }
 
-/* ---------------- team (full admin only) ---------------- */
+/* ---------------- team (needs the 'team' permission) ---------------- */
 
-export type StaffMember = { userId: string; email: string; role: "admin" | "manager" };
+export type StaffMember = {
+  userId: string;
+  email: string;
+  role: "admin" | "manager";
+  permissions: string[];
+};
+
+const cleanPerms = (list: unknown): string[] =>
+  Array.isArray(list) ? [...new Set(list.filter((k): k is string => isPermKey(k)))] : [];
 
 export async function listStaff(): Promise<{ ok: true; staff: StaffMember[] } | { ok: false; error: string }> {
-  const ctx = await guardFull();
-  if (!ctx) return { ok: false, error: "Only a full admin can do this." };
+  const ctx = await guardPerm("team");
+  if (!ctx || ctx === "denied") return { ok: false, error: "You do not have access to the team." };
   const admin = createAdminClient();
   if (!admin) return { ok: false, error: "Store is not available." };
   const { data, error } = await admin
     .from("admins")
-    .select("user_id, email, role")
+    .select("user_id, email, role, permissions")
     .order("role", { ascending: true })
     .order("created_at", { ascending: true });
   if (error) return { ok: false, error: error.message };
@@ -163,6 +179,7 @@ export async function listStaff(): Promise<{ ok: true; staff: StaffMember[] } | 
       userId: String(r.user_id),
       email: String(r.email),
       role: r.role === "manager" ? "manager" : "admin",
+      permissions: cleanPerms(r.permissions),
     })),
   };
 }
@@ -171,9 +188,11 @@ export async function addManager(input: {
   email: string;
   password: string;
   fullName: string;
+  permissions: string[];
 }): Promise<Result> {
-  const ctx = await guardFull();
-  if (!ctx) return NOT_ADMIN;
+  const ctx = await guardPerm("team");
+  if (ctx === "denied") return NOT_ALLOWED;
+  if (!ctx) return NOT_SIGNED_IN;
   const admin = createAdminClient();
   if (!admin) return { ok: false, error: "Store is not available." };
 
@@ -182,6 +201,7 @@ export async function addManager(input: {
     return { ok: false, error: "A valid email is required." };
   if (input.password.length < 8)
     return { ok: false, error: "Password must be at least 8 characters." };
+  const permissions = cleanPerms(input.permissions);
 
   // create the auth user (or reuse if it already exists)
   let userId: string | null = null;
@@ -202,16 +222,39 @@ export async function addManager(input: {
 
   const { error } = await admin
     .from("admins")
-    .upsert({ user_id: userId, email, role: "manager" }, { onConflict: "user_id" });
+    .upsert({ user_id: userId, email, role: "manager", permissions }, { onConflict: "user_id" });
   if (error) return { ok: false, error: error.message };
 
   revalidatePath("/en/admin");
   return { ok: true };
 }
 
+/** Change what a manager can do. Full admins are never touched here. */
+export async function setManagerPermissions(
+  userId: string,
+  permissions: string[]
+): Promise<Result> {
+  const ctx = await guardPerm("team");
+  if (ctx === "denied") return NOT_ALLOWED;
+  if (!ctx) return NOT_SIGNED_IN;
+  const admin = createAdminClient();
+  if (!admin) return { ok: false, error: "Store is not available." };
+
+  const { error } = await admin
+    .from("admins")
+    .update({ permissions: cleanPerms(permissions) })
+    .eq("user_id", userId)
+    .eq("role", "manager");
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/en/admin");
+  revalidatePath("/bn/admin");
+  return { ok: true };
+}
+
 export async function removeStaff(userId: string): Promise<Result> {
-  const ctx = await guardFull();
-  if (!ctx) return NOT_ADMIN;
+  const ctx = await guardPerm("team");
+  if (ctx === "denied") return NOT_ALLOWED;
+  if (!ctx) return NOT_SIGNED_IN;
   if (userId === ctx.session.userId)
     return { ok: false, error: "You cannot remove yourself." };
   const admin = createAdminClient();

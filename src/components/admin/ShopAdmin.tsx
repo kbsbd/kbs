@@ -15,6 +15,7 @@ import {
   setQuoteStatus,
   moderateReview,
   saveGateway,
+  saveDeliveryPartner,
   type ProductInput,
 } from "@/app/[locale]/admin/shop-actions";
 
@@ -90,11 +91,17 @@ export type AdminGateway = {
   mode: "sandbox" | "live";
   config: Record<string, string>;
 };
+export type DeliveryId = "steadfast" | "pathao" | "redx" | "sundarban" | "sa-paribahan";
+export type AdminDeliveryPartner = {
+  id: DeliveryId;
+  enabled: boolean;
+  config: Record<string, string>;
+};
 
 const field =
   "w-full rounded-lg border border-[color:var(--panel-edge)] bg-[color:var(--canvas)] px-3 py-2 text-sm outline-none focus:border-[color:var(--accent)]";
 const lbl = "font-mono-label text-[color:var(--text-quiet)]";
-const SUBTABS = ["Products", "Categories", "Orders", "Quotes", "Reviews", "Storefront", "Payments"] as const;
+const SUBTABS = ["Products", "Categories", "Orders", "Quotes", "Reviews", "Storefront", "Payments", "Delivery"] as const;
 
 export type StorefrontContent = {
   enabled: boolean;
@@ -115,6 +122,17 @@ export type StorefrontContent = {
   search: { enabled: boolean; placeholder: L };
 };
 
+const SUBTAB_PERM: Record<(typeof SUBTABS)[number], string> = {
+  Products: "shop.products",
+  Categories: "shop.products",
+  Orders: "shop.orders",
+  Quotes: "shop.quotes",
+  Reviews: "shop.reviews",
+  Storefront: "shop.storefront",
+  Payments: "shop.payments",
+  Delivery: "shop.delivery",
+};
+
 export default function ShopAdmin({
   products,
   categories,
@@ -122,8 +140,9 @@ export default function ShopAdmin({
   quotes,
   reviews,
   gateways,
+  delivery,
   storefront,
-  isAdmin = true,
+  can,
   notify,
 }: {
   products: AdminProduct[];
@@ -132,14 +151,13 @@ export default function ShopAdmin({
   quotes: AdminQuote[];
   reviews: AdminReview[];
   gateways: AdminGateway[];
+  delivery: AdminDeliveryPartner[];
   storefront: StorefrontContent;
-  isAdmin?: boolean;
+  can: (key: string) => boolean;
   notify: (s: string) => void;
 }) {
-  const subtabs = isAdmin
-    ? SUBTABS
-    : SUBTABS.filter((s) => s !== "Payments" && s !== "Storefront");
-  const [sub, setSub] = useState<(typeof SUBTABS)[number]>("Products");
+  const subtabs = SUBTABS.filter((s) => can(SUBTAB_PERM[s]));
+  const [sub, setSub] = useState<(typeof SUBTABS)[number]>(subtabs[0] ?? "Products");
   const pendingReviews = reviews.filter((r) => r.status === "pending").length;
 
   return (
@@ -165,22 +183,42 @@ export default function ShopAdmin({
         <ProductsPanel
           products={products}
           categories={categories}
-          isAdmin={isAdmin}
+          canDelete={can("shop.products.delete")}
           notify={notify}
         />
       )}
       {sub === "Categories" && (
-        <CategoriesPanel categories={categories} isAdmin={isAdmin} notify={notify} />
+        <CategoriesPanel
+          categories={categories}
+          canDelete={can("shop.products.delete")}
+          notify={notify}
+        />
       )}
       {sub === "Orders" && (
-        <OrdersPanel orders={orders} products={products} isAdmin={isAdmin} notify={notify} />
+        <OrdersPanel
+          orders={orders}
+          products={products}
+          canManage={can("shop.orders.manage")}
+          notify={notify}
+        />
       )}
       {sub === "Quotes" && <QuotesPanel quotes={quotes} notify={notify} />}
-      {sub === "Reviews" && <ReviewsPanel reviews={reviews} isAdmin={isAdmin} notify={notify} />}
-      {sub === "Storefront" && isAdmin && (
+      {sub === "Reviews" && (
+        <ReviewsPanel
+          reviews={reviews}
+          canDelete={can("shop.reviews.delete")}
+          notify={notify}
+        />
+      )}
+      {sub === "Storefront" && can("shop.storefront") && (
         <StorefrontPanel data={storefront} notify={notify} />
       )}
-      {sub === "Payments" && isAdmin && <PaymentsPanel gateways={gateways} notify={notify} />}
+      {sub === "Payments" && can("shop.payments") && (
+        <PaymentsPanel gateways={gateways} notify={notify} />
+      )}
+      {sub === "Delivery" && can("shop.delivery") && (
+        <DeliveryPanel partners={delivery} notify={notify} />
+      )}
     </div>
   );
 }
@@ -462,12 +500,12 @@ const EMPTY_PRODUCT = (): ProductInput => ({
 function ProductsPanel({
   products,
   categories,
-  isAdmin,
+  canDelete,
   notify,
 }: {
   products: AdminProduct[];
   categories: AdminCategory[];
-  isAdmin: boolean;
+  canDelete: boolean;
   notify: (s: string) => void;
 }) {
   const [draft, setDraft] = useState<ProductInput | null>(null);
@@ -686,7 +724,7 @@ function ProductsPanel({
               <button className="hover:text-[color:var(--accent)]" onClick={() => edit(p)}>
                 Edit
               </button>
-              {isAdmin && (
+              {canDelete && (
                 <button
                   className="text-[color:var(--clay)] hover:underline"
                   onClick={() =>
@@ -732,11 +770,11 @@ function L({
 
 function CategoriesPanel({
   categories,
-  isAdmin,
+  canDelete,
   notify,
 }: {
   categories: AdminCategory[];
-  isAdmin: boolean;
+  canDelete: boolean;
   notify: (s: string) => void;
 }) {
   const [draft, setDraft] = useState<{ id?: string; name: string; name_bn: string; sort: number } | null>(
@@ -804,7 +842,7 @@ function CategoriesPanel({
               >
                 Edit
               </button>
-              {isAdmin && (
+              {canDelete && (
               <button
                 className="text-[color:var(--clay)] hover:underline"
                 onClick={() =>
@@ -861,12 +899,12 @@ const emptyOrder = (): OrderDraft => ({
 function OrdersPanel({
   orders,
   products,
-  isAdmin,
+  canManage,
   notify,
 }: {
   orders: AdminOrder[];
   products: AdminProduct[];
-  isAdmin: boolean;
+  canManage: boolean;
   notify: (s: string) => void;
 }) {
   const [, start] = useTransition();
@@ -900,16 +938,16 @@ function OrdersPanel({
       <div className="flex items-center">
         <p className="text-sm text-[color:var(--text-secondary)]">
           Every order with its full customer and delivery details.
-          {!isAdmin && " You can change the status; only an admin can edit or delete an order."}
+          {!canManage && " You can change the status; adding, editing and deleting an order needs the full order permission."}
         </p>
-        {isAdmin && (
+        {canManage && (
           <button className="btn btn-primary ml-auto text-sm" onClick={() => setDraft(emptyOrder())}>
             New order
           </button>
         )}
       </div>
 
-      {isAdmin && draft && (
+      {canManage && draft && (
         <div className="max-w-3xl space-y-4 rounded-2xl border border-[color:var(--accent)] p-5">
           <div className="grid gap-3 sm:grid-cols-2">
             <L label="Customer name">
@@ -1080,7 +1118,7 @@ function OrdersPanel({
                       {PAY_STATUS.map((s) => <option key={s}>{s}</option>)}
                     </select>
                   </label>
-                  {isAdmin && (
+                  {canManage && (
                     <>
                       <button className="text-sm hover:text-[color:var(--accent)]" onClick={() => editOrder(o)}>
                         Edit
@@ -1172,11 +1210,11 @@ function QuotesPanel({ quotes, notify }: { quotes: AdminQuote[]; notify: (s: str
 
 function ReviewsPanel({
   reviews,
-  isAdmin,
+  canDelete,
   notify,
 }: {
   reviews: AdminReview[];
-  isAdmin: boolean;
+  canDelete: boolean;
   notify: (s: string) => void;
 }) {
   const [, start] = useTransition();
@@ -1231,7 +1269,7 @@ function ReviewsPanel({
                 Reject
               </button>
             )}
-            {isAdmin && (
+            {canDelete && (
               <button
                 className="text-[color:var(--clay)] hover:underline"
                 onClick={() =>
@@ -1367,6 +1405,135 @@ function GatewayForm({ gateway, notify }: { gateway: AdminGateway; notify: (s: s
         onClick={() =>
           start(async () => {
             const r = await saveGateway({ id: gateway.id, enabled, mode, config });
+            notify(r.ok ? "Saved." : r.error);
+          })
+        }
+      >
+        {pending ? "Saving" : "Save"}
+      </button>
+    </div>
+  );
+}
+
+/* ================= Delivery partners ================= */
+
+const DELIVERY_META: Record<
+  DeliveryId,
+  { label: string; desc: string; fields: Array<{ key: string; label: string }> }
+> = {
+  steadfast: {
+    label: "Steadfast Courier",
+    desc: "portal.steadfast.com.bd → Settings → API. Base URL is usually https://portal.steadfast.com.bd/api/v1",
+    fields: [
+      { key: "api_key", label: "API Key" },
+      { key: "secret_key", label: "Secret Key" },
+      { key: "base_url", label: "Base URL" },
+    ],
+  },
+  pathao: {
+    label: "Pathao Courier",
+    desc: "Pathao Merchant panel → Developer API. The merchant API uses OAuth, so it needs the client pair plus your login.",
+    fields: [
+      { key: "client_id", label: "Client ID" },
+      { key: "client_secret", label: "Client Secret" },
+      { key: "username", label: "Merchant Email" },
+      { key: "password", label: "Merchant Password" },
+      { key: "store_id", label: "Store ID" },
+      { key: "base_url", label: "Base URL" },
+    ],
+  },
+  redx: {
+    label: "RedX",
+    desc: "RedX merchant dashboard → API. Paste the access token they issue you.",
+    fields: [
+      { key: "access_token", label: "Access Token" },
+      { key: "base_url", label: "Base URL" },
+    ],
+  },
+  sundarban: {
+    label: "Sundarban Courier",
+    desc: "Credentials from your Sundarban account manager (used for tracking / booking where available).",
+    fields: [
+      { key: "user_id", label: "User ID" },
+      { key: "password", label: "Password" },
+      { key: "api_key", label: "API Key (if provided)" },
+    ],
+  },
+  "sa-paribahan": {
+    label: "SA Paribahan",
+    desc: "Credentials from your SA Paribahan account manager.",
+    fields: [
+      { key: "user_id", label: "User ID" },
+      { key: "api_key", label: "API Key (if provided)" },
+    ],
+  },
+};
+
+function DeliveryPanel({
+  partners,
+  notify,
+}: {
+  partners: AdminDeliveryPartner[];
+  notify: (s: string) => void;
+}) {
+  return (
+    <div className="max-w-2xl space-y-6">
+      <p className="text-sm leading-relaxed text-[color:var(--text-secondary)]">
+        Paste each courier&apos;s credentials from their merchant panel and tick <b>Active</b>.
+        Keys are stored server-side and never reach the browser. Booking shipments through
+        these APIs is the next step — for now this holds the setup.
+      </p>
+      {partners.map((p) => (
+        <DeliveryForm key={p.id} partner={p} notify={notify} />
+      ))}
+    </div>
+  );
+}
+
+function DeliveryForm({
+  partner,
+  notify,
+}: {
+  partner: AdminDeliveryPartner;
+  notify: (s: string) => void;
+}) {
+  const [enabled, setEnabled] = useState(partner.enabled);
+  const [config, setConfig] = useState<Record<string, string>>(partner.config ?? {});
+  const [pending, start] = useTransition();
+  const meta = DELIVERY_META[partner.id];
+
+  return (
+    <div className="rounded-xl border border-[color:var(--panel-edge)] p-4">
+      <div className="flex items-center gap-4">
+        <span className="font-medium">{meta.label}</span>
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={enabled}
+            onChange={(e) => setEnabled(e.target.checked)}
+          />
+          Active
+        </label>
+      </div>
+      <p className="mt-1.5 text-xs text-[color:var(--text-quiet)]">{meta.desc}</p>
+      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+        {meta.fields.map((f) => (
+          <label key={f.key} className="block">
+            <span className={lbl}>{f.label}</span>
+            <input
+              className={`${field} mt-1 font-mono`}
+              value={config[f.key] ?? ""}
+              onChange={(e) => setConfig({ ...config, [f.key]: e.target.value })}
+            />
+          </label>
+        ))}
+      </div>
+      <button
+        className="btn btn-primary mt-4 text-sm"
+        disabled={pending}
+        onClick={() =>
+          start(async () => {
+            const r = await saveDeliveryPartner({ id: partner.id, enabled, config });
             notify(r.ok ? "Saved." : r.error);
           })
         }

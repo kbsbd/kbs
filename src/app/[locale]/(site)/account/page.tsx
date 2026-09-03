@@ -27,7 +27,7 @@ export default async function AccountPage({
   const c = await getContent();
 
   const [profileRes, ordersRes, wishRes] = await Promise.all([
-    supabase.from("profiles").select("full_name, phone").eq("user_id", user.id).maybeSingle(),
+    supabase.from("profiles").select("full_name, phone, address").eq("user_id", user.id).maybeSingle(),
     supabase
       .from("orders")
       .select("order_number, status, payment_status, payment_method, total, created_at, order_items(name, qty, line_total)")
@@ -79,6 +79,7 @@ export default async function AccountPage({
           profile={{
             fullName: String((profileRes.data as Row | null)?.full_name ?? ""),
             phone: String((profileRes.data as Row | null)?.phone ?? ""),
+            address: String((profileRes.data as Row | null)?.address ?? ""),
           }}
           orders={orders}
           wishlist={wishlist}

@@ -57,6 +57,7 @@ export default async function AdminPage({
       email={session.email}
       fullName={fullName}
       role={session.role}
+      permissions={session.permissions}
       groups={editableStrings(content)}
       lists={{
         "heroBands|": content.heroBands,

@@ -1,15 +1,15 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createAuthClient, getAdminSession } from "@/lib/supabase/auth";
+import { createAuthClient, getAdminSession, can } from "@/lib/supabase/auth";
 import type { Block } from "@/lib/cms";
 
 type Result = { ok: true } | { ok: false; error: string };
 
 async function guard() {
   const session = await getAdminSession();
-  // the CMS is full-admin only; managers never reach it
-  if (!session || session.role !== "admin") return null;
+  // Pages & menu need the 'pages' permission (a full admin always has it)
+  if (!session || !can(session, "pages")) return null;
   const supabase = await createAuthClient();
   return supabase ? { session, supabase } : null;
 }
