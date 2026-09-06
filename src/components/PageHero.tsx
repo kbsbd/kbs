@@ -52,7 +52,7 @@ export default function PageHero({
   }
 
   return (
-    <header className="relative w-full overflow-hidden">
+    <header data-page-hero className="relative w-full overflow-hidden">
       <div className="relative min-h-[62svh] w-full sm:min-h-[70svh]">
         <img
           src={src}

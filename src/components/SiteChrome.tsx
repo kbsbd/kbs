@@ -35,10 +35,14 @@ export default function SiteChrome({
   children: React.ReactNode;
 }) {
   const [navSolid, setNavSolid] = useState(false);
+  /* true while the header floats over a standalone page hero (PageHero), which —
+     unlike the always-dark home scrub hero — can be a bright photo, so the nav
+     gets its own slim scrim for legibility. */
+  const [overPageHero, setOverPageHero] = useState(false);
   const spineRef = useRef<SVGSVGElement>(null);
   const pathname = usePathname();
-  /* The transparent-over-footage header is only right on the home page, where
-     the scrub hero sits behind it. Everywhere else the bar is solid. */
+  /* The header floats transparent over any hero — the home scrub hero or a
+     standalone page's PageHero — and turns solid once it has scrolled past it. */
   const isHome = /^\/(en|bn)\/?$/.test(pathname);
   const other: Locale = locale === "en" ? "bn" : "en";
   const otherPath = pathname.replace(/^\/(en|bn)/, `/${other}`) || `/${other}`;
@@ -134,22 +138,40 @@ export default function SiteChrome({
     const onScroll = () => {
       /* On the home page the scrub hero is many viewports tall but its stage is
          pinned to the screen the whole time, so keep the header see-through for
-         all of it — go solid only once the hero has scrolled away. Elsewhere the
-         first viewport-height is enough. */
-      const heroEl = isHome ? document.querySelector<HTMLElement>(".hero") : null;
-      const threshold = heroEl
-        ? heroEl.offsetTop + heroEl.offsetHeight - window.innerHeight - 4
-        : window.innerHeight * 0.9;
-      setNavSolid(!isHome || window.scrollY > threshold);
+         all of it — go solid only once the hero has scrolled away. A standalone
+         page hero (PageHero) is a normal block, so the header stays see-through
+         until it has cleared the image. Pages with no hero go solid at once. */
+      const scrubHero = isHome ? document.querySelector<HTMLElement>(".hero") : null;
+      const pageHero = scrubHero
+        ? null
+        : document.querySelector<HTMLElement>("[data-page-hero]");
+      let solid: boolean;
+      if (scrubHero) {
+        const end =
+          scrubHero.offsetTop + scrubHero.offsetHeight - window.innerHeight - 4;
+        solid = window.scrollY > end;
+      } else if (pageHero) {
+        /* solid once the header no longer overlaps the photo — its bottom edge
+           has passed the hero's. Clamped so a page too short to scroll that far
+           still resolves (it stays over the hero, which is then correct). */
+        const end = pageHero.offsetTop + pageHero.offsetHeight - 72;
+        solid = window.scrollY > end;
+      } else {
+        solid = true;
+      }
+      setNavSolid(solid);
+      setOverPageHero(!!pageHero && !solid);
       if (raf === null) raf = requestAnimationFrame(write);
     };
     window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
     onScroll();
     return () => {
       window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
       if (raf !== null) cancelAnimationFrame(raf);
     };
-  }, [isHome]);
+  }, [pathname, isHome]);
 
   /* pause every animation on a hidden tab. animation-play-state does not
      inherit, so the CSS rule targets elements and pseudo-elements alike. */
@@ -199,7 +221,7 @@ export default function SiteChrome({
 
       <header
         data-nav-solid={navSolid ? "true" : "false"}
-        data-nav-over-hero={isHome && !navSolid ? "true" : "false"}
+        data-nav-over-hero={navSolid ? "false" : "true"}
         className={`fixed inset-x-0 top-0 z-50 transition-[background-color,backdrop-filter,border-color] duration-500 ${
           navSolid
             ? "border-b border-[color:var(--panel-edge)] bg-[color:var(--canvas)]/85 backdrop-blur-xl"
@@ -220,6 +242,18 @@ export default function SiteChrome({
             }}
           />
         )}
+        {/* standalone page heroes can be bright photos, so the nav always keeps a
+            slim gradient over them — independent of the admin scrim, which is for
+            the home footage. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 h-32 transition-opacity duration-500"
+          style={{
+            opacity: overPageHero ? 1 : 0,
+            background:
+              "linear-gradient(180deg, rgba(7,16,26,.72) 0%, rgba(7,16,26,.4) 44%, rgba(7,16,26,0) 100%)",
+          }}
+        />
         <nav className="relative mx-auto flex max-w-[86rem] items-center gap-3 px-4 py-3 sm:gap-4 sm:px-8">
           <Link
             href={`/${locale}`}
