@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import type { Locale, SiteContent } from "@/content/seed";
 import { img } from "@/lib/media";
+import ZoomableImage from "@/components/ZoomableImage";
 
 /**
  * The page below the hero. No two adjacent sections share a layout skeleton,
@@ -115,14 +116,14 @@ export function Amenities({ c, l }: { c: SiteContent; l: Locale }) {
         <div className="mt-12 grid gap-6 lg:grid-cols-[1.25fr_1fr]">
           {lead && (
             <figure className="part group relative overflow-hidden rounded-2xl">
-              <img
+              <ZoomableImage
                 src={img(lead.image, 1600)}
-                alt=""
-                loading="lazy"
+                full={img(lead.image, 2400)}
+                alt={pick(lead.title, l)}
                 className="h-full min-h-[22rem] w-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.03]"
               />
               <figcaption
-                className="absolute inset-x-0 bottom-0 p-8 text-white"
+                className="pointer-events-none absolute inset-x-0 bottom-0 p-8 text-white"
                 style={{
                   // the lead card carries two lines of body copy over bright
                   // pergola and sky, so it needs a deeper, taller gradient than
@@ -146,14 +147,14 @@ export function Amenities({ c, l }: { c: SiteContent; l: Locale }) {
                 key={a.id}
                 className="part group relative overflow-hidden rounded-2xl"
               >
-                <img
+                <ZoomableImage
                   src={img(a.image, 1000)}
-                  alt=""
-                  loading="lazy"
+                  full={img(a.image, 2000)}
+                  alt={pick(a.title, l)}
                   className="h-56 w-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.03]"
                 />
                 <figcaption
-                  className="absolute inset-x-0 bottom-0 p-6 text-white"
+                  className="pointer-events-none absolute inset-x-0 bottom-0 p-6 text-white"
                   style={{
                     background:
                       "linear-gradient(0deg, rgba(7,16,26,.94) 0%, rgba(7,16,26,.5) 55%, transparent 100%)",
@@ -172,14 +173,14 @@ export function Amenities({ c, l }: { c: SiteContent; l: Locale }) {
               key={a.id}
               className="part group relative overflow-hidden rounded-2xl"
             >
-              <img
+              <ZoomableImage
                 src={img(a.image, 1200)}
-                alt=""
-                loading="lazy"
+                full={img(a.image, 2200)}
+                alt={pick(a.title, l)}
                 className="h-64 w-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.03]"
               />
               <figcaption
-                className="absolute inset-x-0 bottom-0 p-6 text-white"
+                className="pointer-events-none absolute inset-x-0 bottom-0 p-6 text-white"
                 style={{
                   background:
                     "linear-gradient(0deg, rgba(7,16,26,.96) 0%, rgba(7,16,26,.78) 42%, rgba(7,16,26,.36) 72%, transparent 100%)",

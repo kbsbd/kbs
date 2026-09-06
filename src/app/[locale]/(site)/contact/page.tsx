@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { LOCALES, type Locale } from "@/content/seed";
 import { getContent } from "@/lib/content";
+import { toMapEmbedSrc } from "@/lib/mapEmbed";
 import { siteUrl } from "@/lib/site-url";
 import ContactForm from "@/components/sections/ContactForm";
 import ChannelIcon from "@/components/ChannelIcon";
@@ -112,11 +113,12 @@ export default async function ContactPage({
               </div>
             )}
 
-            {c.site.mapEmbed ? (
+            {toMapEmbedSrc(c.site.mapEmbed) ? (
               <iframe
-                src={c.site.mapEmbed}
+                src={toMapEmbedSrc(c.site.mapEmbed)}
                 title="Map"
                 loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
                 className="aspect-[16/10] w-full rounded-lg border border-[color:var(--panel-edge)]"
               />
             ) : null}

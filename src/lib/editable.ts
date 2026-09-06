@@ -110,7 +110,11 @@ export const SITE_FIELDS: Array<{ key: string; label: string; hint?: string; typ
     hint: "Digits with country code, e.g. 8801313401405. Powers the floating WhatsApp button.",
   },
   { key: "email", label: "Email address" },
-  { key: "mapEmbed", label: "Google Maps embed URL", hint: "Leave blank to hide the map" },
+  {
+    key: "mapEmbed",
+    label: "Google Maps",
+    hint: 'In Google Maps: Share → "Embed a map" → Copy HTML, and paste the whole thing here (or just the map link). Shows on Contact and KB Homes. Leave blank to hide the map.',
+  },
   { key: "founded", label: "Founded (year)", hint: 'Shown in the footer as "SINCE 1995"' },
 ];
 
