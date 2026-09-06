@@ -25,7 +25,7 @@ export type MediaContent = {
   premise: { image: string };
   building: { image: string };
   amenities: { items: Item[] };
-  servicesPage: { items: Item[] };
+  servicesPage: { items: Item[]; heroImage: string };
   kbHomes: { gallery: GalleryItem[] };
   clientsPage: { logos: Logo[]; projects: ClientProject[] };
 };
@@ -49,6 +49,7 @@ export default function MediaAdmin({
     "staticHero.image": media.staticHero.image,
     "premise.image": media.premise.image,
     "building.image": media.building.image,
+    "servicesPage.heroImage": media.servicesPage.heroImage,
   });
 
   const [amenities, setAmenities] = useState<Item[]>(media.amenities.items);
@@ -66,10 +67,17 @@ export default function MediaAdmin({
     });
   }
 
-  const SCALARS: Array<{ key: keyof typeof scalars; root: string; label: string; ratio: string }> = [
-    { key: "staticHero.image", root: "staticHero", label: "Static hero image (phones & reduced-motion)", ratio: "3 / 4" },
-    { key: "premise.image", root: "premise", label: "“The idea” section image", ratio: "4 / 5" },
-    { key: "building.image", root: "building", label: "“The building” section image", ratio: "21 / 9" },
+  const SCALARS: Array<{
+    key: keyof typeof scalars;
+    root: string;
+    path: string;
+    label: string;
+    ratio: string;
+  }> = [
+    { key: "staticHero.image", root: "staticHero", path: "image", label: "Static hero image (phones & reduced-motion)", ratio: "3 / 4" },
+    { key: "premise.image", root: "premise", path: "image", label: "“The idea” section image", ratio: "4 / 5" },
+    { key: "building.image", root: "building", path: "image", label: "“The building” section image", ratio: "21 / 9" },
+    { key: "servicesPage.heroImage", root: "servicesPage", path: "heroImage", label: "Services page hero image", ratio: "16 / 9" },
   ];
 
   return (
@@ -90,7 +98,7 @@ export default function MediaAdmin({
               value={scalars[s.key]}
               onChange={(url) => {
                 setScalars((v) => ({ ...v, [s.key]: url }));
-                save([{ root: s.root, path: "image", value: url }], "Image updated.");
+                save([{ root: s.root, path: s.path, value: url }], "Image updated.");
               }}
             />
           </div>

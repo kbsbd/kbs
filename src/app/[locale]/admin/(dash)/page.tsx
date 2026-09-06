@@ -93,7 +93,10 @@ export default async function AdminPage({
         premise: { image: content.premise.image },
         building: { image: content.building.image },
         amenities: { items: content.amenities.items },
-        servicesPage: { items: content.servicesPage.items },
+        servicesPage: {
+          items: content.servicesPage.items,
+          heroImage: content.servicesPage.heroImage,
+        },
         kbHomes: { gallery: content.kbHomes.gallery },
         clientsPage: {
           logos: content.clientsPage.logos,

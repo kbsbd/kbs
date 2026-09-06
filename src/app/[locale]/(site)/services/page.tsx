@@ -55,6 +55,18 @@ export default async function ServicesPage({
         <p className="chip font-mono-label">{t(s.kicker)}</p>
         <h1 className="font-display mt-6 text-[clamp(2.2rem,6vw,3.6rem)]">{t(s.head)}</h1>
 
+        {s.heroImage && (
+          <MediaSlot
+            name={s.heroImage}
+            alt={t(s.head)}
+            label="Services hero"
+            ratio="16 / 9"
+            width={1600}
+            priority
+            className="mt-8"
+          />
+        )}
+
         <div className="prose-block mt-8">
           {s.intro.map((p, i) => (
             <p key={i}>{t(p)}</p>

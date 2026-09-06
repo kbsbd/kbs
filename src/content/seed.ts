@@ -501,6 +501,8 @@ export const footer = {
 export const servicesPage = {
   kicker: bi("WHAT WE DO", "আমরা যা করি"),
   head: bi("Our services", "আমাদের সেবাসমূহ"),
+  /** Optional hero image at the top of the Services page; set on the Media tab. */
+  heroImage: "",
   intro: [
     bi(
       "Welcome to Kanchan Builders. We are one of the leading Sanitary & Plumbing systems solution providing companies in the Bangladeshi market. For the last 36 years we have worked in this field, for a green world and to every international standard.",
