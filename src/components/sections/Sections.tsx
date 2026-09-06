@@ -116,9 +116,10 @@ export function Building({ c, l }: { c: SiteContent; l: Locale }) {
   );
 }
 
-/* 4. Amenities. Deliberately asymmetric: one tall lead, then a run of cards. */
+/* 4. Amenities. A uniform card grid: the whole photo on top, the name and
+   description on a panel below — so no image is cropped and no caption floats
+   over empty space. */
 export function Amenities({ c, l }: { c: SiteContent; l: Locale }) {
-  const [lead, ...rest] = c.amenities.items;
   /* A card opens the page the admin picked, otherwise the detail view built
      from the card's own image and description — so every card is clickable out
      of the box and the picker is an override, not a requirement. */
@@ -134,86 +135,28 @@ export function Amenities({ c, l }: { c: SiteContent; l: Locale }) {
           </h2>
         </div>
 
-        <div className="mt-12 grid gap-6 lg:grid-cols-[1.25fr_1fr]">
-          {lead && (
-            <figure className="part group relative overflow-hidden rounded-2xl bg-[color:var(--panel)]">
-              <CardLink href={href(lead)} label={pick(lead.title, l)} />
-              <img
-                src={img(lead.image, 1600)}
-                alt=""
-                loading="lazy"
-                className="w-full transition-transform duration-[1200ms] ease-out group-hover:scale-[1.03]"
-              />
-              <figcaption
-                className="pointer-events-none absolute inset-x-0 bottom-0 p-8 text-white"
-                style={{
-                  // the lead card carries two lines of body copy over bright
-                  // pergola and sky, so it needs a deeper, taller gradient than
-                  // the title-only cards beside it. The gradient is dark in both
-                  // themes, so the text is pinned light, not theme-following.
-                  background:
-                    "linear-gradient(0deg, rgba(7,16,26,.96) 0%, rgba(7,16,26,.82) 38%, rgba(7,16,26,.42) 68%, transparent 100%)",
-                }}
-              >
-                <h3 className="font-display text-2xl">{pick(lead.title, l)}</h3>
-                <p className="mt-2 max-w-[38ch] text-sm leading-relaxed text-white/80">
-                  {pick(lead.body, l)}
-                </p>
-              </figcaption>
-            </figure>
-          )}
-
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-1">
-            {rest.slice(0, 2).map((a) => (
-              <figure
-                key={a.id}
-                className="part group relative overflow-hidden rounded-2xl bg-[color:var(--panel)]"
-              >
-                <CardLink href={href(a)} label={pick(a.title, l)} />
+        <div className="mt-12 grid items-start gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {c.amenities.items.map((a) => (
+            <figure
+              key={a.id}
+              className="part group relative overflow-hidden rounded-2xl border border-[color:var(--panel-edge)] bg-[color:var(--panel)]"
+            >
+              <CardLink href={href(a)} label={pick(a.title, l)} />
+              <div className="overflow-hidden">
                 <img
-                  src={img(a.image, 1000)}
+                  src={img(a.image, 1200)}
                   alt=""
                   loading="lazy"
                   className="w-full transition-transform duration-[1200ms] ease-out group-hover:scale-[1.03]"
                 />
-                <figcaption
-                  className="pointer-events-none absolute inset-x-0 bottom-0 p-6 text-white"
-                  style={{
-                    background:
-                      "linear-gradient(0deg, rgba(7,16,26,.94) 0%, rgba(7,16,26,.5) 55%, transparent 100%)",
-                  }}
-                >
-                  <h3 className="font-display text-lg">{pick(a.title, l)}</h3>
-                </figcaption>
-              </figure>
-            ))}
-          </div>
-        </div>
-
-        <div className="mt-6 grid gap-6 sm:grid-cols-2">
-          {rest.slice(2).map((a) => (
-            <figure
-              key={a.id}
-              className="part group relative overflow-hidden rounded-2xl bg-[color:var(--panel)]"
-            >
-              <CardLink href={href(a)} label={pick(a.title, l)} />
-              <img
-                src={img(a.image, 1200)}
-                alt=""
-                loading="lazy"
-                className="w-full transition-transform duration-[1200ms] ease-out group-hover:scale-[1.03]"
-              />
-              <figcaption
-                className="pointer-events-none absolute inset-x-0 bottom-0 p-6 text-white"
-                style={{
-                  background:
-                    "linear-gradient(0deg, rgba(7,16,26,.96) 0%, rgba(7,16,26,.78) 42%, rgba(7,16,26,.36) 72%, transparent 100%)",
-                }}
-              >
+              </div>
+              <figcaption className="p-5">
                 <h3 className="font-display text-lg">{pick(a.title, l)}</h3>
-                <p className="mt-1.5 max-w-[40ch] text-sm leading-relaxed text-white/80">
-                  {pick(a.body, l)}
-                </p>
+                {pick(a.body, l) && (
+                  <p className="mt-2 text-sm leading-relaxed text-[color:var(--text-secondary)]">
+                    {pick(a.body, l)}
+                  </p>
+                )}
               </figcaption>
             </figure>
           ))}
