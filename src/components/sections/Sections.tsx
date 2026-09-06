@@ -136,41 +136,62 @@ export function Premise({ c, l }: { c: SiteContent; l: Locale }) {
   );
 }
 
-/* 2. The building. Image on the left, the heading and spec table on the right;
-   on a phone the info stacks under the image. */
+/* 2. The building. The heading spans the full width at the top; below it the
+   image sits left and the spec sheet right, stacking on a phone. The image and
+   the "full details" link both open the standalone building page. */
 export function Building({ c, l }: { c: SiteContent; l: Locale }) {
+  const to = `/${l}/building`;
+  const more = l === "bn" ? "সম্পূর্ণ বিবরণ" : "Full building details";
   return (
     <section className="sec reveal" id="building">
       <Wrap>
-        <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
-          <div className="part relative overflow-hidden rounded-2xl bg-[color:var(--panel)]">
+        <div className="part flex flex-wrap items-end justify-between gap-x-8 gap-y-4">
+          <div>
+            <Kicker>{pick(c.building.kicker, l)}</Kicker>
+            <h2 className="font-display mt-4 text-[clamp(1.9rem,3.6vw,3rem)]">
+              {pick(c.building.head, l)}
+            </h2>
+          </div>
+          <Link
+            href={to}
+            className="font-mono-label group inline-flex items-center gap-2 text-[color:var(--clay)] hover:underline"
+          >
+            {more}
+            <span aria-hidden="true" className="transition-transform group-hover:translate-x-1">
+              →
+            </span>
+          </Link>
+        </div>
+
+        <div className="mt-10 grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
+          <Link
+            href={to}
+            aria-label={more}
+            className="part group relative block overflow-hidden rounded-2xl bg-[color:var(--panel)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--clay)]"
+          >
             <img
               src={img(c.building.image, 1400)}
               alt=""
               loading="lazy"
-              className="w-full"
+              className="w-full transition-transform duration-[1200ms] ease-out group-hover:scale-[1.03]"
             />
-          </div>
+          </Link>
 
-          <div>
-            <div className="part">
-              <Kicker>{pick(c.building.kicker, l)}</Kicker>
-              <h2 className="font-display mt-4 text-[clamp(1.9rem,3.6vw,3rem)]">
-                {pick(c.building.head, l)}
-              </h2>
-            </div>
-
-            <dl className="part mt-8 grid gap-px overflow-hidden rounded-2xl border border-[color:var(--panel-edge)] bg-[color:var(--panel-edge)] sm:grid-cols-2">
-              {c.building.specs.map((s) => (
-                <div key={s.id} className="bg-[color:var(--panel)] px-6 py-6">
-                  <dt className="font-mono-label text-[color:var(--text-quiet)]">
-                    {pick(s.label, l)}
-                  </dt>
-                  <dd className="font-display mt-2 text-xl">{pick(s.value, l)}</dd>
-                </div>
-              ))}
-            </dl>
-          </div>
+          <dl className="part divide-y divide-[color:var(--panel-edge)] border-y border-[color:var(--panel-edge)]">
+            {c.building.specs.map((s) => (
+              <div
+                key={s.id}
+                className="flex items-baseline justify-between gap-6 py-4"
+              >
+                <dt className="font-mono-label text-[color:var(--text-quiet)]">
+                  {pick(s.label, l)}
+                </dt>
+                <dd className="font-display text-right text-lg sm:text-xl">
+                  {pick(s.value, l)}
+                </dd>
+              </div>
+            ))}
+          </dl>
         </div>
       </Wrap>
     </section>

@@ -181,6 +181,10 @@ export const building = {
   image: "aerial-context",
   kicker: { en: "THE BUILDING", bn: "ভবনটি" },
   head: { en: "KB HOUSE, in numbers.", bn: "কেবি হাউস, সংখ্যায়।" },
+  body: {
+    en: "A nine-storey residential building in Dhaka, planned around light, cross-ventilation and a planted terrace on every floor. The figures below are the fixed points; the full page walks through the plan, the materials and where the project stands today.",
+    bn: "ঢাকায় একটি নয়তলা আবাসিক ভবন, আলো, ক্রস-ভেন্টিলেশন এবং প্রতি তলায় একটি সবুজ বারান্দাকে কেন্দ্র করে পরিকল্পিত। নিচের সংখ্যাগুলো নির্দিষ্ট বিষয়; সম্পূর্ণ পৃষ্ঠায় পরিকল্পনা, উপকরণ এবং প্রকল্পের বর্তমান অবস্থা তুলে ধরা হয়েছে।",
+  },
   specs: [
     {
       id: "floors",
