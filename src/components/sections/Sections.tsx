@@ -38,11 +38,16 @@ const Kicker = ({ children }: { children: React.ReactNode }) => (
 );
 
 /**
- * One gallery card in the old overlay style. The frame keeps a fixed shape so
- * the layout never collapses or shifts; the WHOLE photo shows inside it
- * (object-contain, never cropped); a blurred copy of the same photo fills
- * whatever the photo doesn't cover, so there is no empty edge; and the caption
- * sits over a bottom gradient. The whole card is one link.
+ * One gallery card in the overlay style. The frame keeps a fixed shape so the
+ * layout never collapses; the uploaded photo is resized to exactly fill that
+ * frame (object-fill — no crop, no letterbox, no blur pad). On hover the whole
+ * card lifts and grows a little past its cell with a soft shadow, and the photo
+ * inside pushes in further, for a smooth "out of the frame" 3D zoom. The whole
+ * card is one link.
+ *
+ * `fill` makes the card take the full height of its grid row instead of a fixed
+ * aspect ratio — used for the tall lead card so it matches the stacked pair
+ * beside it.
  */
 function GalleryCard({
   image,
@@ -52,48 +57,56 @@ function GalleryCard({
   width,
   aspect,
   big = false,
+  fill = false,
 }: {
   image: string;
   title: string;
   body?: string;
   href?: string;
   width: number;
-  /** frame shape, e.g. "4 / 3" */
+  /** frame shape, e.g. "16 / 10" — ignored when `fill` is set on lg screens */
   aspect: string;
   big?: boolean;
+  fill?: boolean;
 }) {
   const src = img(image, width);
   return (
-    <figure className="part group relative overflow-hidden rounded-2xl bg-[color:var(--panel)]">
-      <CardLink href={href} label={title} />
-      <div className="relative w-full" style={{ aspectRatio: aspect }}>
-        {src && (
-          <div
-            aria-hidden="true"
-            className="absolute inset-0 scale-125 bg-cover bg-center"
-            style={{ backgroundImage: `url("${img(image, 500)}")`, filter: "blur(32px)" }}
-          />
-        )}
-        <img
-          src={src}
-          alt=""
-          loading="lazy"
-          className="absolute inset-0 h-full w-full object-contain transition-transform duration-[1200ms] ease-out group-hover:scale-[1.03]"
-        />
-      </div>
-      <figcaption
-        className="pointer-events-none absolute inset-x-0 bottom-0 p-6 text-white"
-        style={{
-          background: big
-            ? "linear-gradient(0deg, rgba(7,16,26,.94) 0%, rgba(7,16,26,.72) 40%, rgba(7,16,26,.28) 70%, transparent 100%)"
-            : "linear-gradient(0deg, rgba(7,16,26,.92) 0%, rgba(7,16,26,.5) 55%, transparent 100%)",
-        }}
+    <figure className={`part group relative ${fill ? "lg:h-full" : ""}`}>
+      <div
+        className={`relative rounded-2xl transition duration-500 ease-out will-change-transform group-hover:z-20 group-hover:scale-[1.04] group-hover:shadow-[0_38px_80px_-20px_rgba(7,16,26,.55)] group-focus-within:z-20 group-focus-within:scale-[1.04] ${
+          fill ? "lg:h-full" : ""
+        }`}
       >
-        <h3 className={`font-display ${big ? "text-2xl" : "text-lg"}`}>{title}</h3>
-        {body && (
-          <p className="mt-2 max-w-[42ch] text-sm leading-relaxed text-white/85">{body}</p>
-        )}
-      </figcaption>
+        <CardLink href={href} label={title} />
+        <div
+          className={`relative w-full overflow-hidden rounded-2xl bg-[color:var(--panel)] ${
+            fill ? "aspect-[4/3] lg:aspect-auto lg:h-full" : ""
+          }`}
+          style={fill ? undefined : { aspectRatio: aspect }}
+        >
+          <img
+            src={src}
+            alt=""
+            loading="lazy"
+            className="absolute inset-0 h-full w-full object-fill transition-transform duration-[1100ms] ease-out group-hover:scale-[1.09] group-focus-within:scale-[1.09]"
+          />
+          <figcaption
+            className="pointer-events-none absolute inset-x-0 bottom-0 rounded-b-2xl p-6 text-white"
+            style={{
+              background: big
+                ? "linear-gradient(0deg, rgba(7,16,26,.94) 0%, rgba(7,16,26,.72) 40%, rgba(7,16,26,.28) 70%, transparent 100%)"
+                : "linear-gradient(0deg, rgba(7,16,26,.92) 0%, rgba(7,16,26,.5) 55%, transparent 100%)",
+            }}
+          >
+            <h3 className={`font-display ${big ? "text-2xl" : "text-lg"}`}>{title}</h3>
+            {body && (
+              <p className="mt-2 max-w-[42ch] text-sm leading-relaxed text-white/85">
+                {body}
+              </p>
+            )}
+          </figcaption>
+        </div>
+      </div>
     </figure>
   );
 }
@@ -198,9 +211,9 @@ export function Building({ c, l }: { c: SiteContent; l: Locale }) {
   );
 }
 
-/* 4. Amenities. Asymmetric gallery: one tall lead, two stacked beside it, then a
-   run of wider cards. Every frame shows the whole photo, blur-filled so there is
-   no empty edge and no crop. */
+/* 4. Amenities. Asymmetric gallery: one tall lead whose height matches the two
+   stacked cards beside it, then a run of wider cards. Every photo is resized to
+   fill its frame exactly. */
 export function Amenities({ c, l }: { c: SiteContent; l: Locale }) {
   const [lead, ...rest] = c.amenities.items;
   /* A card opens the page the admin picked, otherwise the detail view built
@@ -218,7 +231,7 @@ export function Amenities({ c, l }: { c: SiteContent; l: Locale }) {
           </h2>
         </div>
 
-        <div className="mt-12 grid items-start gap-6 lg:grid-cols-[1.2fr_1fr]">
+        <div className="mt-12 grid items-stretch gap-6 lg:grid-cols-[1.2fr_1fr]">
           {lead && (
             <GalleryCard
               image={lead.image}
@@ -228,10 +241,11 @@ export function Amenities({ c, l }: { c: SiteContent; l: Locale }) {
               width={1600}
               aspect="1 / 1"
               big
+              fill
             />
           )}
 
-          <div className="grid items-start gap-6 sm:grid-cols-2 lg:grid-cols-1">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-1">
             {rest.slice(0, 2).map((a) => (
               <GalleryCard
                 key={a.id}

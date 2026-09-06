@@ -63,7 +63,7 @@ export default async function AmenityDetail({
   const cta = l === "bn" ? "সাইট ভিজিট বুক করুন" : "Book a site visit";
 
   return (
-    <div className="page">
+    <div>
       <JsonLd
         data={[
           {
@@ -82,35 +82,48 @@ export default async function AmenityDetail({
         ]}
       />
 
-      <div className="page-wrap">
-        <Link
-          href={`/${l}#amenities`}
-          className="font-mono-label text-[color:var(--clay)] hover:underline"
-        >
-          ← {back}
-        </Link>
-
-        <h1 className="font-display mt-5 max-w-[20ch] text-[clamp(2rem,5.5vw,3.2rem)]">
-          {t(item.title)}
-        </h1>
-
-        {item.image && (
-          <figure className="mt-8 overflow-hidden rounded-2xl bg-[color:var(--panel)]">
+      {/* Full-bleed hero: the photo runs edge to edge and the heading and
+          sub-heading sit on top of it. */}
+      <header className="relative w-full overflow-hidden">
+        <div className="relative min-h-[64svh] w-full sm:min-h-[72svh]">
+          {item.image && (
             <img
-              src={img(item.image, 1600)}
+              src={img(item.image, 2000)}
               alt={t(item.title)}
-              className="w-full"
+              className="absolute inset-0 h-full w-full object-cover"
+              fetchPriority="high"
             />
-          </figure>
-        )}
-
-        <p className="page-lede mt-8 max-w-[62ch]">{t(item.body)}</p>
-
-        <div className="mt-10">
-          <Link href={`/${l}#book`} className="btn btn-primary">
-            {cta}
-          </Link>
+          )}
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(180deg, rgba(7,16,26,.55) 0%, rgba(7,16,26,.18) 34%, rgba(7,16,26,.42) 66%, rgba(7,16,26,.9) 100%)",
+            }}
+          />
+          <div className="relative mx-auto flex min-h-[64svh] max-w-[72rem] flex-col justify-end px-[clamp(1.25rem,5vw,2.5rem)] pb-14 pt-32 sm:min-h-[72svh]">
+            <Link
+              href={`/${l}#amenities`}
+              className="font-mono-label text-white/80 transition-colors hover:text-white"
+            >
+              ← {back}
+            </Link>
+            <h1 className="font-display mt-4 max-w-[20ch] text-[clamp(2.2rem,6vw,3.6rem)] text-white">
+              {t(item.title)}
+            </h1>
+            {t(item.body) && (
+              <p className="mt-4 max-w-[52ch] text-[clamp(1.05rem,1.7vw,1.3rem)] leading-relaxed text-white/85">
+                {t(item.body)}
+              </p>
+            )}
+          </div>
         </div>
+      </header>
+
+      <div className="page-wrap py-14">
+        <Link href={`/${l}#book`} className="btn btn-primary">
+          {cta}
+        </Link>
 
         {(prev || next) && (
           <nav
