@@ -132,7 +132,15 @@ export default function SiteChrome({
       });
     };
     const onScroll = () => {
-      setNavSolid(!isHome || window.scrollY > window.innerHeight * 0.9);
+      /* On the home page the scrub hero is many viewports tall but its stage is
+         pinned to the screen the whole time, so keep the header see-through for
+         all of it — go solid only once the hero has scrolled away. Elsewhere the
+         first viewport-height is enough. */
+      const heroEl = isHome ? document.querySelector<HTMLElement>(".hero") : null;
+      const threshold = heroEl
+        ? heroEl.offsetTop + heroEl.offsetHeight - window.innerHeight - 4
+        : window.innerHeight * 0.9;
+      setNavSolid(!isHome || window.scrollY > threshold);
       if (raf === null) raf = requestAnimationFrame(write);
     };
     window.addEventListener("scroll", onScroll, { passive: true });

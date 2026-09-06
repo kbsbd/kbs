@@ -295,13 +295,15 @@ html[lang="bn"] .font-mono-label {
   color: rgba(241, 238, 231, 0.92);
 }
 
-/* Before it scrolls to a solid background, the header floats on the hero's dark
-   scrim — dark in both themes — so its links and icon buttons are pinned light
-   here instead of following --text-secondary. The "Book a visit" button keeps
-   its own colours. */
+/* Before it scrolls to a solid background, the header floats over the hero —
+   dark footage in both themes — so its links and icon buttons are pinned light
+   here instead of following --text-secondary. With the scrim now optional, a
+   text-shadow carries legibility over a bright frame. The "Book a visit" button
+   keeps its own colours. */
 header[data-nav-over-hero="true"] a:not(.btn),
 header[data-nav-over-hero="true"] button:not(.btn) {
   color: #eef1f4;
+  text-shadow: 0 1px 3px rgba(5, 8, 14, 0.72), 0 2px 10px rgba(5, 8, 14, 0.5);
 }
 header[data-nav-over-hero="true"] a:not(.btn):hover,
 header[data-nav-over-hero="true"] button:not(.btn):hover {
@@ -428,17 +430,15 @@ header[data-nav-over-hero="true"] button:not(.btn):hover {
   position: absolute;
   inset: -4%;
   pointer-events: none;
-  /* The scrim's floor matters as much as its peak. At 0.25 the darkening was
-     still ramping while the text was already 40 percent assembled and readable,
-     which is exactly where the settle band failed its audit. The band's own
-     opacity still fades the whole thing in, so a higher floor never pops. */
   opacity: calc(0.45 + 0.55 * var(--k, 1));
+  /* By request the caption scrim is barely there — the heavy triple text-shadow
+     on `.band` carries legibility now. The stored "Backdrop darkness" per band
+     still nudges it, but capped hard so no visible dark blob returns. */
   background: radial-gradient(
-    ellipse 94% 78% at var(--scrim-x, 30%) 50%,
-    rgba(5, 6, 12, var(--scrim-a, 0.7)) 0%,
-    rgba(5, 6, 12, calc(var(--scrim-a, 0.7) * 0.88)) 40%,
-    rgba(5, 6, 12, calc(var(--scrim-a, 0.7) * 0.52)) 66%,
-    rgba(5, 6, 12, 0) 88%
+    ellipse 88% 66% at var(--scrim-x, 30%) 50%,
+    rgba(5, 6, 12, calc(min(var(--scrim-a, 0.7), 0.8) * 0.22)) 0%,
+    rgba(5, 6, 12, calc(min(var(--scrim-a, 0.7), 0.8) * 0.12)) 45%,
+    rgba(5, 6, 12, 0) 80%
   );
 }
 

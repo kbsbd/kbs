@@ -37,6 +37,67 @@ const Kicker = ({ children }: { children: React.ReactNode }) => (
   <p className="font-mono-label text-[color:var(--clay)]">{children}</p>
 );
 
+/**
+ * One gallery card in the old overlay style. The frame keeps a fixed shape so
+ * the layout never collapses or shifts; the WHOLE photo shows inside it
+ * (object-contain, never cropped); a blurred copy of the same photo fills
+ * whatever the photo doesn't cover, so there is no empty edge; and the caption
+ * sits over a bottom gradient. The whole card is one link.
+ */
+function GalleryCard({
+  image,
+  title,
+  body,
+  href,
+  width,
+  aspect,
+  big = false,
+}: {
+  image: string;
+  title: string;
+  body?: string;
+  href?: string;
+  width: number;
+  /** frame shape, e.g. "4 / 3" */
+  aspect: string;
+  big?: boolean;
+}) {
+  const src = img(image, width);
+  return (
+    <figure className="part group relative overflow-hidden rounded-2xl bg-[color:var(--panel)]">
+      <CardLink href={href} label={title} />
+      <div className="relative w-full" style={{ aspectRatio: aspect }}>
+        {src && (
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 scale-125 bg-cover bg-center"
+            style={{ backgroundImage: `url("${img(image, 500)}")`, filter: "blur(32px)" }}
+          />
+        )}
+        <img
+          src={src}
+          alt=""
+          loading="lazy"
+          className="absolute inset-0 h-full w-full object-contain transition-transform duration-[1200ms] ease-out group-hover:scale-[1.03]"
+        />
+      </div>
+      <figcaption
+        className="pointer-events-none absolute inset-x-0 bottom-0 p-6 text-white"
+        style={{
+          background: big
+            ? "linear-gradient(0deg, rgba(7,16,26,.94) 0%, rgba(7,16,26,.72) 40%, rgba(7,16,26,.28) 70%, transparent 100%)"
+            : "linear-gradient(0deg, rgba(7,16,26,.92) 0%, rgba(7,16,26,.5) 55%, transparent 100%)",
+        }}
+      >
+        <h3 className={`font-display ${big ? "text-2xl" : "text-lg"}`}>{title}</h3>
+        {body && (
+          <p className="mt-2 max-w-[42ch] text-sm leading-relaxed text-white/85">{body}</p>
+        )}
+      </figcaption>
+    </figure>
+  );
+}
+
 /* 1. The one idea. Full-bleed image with the claim beside it. */
 export function Premise({ c, l }: { c: SiteContent; l: Locale }) {
   return (
@@ -116,10 +177,11 @@ export function Building({ c, l }: { c: SiteContent; l: Locale }) {
   );
 }
 
-/* 4. Amenities. A uniform card grid: the whole photo on top, the name and
-   description on a panel below — so no image is cropped and no caption floats
-   over empty space. */
+/* 4. Amenities. Asymmetric gallery: one tall lead, two stacked beside it, then a
+   run of wider cards. Every frame shows the whole photo, blur-filled so there is
+   no empty edge and no crop. */
 export function Amenities({ c, l }: { c: SiteContent; l: Locale }) {
+  const [lead, ...rest] = c.amenities.items;
   /* A card opens the page the admin picked, otherwise the detail view built
      from the card's own image and description — so every card is clickable out
      of the box and the picker is an override, not a requirement. */
@@ -135,30 +197,44 @@ export function Amenities({ c, l }: { c: SiteContent; l: Locale }) {
           </h2>
         </div>
 
-        <div className="mt-12 grid items-start gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {c.amenities.items.map((a) => (
-            <figure
+        <div className="mt-12 grid items-start gap-6 lg:grid-cols-[1.2fr_1fr]">
+          {lead && (
+            <GalleryCard
+              image={lead.image}
+              title={pick(lead.title, l)}
+              body={pick(lead.body, l)}
+              href={href(lead)}
+              width={1600}
+              aspect="1 / 1"
+              big
+            />
+          )}
+
+          <div className="grid items-start gap-6 sm:grid-cols-2 lg:grid-cols-1">
+            {rest.slice(0, 2).map((a) => (
+              <GalleryCard
+                key={a.id}
+                image={a.image}
+                title={pick(a.title, l)}
+                href={href(a)}
+                width={1100}
+                aspect="16 / 10"
+              />
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-6 grid items-start gap-6 sm:grid-cols-2">
+          {rest.slice(2).map((a) => (
+            <GalleryCard
               key={a.id}
-              className="part group relative overflow-hidden rounded-2xl border border-[color:var(--panel-edge)] bg-[color:var(--panel)]"
-            >
-              <CardLink href={href(a)} label={pick(a.title, l)} />
-              <div className="overflow-hidden">
-                <img
-                  src={img(a.image, 1200)}
-                  alt=""
-                  loading="lazy"
-                  className="w-full transition-transform duration-[1200ms] ease-out group-hover:scale-[1.03]"
-                />
-              </div>
-              <figcaption className="p-5">
-                <h3 className="font-display text-lg">{pick(a.title, l)}</h3>
-                {pick(a.body, l) && (
-                  <p className="mt-2 text-sm leading-relaxed text-[color:var(--text-secondary)]">
-                    {pick(a.body, l)}
-                  </p>
-                )}
-              </figcaption>
-            </figure>
+              image={a.image}
+              title={pick(a.title, l)}
+              body={pick(a.body, l)}
+              href={href(a)}
+              width={1200}
+              aspect="16 / 10"
+            />
           ))}
         </div>
 

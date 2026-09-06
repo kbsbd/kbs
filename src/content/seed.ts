@@ -444,8 +444,8 @@ export const appearance = {
    *  of the design size. */
   heroScale: 1,
   /** How dark the scrim behind the header is while it sits over the hero.
-   *  1 = the original scrim, 0 = no scrim at all (fully see-through). */
-  navScrim: 0.5,
+   *  0 = no scrim at all (fully see-through, the default), 1 = the old scrim. */
+  navScrim: 0,
 };
 
 /** Slider bounds + default, shared by the editor and the render path so a
@@ -453,7 +453,7 @@ export const appearance = {
 export const APPEARANCE_RANGE = {
   logoScale: { min: 0.7, max: 2, step: 0.05, def: 1 },
   heroScale: { min: 0.75, max: 1.4, step: 0.05, def: 1 },
-  navScrim: { min: 0, max: 1, step: 0.05, def: 0.5 },
+  navScrim: { min: 0, max: 1, step: 0.05, def: 0 },
 } as const;
 
 /** Clamp a stored/edited appearance value to its allowed range. */
