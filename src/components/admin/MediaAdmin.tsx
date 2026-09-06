@@ -49,8 +49,8 @@ export default function MediaAdmin({
     "staticHero.image": media.staticHero.image,
     "premise.image": media.premise.image,
     "building.image": media.building.image,
-    "servicesPage.heroImage": media.servicesPage.heroImage,
   });
+  const [servicesHero, setServicesHero] = useState(media.servicesPage.heroImage);
 
   const [amenities, setAmenities] = useState<Item[]>(media.amenities.items);
   const [services, setServices] = useState<Item[]>(media.servicesPage.items);
@@ -77,7 +77,6 @@ export default function MediaAdmin({
     { key: "staticHero.image", root: "staticHero", path: "image", label: "Static hero image (phones & reduced-motion)", ratio: "3 / 4" },
     { key: "premise.image", root: "premise", path: "image", label: "“The idea” section image", ratio: "4 / 5" },
     { key: "building.image", root: "building", path: "image", label: "“The building” section image", ratio: "21 / 9" },
-    { key: "servicesPage.heroImage", root: "servicesPage", path: "heroImage", label: "Services page hero image", ratio: "16 / 9" },
   ];
 
   return (
@@ -114,7 +113,24 @@ export default function MediaAdmin({
         pending={pending}
       />
 
-      {/* service images */}
+      {/* services page */}
+      <section className="space-y-4">
+        <h3 className="font-display text-lg">Services page</h3>
+        <ImageUpload
+          label="Services page hero image"
+          value={servicesHero}
+          hint="Shown as a wide banner under the “Our services” heading. Leave blank for no banner. Uploading replaces it; the ✕ on the preview removes it."
+          onChange={(url) => {
+            setServicesHero(url);
+            save(
+              [{ root: "servicesPage", path: "heroImage", value: url }],
+              url ? "Services hero image saved." : "Services hero image removed."
+            );
+          }}
+        />
+      </section>
+
+      {/* service card images */}
       <ItemGrid
         title="Service images"
         items={services}

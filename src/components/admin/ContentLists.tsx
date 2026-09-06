@@ -151,7 +151,7 @@ export const CONTENT_LISTS: Record<string, ListSpec[]> = {
       root: "servicesPage",
       path: "ctas",
       label: "Call-to-action buttons",
-      hint: "The big buttons on the Services page. “Opens” can be a page you built on the Pages tab (type /p/its-slug) or any link. Colour is a hex code like #5f7d1f.",
+      hint: "The big buttons on the Services page. “Opens” takes a page you built on the Pages tab (type /p/its-slug), an internal path like /contact, or a full link to another website (https://…). Colour is a hex code like #5f7d1f.",
       shape: "object",
       summaryKey: "label",
       fields: [

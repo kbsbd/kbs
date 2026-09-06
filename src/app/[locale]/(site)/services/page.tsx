@@ -30,12 +30,15 @@ function CtaRow({
 }) {
   const here = ctas.filter((x) => x.position === at && (x.label[l] || x.label.en) && x.href);
   if (!here.length) return null;
+  /* internal links (/… or #…) get the active locale; external URLs pass through */
+  const resolve = (href: string) =>
+    href.startsWith("/") || href.startsWith("#") ? `/${l}${href}` : href;
   return (
     <div className={`flex flex-wrap gap-3 ${className}`}>
       {here.map((cta) => (
         <a
           key={cta.id}
-          href={cta.href}
+          href={resolve(cta.href)}
           className="btn text-sm font-medium text-white"
           style={{
             backgroundColor: cta.color || "var(--accent)",
