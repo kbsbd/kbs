@@ -4,11 +4,14 @@
  *
  * Google's "Share → Embed a map" gives a full `<iframe src="…/maps/embed?pb=…">`
  * snippet; people also paste a plain place link or a maps.app.goo.gl short link.
- * Only the `…/maps/embed` URL renders in a frame — a normal maps URL is refused
- * by Google with X-Frame-Options. So: pull the src out of a pasted iframe, keep
- * a real embed URL as-is, and fall back to the `?output=embed` form for a plain
- * maps link (short links can't be resolved here, so those are dropped).
+ * `/maps/embed` URLs frame directly; a normal place URL is refused by Google
+ * with X-Frame-Options, but the same place as `?q=…&output=embed` renders fine.
+ * Short links can't be read without following them, so `resolveMapEmbed` does
+ * that once and caches the result.
  */
+import { unstable_cache } from "next/cache";
+
+/** Synchronous best-effort: iframe snippet, embed URL, or a full place URL. */
 export function toMapEmbedSrc(raw: string | null | undefined): string {
   const input = (raw ?? "").trim();
   if (!input) return "";
@@ -27,18 +30,43 @@ export function toMapEmbedSrc(raw: string | null | undefined): string {
 
   const host = url.hostname.replace(/^www\./, "");
   const isGoogleMaps =
-    (host === "google.com" || host.endsWith(".google.com")) && url.pathname.startsWith("/maps");
-  const isEmbed = isGoogleMaps && url.pathname.startsWith("/maps/embed");
+    (host === "google.com" || host.endsWith(".google.com") || host === "maps.google.com") &&
+    url.pathname.startsWith("/maps");
+  if (!isGoogleMaps) return "";
+  if (url.pathname.startsWith("/maps/embed")) return url.toString();
 
-  if (isEmbed) return url.toString();
-
-  if (isGoogleMaps) {
-    // /maps/place/… or /maps?q=… → the embeddable query form
-    const q =
-      url.searchParams.get("q") ||
-      decodeURIComponent(url.pathname.split("/place/")[1]?.split("/")[0] || "");
-    if (q) return `https://www.google.com/maps?q=${encodeURIComponent(q)}&output=embed`;
-  }
+  // /maps/place/Name/@lat,lng,zoom/… or /maps?q=… → the embeddable query form
+  const atMatch = value.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+  const q =
+    (atMatch && `${atMatch[1]},${atMatch[2]}`) ||
+    url.searchParams.get("q") ||
+    decodeURIComponent(url.pathname.split("/place/")[1]?.split("/")[0] || "");
+  if (q) return `https://www.google.com/maps?q=${encodeURIComponent(q)}&output=embed`;
 
   return "";
 }
+
+const isGoogleShortLink = (v: string) =>
+  /^https:\/\/(maps\.app\.goo\.gl|goo\.gl\/maps|g\.co\/kgs)\//i.test(v.trim());
+
+/**
+ * Async: everything `toMapEmbedSrc` does, plus following a Google short link to
+ * the real place URL. Cached for a day, keyed on the raw value.
+ */
+export const resolveMapEmbed = unstable_cache(
+  async (raw: string | null | undefined): Promise<string> => {
+    const direct = toMapEmbedSrc(raw);
+    if (direct) return direct;
+
+    const input = (raw ?? "").trim();
+    if (!isGoogleShortLink(input)) return "";
+    try {
+      const res = await fetch(input, { redirect: "follow" });
+      return toMapEmbedSrc(res.url);
+    } catch {
+      return "";
+    }
+  },
+  ["map-embed-resolve"],
+  { revalidate: 86400 }
+);

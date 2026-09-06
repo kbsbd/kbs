@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { LOCALES, type Locale } from "@/content/seed";
 import { getContent } from "@/lib/content";
-import { toMapEmbedSrc } from "@/lib/mapEmbed";
+import { resolveMapEmbed } from "@/lib/mapEmbed";
 import MediaSlot from "@/components/MediaSlot";
 
 export const revalidate = 600;
@@ -24,6 +24,7 @@ export default async function KbHomesPage({
   const c = await getContent();
   const k = c.kbHomes;
   const t = (v: Record<Locale, string>) => v[l] || v.en;
+  const mapSrc = await resolveMapEmbed(k.mapEmbed || c.site.mapEmbed);
 
   return (
     <div className="page">
@@ -90,9 +91,9 @@ export default async function KbHomesPage({
           </h2>
           <p className="mt-3 text-[color:var(--text-primary)]">{t(k.address)}</p>
           <p className="mt-1 text-sm text-[color:var(--text-quiet)]">{t(k.addressNote)}</p>
-          {toMapEmbedSrc(k.mapEmbed || c.site.mapEmbed) ? (
+          {mapSrc ? (
             <iframe
-              src={toMapEmbedSrc(k.mapEmbed || c.site.mapEmbed)}
+              src={mapSrc}
               title="Map"
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"

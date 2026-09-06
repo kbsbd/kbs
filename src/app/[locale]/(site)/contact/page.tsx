@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { LOCALES, type Locale } from "@/content/seed";
 import { getContent } from "@/lib/content";
-import { toMapEmbedSrc } from "@/lib/mapEmbed";
+import { resolveMapEmbed } from "@/lib/mapEmbed";
 import { siteUrl } from "@/lib/site-url";
 import ContactForm from "@/components/sections/ContactForm";
 import ChannelIcon from "@/components/ChannelIcon";
@@ -27,6 +27,7 @@ export default async function ContactPage({
   const ct = c.contact;
   const t = (v: Record<Locale, string>) => v[l] || v.en;
   const base = siteUrl();
+  const mapSrc = await resolveMapEmbed(c.site.mapEmbed);
 
   const ld = [
     {
@@ -113,9 +114,9 @@ export default async function ContactPage({
               </div>
             )}
 
-            {toMapEmbedSrc(c.site.mapEmbed) ? (
+            {mapSrc ? (
               <iframe
-                src={toMapEmbedSrc(c.site.mapEmbed)}
+                src={mapSrc}
                 title="Map"
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
