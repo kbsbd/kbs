@@ -77,6 +77,7 @@ export default async function AdminPage({
       }}
       site={content.site}
       appearance={content.appearance}
+      footerColumns={content.footer.columns}
       integrations={content.integrations}
       bookings={bookingsRes.data ?? []}
       projects={projectsRes.data ?? []}

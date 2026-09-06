@@ -104,6 +104,7 @@ export function getPath(source: unknown, path: string): unknown {
 /** The plain, non-bilingual site settings the client fills in first. */
 export const SITE_FIELDS: Array<{ key: string; label: string; hint?: string; type?: string }> = [
   { key: "phone", label: "Phone number", hint: "Shown in the footer and used by the call link" },
+  { key: "phone2", label: "Second phone number", hint: "Optional. Shows in the footer under the first number." },
   {
     key: "whatsapp",
     label: "WhatsApp number",

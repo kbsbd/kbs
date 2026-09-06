@@ -18,6 +18,7 @@ import ShopAdmin, {
 import CmsAdmin, { type AdminPage, type AdminMenuItem } from "@/components/admin/CmsAdmin";
 import MediaAdmin, { type MediaContent } from "@/components/admin/MediaAdmin";
 import ListEditor, { CONTENT_LISTS } from "@/components/admin/ContentLists";
+import FooterColumnsEditor, { type FooterColumn } from "@/components/admin/FooterColumnsEditor";
 import { PERMISSIONS, SHOP_PERM_KEYS } from "@/lib/permissions";
 import { SOCIAL_PLATFORMS } from "@/components/icons/SocialIcons";
 import { MenuIcon, CloseIcon } from "@/components/icons/Icons";
@@ -72,6 +73,7 @@ type Props = {
   groups: Record<string, EditableString[]>;
   site: Record<string, unknown>;
   appearance: Record<string, unknown>;
+  footerColumns: FooterColumn[];
   integrations: Record<string, unknown>;
   bookings: Booking[];
   projects: Project[];
@@ -136,6 +138,7 @@ export default function Dashboard({
   groups,
   site,
   appearance,
+  footerColumns,
   integrations,
   bookings,
   projects,
@@ -295,7 +298,13 @@ export default function Dashboard({
           {tab === "Pages" && <CmsAdmin {...cms} notify={setToast} />}
           {tab === "Media" && <MediaAdmin media={media} notify={setToast} />}
           {tab === "Site details" && (
-            <SiteDetails site={site} appearance={appearance} groups={groups} notify={setToast} />
+            <SiteDetails
+              site={site}
+              appearance={appearance}
+              footerColumns={footerColumns}
+              groups={groups}
+              notify={setToast}
+            />
           )}
           {tab === "Text" && (
             <TextEditor groups={groups} lists={lists} pages={cms.pages} notify={setToast} />
@@ -683,11 +692,13 @@ function ScaleControl({
 function SiteDetails({
   site,
   appearance,
+  footerColumns,
   groups,
   notify,
 }: {
   site: Record<string, unknown>;
   appearance: Record<string, unknown>;
+  footerColumns: FooterColumn[];
   groups: Record<string, EditableString[]>;
   notify: (s: string) => void;
 }) {
@@ -698,7 +709,10 @@ function SiteDetails({
   const [values, setValues] = useState<Record<string, string>>(() =>
     Object.fromEntries(SITE_FIELDS.map((f) => [f.key, String(site[f.key] ?? "")]))
   );
-  const bilingual = (groups.site ?? []).concat(groups.footer ?? []);
+  const bilingual = (groups.site ?? [])
+    .concat(groups.footer ?? [])
+    /* footer.columns is edited by its own builder below, not as loose fields */
+    .filter((s) => !s.path.startsWith("columns"));
   const [bi, setBi] = useState<Record<string, { en: string; bn: string }>>(() =>
     Object.fromEntries(bilingual.map((s) => [`${s.root}|${s.path}`, { ...s.values }]))
   );
@@ -909,6 +923,8 @@ function SiteDetails({
           )}
         </div>
       </div>
+
+      <FooterColumnsEditor initial={footerColumns} notify={notify} />
 
       <button className="btn btn-primary" onClick={save} disabled={pending}>
         {pending ? "Saving" : "Save changes"}

@@ -416,6 +416,8 @@ export const site = {
     bn: "১৯৯৫ সাল থেকে বাংলাদেশে নির্মাণ।",
   },
   phone: "+880 19 5402 2530",
+  /** Optional second phone number; shows in the footer under the first. */
+  phone2: "",
   whatsapp: "+880 17 1073 7157",
   email: "Info@kbsbd.com",
   address: {
@@ -488,6 +490,13 @@ export const footer = {
     en: "Office address is being added.",
     bn: "অফিসের ঠিকানা যুক্ত করা হচ্ছে।",
   },
+  /** Columns the admin builds in Site details → Footer columns. They render
+   *  after the contact and office columns. A row with no link is plain text. */
+  columns: [] as Array<{
+    id: string;
+    heading: L;
+    rows: Array<{ id: string; label: L; href: string }>;
+  }>,
 };
 
 /* ============================================================

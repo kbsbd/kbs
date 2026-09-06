@@ -67,6 +67,24 @@ export default function SiteChrome({
     else footerGroups.push({ name: m.footerGroup, links: [{ href: m.href, label }] });
   }
 
+  /* Admin-built footer columns (Site details → Footer columns). A row with no
+     href renders as plain text rather than a link. */
+  const footerColumns = (content.footer.columns ?? [])
+    .map((col) => ({
+      id: col.id,
+      heading: (locale === "bn" && col.heading.bn) || col.heading.en,
+      rows: (col.rows ?? [])
+        .map((r) => ({
+          id: r.id,
+          label: (locale === "bn" && r.label.bn) || r.label.en,
+          href: r.href?.trim() ?? "",
+        }))
+        .filter((r) => r.label),
+    }))
+    .filter((col) => col.heading && col.rows.length);
+
+  const extraCols = footerGroups.length + footerColumns.length;
+
   /* section entrances, and retiring the stagger when they finish */
   useEffect(() => {
     const els = Array.from(document.querySelectorAll<HTMLElement>(".reveal"));
@@ -285,7 +303,7 @@ export default function SiteChrome({
       <footer className="relative z-[2] border-t border-[color:var(--panel-edge)] bg-[color:var(--canvas-deep)]">
         <div
           className={`mx-auto grid max-w-[86rem] gap-10 px-5 py-16 sm:grid-cols-2 sm:px-8 ${
-            footerGroups.length > 0 ? "lg:grid-cols-4" : "md:grid-cols-3"
+            extraCols > 0 ? "md:grid-cols-3 lg:grid-cols-4" : "md:grid-cols-3"
           }`}
         >
           <div>
@@ -323,6 +341,16 @@ export default function SiteChrome({
                     className="transition-colors duration-300 hover:text-[color:var(--accent)]"
                   >
                     {content.site.phone}
+                  </a>
+                </li>
+              )}
+              {content.site.phone2 && (
+                <li>
+                  <a
+                    href={`tel:${content.site.phone2.replace(/\s/g, "")}`}
+                    className="transition-colors duration-300 hover:text-[color:var(--accent)]"
+                  >
+                    {content.site.phone2}
                   </a>
                 </li>
               )}
@@ -387,6 +415,28 @@ export default function SiteChrome({
                     >
                       {link.label}
                     </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+
+          {footerColumns.map((col) => (
+            <div key={col.id}>
+              <h2 className="font-mono-label text-[color:var(--text-quiet)]">{col.heading}</h2>
+              <ul className="mt-4 space-y-2 text-sm">
+                {col.rows.map((row) => (
+                  <li key={row.id}>
+                    {row.href ? (
+                      <a
+                        href={navHref(row.href)}
+                        className="text-[color:var(--text-secondary)] transition-colors duration-300 hover:text-[color:var(--accent)]"
+                      >
+                        {row.label}
+                      </a>
+                    ) : (
+                      <span className="text-[color:var(--text-secondary)]">{row.label}</span>
+                    )}
                   </li>
                 ))}
               </ul>
