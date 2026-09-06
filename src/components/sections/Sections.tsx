@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
+import Link from "next/link";
 import type { Locale, SiteContent } from "@/content/seed";
 import { img } from "@/lib/media";
-import ZoomableImage from "@/components/ZoomableImage";
 
 /**
  * The page below the hero. No two adjacent sections share a layout skeleton,
@@ -17,6 +17,22 @@ const Wrap = ({ children }: { children: React.ReactNode }) => (
   <div className="mx-auto max-w-[86rem] px-5 sm:px-8">{children}</div>
 );
 
+/**
+ * Makes a whole card clickable without wrapping it in an anchor. The cards are
+ * grid children with an absolutely-positioned caption, so wrapping them in a
+ * link changes the layout; a stretched overlay keeps the markup exactly as it
+ * was, gives one large hit target, and — sitting inside the `group` — still
+ * lets hover/focus drive the image zoom. Renders nothing when `href` is blank.
+ */
+const CardLink = ({ href, label }: { href?: string; label: string }) =>
+  href ? (
+    <Link
+      href={href}
+      aria-label={label}
+      className="absolute inset-0 z-10 rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--clay)]"
+    />
+  ) : null;
+
 const Kicker = ({ children }: { children: React.ReactNode }) => (
   <p className="font-mono-label text-[color:var(--clay)]">{children}</p>
 );
@@ -27,12 +43,12 @@ export function Premise({ c, l }: { c: SiteContent; l: Locale }) {
     <section className="sec reveal" id="idea">
       <Wrap>
         <div className="grid items-center gap-12 lg:grid-cols-[1.05fr_1fr] lg:gap-20">
-          <div className="part relative overflow-hidden rounded-2xl">
+          <div className="part relative overflow-hidden rounded-2xl bg-[color:var(--panel)]">
             <img
               src={img(c.premise.image, 1400)}
               alt=""
               loading="lazy"
-              className="aspect-[4/5] w-full object-cover"
+              className="w-full"
             />
             <div
               className="pointer-events-none absolute inset-0"
@@ -66,12 +82,12 @@ export function Building({ c, l }: { c: SiteContent; l: Locale }) {
     <section className="sec reveal" id="building">
       <Wrap>
         <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
-          <div className="part relative overflow-hidden rounded-2xl">
+          <div className="part relative overflow-hidden rounded-2xl bg-[color:var(--panel)]">
             <img
               src={img(c.building.image, 1400)}
               alt=""
               loading="lazy"
-              className="aspect-[4/3] w-full object-cover lg:aspect-[4/5]"
+              className="w-full"
             />
           </div>
 
@@ -103,6 +119,11 @@ export function Building({ c, l }: { c: SiteContent; l: Locale }) {
 /* 4. Amenities. Deliberately asymmetric: one tall lead, then a run of cards. */
 export function Amenities({ c, l }: { c: SiteContent; l: Locale }) {
   const [lead, ...rest] = c.amenities.items;
+  /* A card opens the page the admin picked, otherwise the detail view built
+     from the card's own image and description — so every card is clickable out
+     of the box and the picker is an override, not a requirement. */
+  const href = (a: { id: string; link?: string }) =>
+    a.link ? `/${l}/p/${a.link}` : `/${l}/amenities/${a.id}`;
   return (
     <section className="sec reveal" id="amenities">
       <Wrap>
@@ -115,12 +136,13 @@ export function Amenities({ c, l }: { c: SiteContent; l: Locale }) {
 
         <div className="mt-12 grid gap-6 lg:grid-cols-[1.25fr_1fr]">
           {lead && (
-            <figure className="part group relative overflow-hidden rounded-2xl">
-              <ZoomableImage
+            <figure className="part group relative overflow-hidden rounded-2xl bg-[color:var(--panel)]">
+              <CardLink href={href(lead)} label={pick(lead.title, l)} />
+              <img
                 src={img(lead.image, 1600)}
-                full={img(lead.image, 2400)}
-                alt={pick(lead.title, l)}
-                className="h-full min-h-[22rem] w-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.03]"
+                alt=""
+                loading="lazy"
+                className="w-full transition-transform duration-[1200ms] ease-out group-hover:scale-[1.03]"
               />
               <figcaption
                 className="pointer-events-none absolute inset-x-0 bottom-0 p-8 text-white"
@@ -145,13 +167,14 @@ export function Amenities({ c, l }: { c: SiteContent; l: Locale }) {
             {rest.slice(0, 2).map((a) => (
               <figure
                 key={a.id}
-                className="part group relative overflow-hidden rounded-2xl"
+                className="part group relative overflow-hidden rounded-2xl bg-[color:var(--panel)]"
               >
-                <ZoomableImage
+                <CardLink href={href(a)} label={pick(a.title, l)} />
+                <img
                   src={img(a.image, 1000)}
-                  full={img(a.image, 2000)}
-                  alt={pick(a.title, l)}
-                  className="h-56 w-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.03]"
+                  alt=""
+                  loading="lazy"
+                  className="w-full transition-transform duration-[1200ms] ease-out group-hover:scale-[1.03]"
                 />
                 <figcaption
                   className="pointer-events-none absolute inset-x-0 bottom-0 p-6 text-white"
@@ -171,13 +194,14 @@ export function Amenities({ c, l }: { c: SiteContent; l: Locale }) {
           {rest.slice(2).map((a) => (
             <figure
               key={a.id}
-              className="part group relative overflow-hidden rounded-2xl"
+              className="part group relative overflow-hidden rounded-2xl bg-[color:var(--panel)]"
             >
-              <ZoomableImage
+              <CardLink href={href(a)} label={pick(a.title, l)} />
+              <img
                 src={img(a.image, 1200)}
-                full={img(a.image, 2200)}
-                alt={pick(a.title, l)}
-                className="h-64 w-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.03]"
+                alt=""
+                loading="lazy"
+                className="w-full transition-transform duration-[1200ms] ease-out group-hover:scale-[1.03]"
               />
               <figcaption
                 className="pointer-events-none absolute inset-x-0 bottom-0 p-6 text-white"
@@ -260,7 +284,14 @@ export function Projects({
 }: {
   c: SiteContent;
   l: Locale;
-  items: Array<{ id: string; image: string; title: T; location: T; status: T }>;
+  items: Array<{
+    id: string;
+    image: string;
+    title: T;
+    location: T;
+    status: T;
+    link?: string;
+  }>;
 }) {
   if (!items.length) return null;
   return (
@@ -274,13 +305,17 @@ export function Projects({
         </div>
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((p) => (
-            <article key={p.id} className="part group">
-              <div className="overflow-hidden rounded-2xl">
+            <article key={p.id} className="part group relative">
+              <CardLink
+                href={p.link ? `/${l}/p/${p.link}` : undefined}
+                label={pick(p.title, l)}
+              />
+              <div className="overflow-hidden rounded-2xl bg-[color:var(--panel)]">
                 <img
                   src={img(p.image, 1000)}
                   alt=""
                   loading="lazy"
-                  className="h-60 w-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.04]"
+                  className="w-full transition-transform duration-[1200ms] ease-out group-hover:scale-[1.04]"
                 />
               </div>
               <h3 className="font-display mt-5 text-xl">{pick(p.title, l)}</h3>

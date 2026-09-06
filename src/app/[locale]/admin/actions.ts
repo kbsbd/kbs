@@ -111,15 +111,26 @@ export async function saveProject(project: {
   status_bn: string;
   sort: number;
   published: boolean;
+  link?: string;
 }): Promise<Result> {
   const ctx = await guardPerm("projects");
   if (ctx === "denied") return NOT_ALLOWED;
   if (!ctx) return NOT_SIGNED_IN;
 
-  const row = { ...project };
-  const { error } = project.id
-    ? await ctx.supabase.from("projects").update(row).eq("id", project.id)
-    : await ctx.supabase.from("projects").insert(row);
+  const write = (row: Record<string, unknown>) =>
+    project.id
+      ? ctx.supabase.from("projects").update(row).eq("id", project.id)
+      : ctx.supabase.from("projects").insert(row);
+
+  const row: Record<string, unknown> = { ...project, link: project.link ?? "" };
+  /* `link` was added after the first deploy; if the migration has not run on
+     this database yet, save everything else rather than losing the edit. */
+  let { error } = await write(row);
+  if (error) {
+    const withoutLink = { ...row };
+    delete withoutLink.link;
+    ({ error } = await write(withoutLink));
+  }
 
   if (error) return { ok: false, error: error.message };
   refresh();

@@ -64,18 +64,29 @@ export async function getProjects() {
   const supabase = createServerClient();
   if (!supabase) return [];
   try {
-    const { data, error } = await supabase
-      .from("projects")
-      .select("id, image, title_en, title_bn, location_en, location_bn, status_en, status_bn, sort")
-      .eq("published", true)
-      .order("sort", { ascending: true });
+    const COLS =
+      "id, image, title_en, title_bn, location_en, location_bn, status_en, status_bn, sort";
+    const read = (cols: string) =>
+      supabase
+        .from("projects")
+        .select(cols)
+        .eq("published", true)
+        .order("sort", { ascending: true });
+
+    /* `link` was added after the first deploy; a database that has not run the
+       migration answers with an unknown-column error, so fall back to the
+       original column list rather than blanking the whole section. */
+    let { data, error } = await read(`${COLS}, link`);
+    if (error) ({ data, error } = await read(COLS));
     if (error || !data) return [];
-    return data.map((p) => ({
+
+    return (data as unknown as Array<Record<string, unknown>>).map((p) => ({
       id: String(p.id),
       image: p.image as string,
       title: { en: p.title_en as string, bn: p.title_bn as string },
       location: { en: p.location_en as string, bn: p.location_bn as string },
       status: { en: p.status_en as string, bn: p.status_bn as string },
+      link: String(p.link ?? ""),
     }));
   } catch {
     return [];

@@ -238,6 +238,8 @@ export const amenities = {
         en: "Open water and a shaded deck, nine floors above the traffic.",
         bn: "খোলা জল আর ছায়াঢাকা ডেক, রাস্তার শব্দ থেকে নয় তলা উপরে।",
       },
+      /** blank = the card opens its built-in detail page; set = opens this published page */
+      link: "",
     },
     {
       id: "gym",
@@ -247,6 +249,7 @@ export const amenities = {
         en: "Full height glass on the long wall, so it is a room you will actually walk into.",
         bn: "লম্বা দেয়াল জুড়ে কাচ, তাই ঘরটায় ঢুকতে ইচ্ছে করবে।",
       },
+      link: "",
     },
     {
       id: "water-garden",
@@ -256,6 +259,7 @@ export const amenities = {
         en: "Moving water at the entrance, which cools the air and covers the road noise.",
         bn: "প্রবেশপথে বয়ে চলা জল, যা বাতাস ঠান্ডা রাখে আর রাস্তার শব্দ ঢেকে দেয়।",
       },
+      link: "",
     },
     {
       id: "terrace",
@@ -265,6 +269,7 @@ export const amenities = {
         en: "Shade over the pool edge for the months when open sky is too much.",
         bn: "পুলের ধারে ছায়া, যে মাসগুলোয় খোলা রোদ সহ্য হয় না।",
       },
+      link: "",
     },
     {
       id: "balconies",
@@ -274,6 +279,7 @@ export const amenities = {
         en: "One on every floor, deep enough to sit in rather than look at.",
         bn: "প্রতি তলায় একটি, দেখার জন্য নয়, বসার মতো গভীর।",
       },
+      link: "",
     },
   ],
   /** Text-only entries until real renders exist. Admin can attach an image later. */
@@ -365,6 +371,8 @@ export const projects = {
     title: L;
     location: L;
     status: L;
+    /** blank = the card is not clickable; set = opens this published page */
+    link: string;
   }>,
 };
 

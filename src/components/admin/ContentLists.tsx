@@ -25,7 +25,8 @@ const lbl = "font-mono-label text-[color:var(--text-quiet)]";
 type FieldSpec = {
   key: string;
   label: string;
-  type: "bi" | "text" | "number" | "select";
+  /** "page" offers the published CMS pages, so a card can open one */
+  type: "bi" | "text" | "number" | "select" | "page";
   options?: string[];
   step?: number;
   placeholder?: string;
@@ -116,14 +117,20 @@ export const CONTENT_LISTS: Record<string, ListSpec[]> = {
       root: "amenities",
       path: "items",
       label: "Amenities with a photo",
-      hint: "The photo for each is set on the Media tab.",
+      hint: "The photo for each is set on the Media tab. Every one of these is a clickable card on the landing page: by default it opens a detail page built from the photo and description here, or you can point it at one of your own pages instead.",
       shape: "object",
       summaryKey: "title",
       fields: [
         { key: "title", label: "Name", type: "bi" },
         { key: "body", label: "Description", type: "bi" },
+        {
+          key: "link",
+          label: "Card opens this page",
+          type: "page",
+          placeholder: "Built-in detail page (default)",
+        },
       ],
-      blank: () => ({ id: rid(), image: "", title: emptyL(), body: emptyL() }),
+      blank: () => ({ id: rid(), image: "", title: emptyL(), body: emptyL(), link: "" }),
     },
     {
       root: "amenities",
@@ -208,10 +215,13 @@ export default function ListEditor({
   spec,
   initial,
   notify,
+  pageOptions = [],
 }: {
   spec: ListSpec;
   initial: AnyItem[];
   notify: (s: string) => void;
+  /** published CMS pages, for fields of type "page" */
+  pageOptions?: Array<{ slug: string; title: string }>;
 }) {
   const [items, setItems] = useState<AnyItem[]>(() =>
     JSON.parse(JSON.stringify(initial ?? []))
@@ -336,6 +346,31 @@ export default function ListEditor({
                           />
                         </div>
                       </div>
+                    );
+                  }
+                  if (f.type === "page") {
+                    return (
+                      <label key={f.key} className="block">
+                        <span className={lbl}>{f.label}</span>
+                        <select
+                          className={`${field} mt-1`}
+                          value={String(raw ?? "")}
+                          onChange={(e) => setItem(i, { [f.key]: e.target.value })}
+                        >
+                          <option value="">{f.placeholder || "Not clickable"}</option>
+                          {pageOptions.map((o) => (
+                            <option key={o.slug} value={o.slug}>
+                              {o.title || o.slug}
+                            </option>
+                          ))}
+                        </select>
+                        {pageOptions.length === 0 && (
+                          <span className="mt-1 block text-xs text-[color:var(--text-quiet)]">
+                            No published pages yet. Create one on the Pages tab and it
+                            will appear here.
+                          </span>
+                        )}
+                      </label>
                     );
                   }
                   if (f.type === "select") {

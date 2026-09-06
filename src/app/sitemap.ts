@@ -48,5 +48,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }))
   );
 
-  return [...staticEntries, ...productEntries, ...pageEntries];
+  /* one detail view per amenity card, generated from the same content the
+     landing page renders, so adding a card in the admin puts it in the sitemap
+     without anyone remembering to. */
+  const amenityEntries = LOCALES.flatMap((l) =>
+    content.amenities.items.map((a) => ({
+      url: `${base}/${l}/amenities/${a.id}`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.5,
+      alternates: {
+        languages: Object.fromEntries(
+          LOCALES.map((x) => [x, `${base}/${x}/amenities/${a.id}`])
+        ),
+      },
+    }))
+  );
+
+  return [...staticEntries, ...amenityEntries, ...productEntries, ...pageEntries];
 }

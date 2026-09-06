@@ -59,6 +59,8 @@ type Project = {
   status_bn: string;
   sort: number;
   published: boolean;
+  /** slug of the page this card opens. Blank = the card is not clickable. */
+  link: string;
 };
 
 type Props = {
@@ -295,8 +297,12 @@ export default function Dashboard({
           {tab === "Site details" && (
             <SiteDetails site={site} appearance={appearance} groups={groups} notify={setToast} />
           )}
-          {tab === "Text" && <TextEditor groups={groups} lists={lists} notify={setToast} />}
-          {tab === "Projects" && <Projects rows={projects} notify={setToast} />}
+          {tab === "Text" && (
+            <TextEditor groups={groups} lists={lists} pages={cms.pages} notify={setToast} />
+          )}
+          {tab === "Projects" && (
+            <Projects rows={projects} pages={cms.pages} notify={setToast} />
+          )}
           {tab === "Team" && <TeamSection notify={setToast} />}
           {tab === "Integrations" && (
             <IntegrationsPanel data={integrations} notify={setToast} />
@@ -1149,12 +1155,23 @@ function TeamSection({ notify }: { notify: (s: string) => void }) {
 function TextEditor({
   groups,
   lists,
+  pages,
   notify,
 }: {
   groups: Record<string, EditableString[]>;
   lists: Props["lists"];
+  pages: AdminPage[];
   notify: (s: string) => void;
 }) {
+  /* only published pages can be a card's destination: linking a card at a draft
+     page would render a dead link on the public site. */
+  const pageOptions = useMemo(
+    () =>
+      pages
+        .filter((p) => p.status === "published")
+        .map((p) => ({ slug: p.slug, title: p.title })),
+    [pages]
+  );
   const sections = useMemo(
     () => Object.keys(groups).filter((k) => !["site", "footer"].includes(k)),
     [groups]
@@ -1243,6 +1260,7 @@ function TextEditor({
               spec={spec}
               initial={lists[`${spec.root}|${spec.path}`] ?? []}
               notify={notify}
+              pageOptions={pageOptions}
             />
           ))}
         </div>
@@ -1407,9 +1425,22 @@ const EMPTY_PROJECT: Project = {
   status_bn: "",
   sort: 0,
   published: false,
+  link: "",
 };
 
-function Projects({ rows, notify }: { rows: Project[]; notify: (s: string) => void }) {
+function Projects({
+  rows,
+  pages,
+  notify,
+}: {
+  rows: Project[];
+  pages: AdminPage[];
+  notify: (s: string) => void;
+}) {
+  const pageOptions = useMemo(
+    () => pages.filter((p) => p.status === "published"),
+    [pages]
+  );
   const [draft, setDraft] = useState<Project | null>(null);
   const [pending, start] = useTransition();
 
@@ -1458,6 +1489,28 @@ function Projects({ rows, notify }: { rows: Project[]; notify: (s: string) => vo
               />
             </div>
           ))}
+          <div>
+            <label className="font-mono-label text-[color:var(--text-quiet)]">
+              Card opens this page
+            </label>
+            <select
+              className={`${field} mt-2`}
+              value={draft.link ?? ""}
+              onChange={(e) => setDraft({ ...draft, link: e.target.value })}
+            >
+              <option value="">Not clickable</option>
+              {pageOptions.map((p) => (
+                <option key={p.slug} value={p.slug}>
+                  {p.title} — /p/{p.slug}
+                </option>
+              ))}
+            </select>
+            {pageOptions.length === 0 && (
+              <p className="mt-2 text-xs text-[color:var(--text-quiet)]">
+                No published pages yet. Add one on the Pages tab first.
+              </p>
+            )}
+          </div>
           <label className="flex items-center gap-2 text-sm">
             <input
               type="checkbox"
