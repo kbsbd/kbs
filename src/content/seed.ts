@@ -450,6 +450,37 @@ export const site = {
 };
 
 /**
+ * Visual tuning the admin nudges from the dashboard with a slider and a live
+ * preview. 1 is the design default; the dashboard's "Reset to default" button
+ * puts a value back to 1.
+ */
+export const appearance = {
+  /** Header + footer logo height, as a multiple of the design size. */
+  logoScale: 1,
+  /** Hero heading size (scroll hero captions + the static hero), as a multiple
+   *  of the design size. */
+  heroScale: 1,
+};
+
+/** Slider bounds, shared by the editor and the render path so a stored value
+ *  can never blow the layout up. */
+export const APPEARANCE_RANGE = {
+  logoScale: { min: 0.7, max: 2, step: 0.05 },
+  heroScale: { min: 0.75, max: 1.4, step: 0.05 },
+} as const;
+
+/** Clamp a stored/edited appearance value to its allowed range. */
+export const clampAppearance = (
+  key: keyof typeof APPEARANCE_RANGE,
+  v: unknown
+): number => {
+  const n = typeof v === "number" ? v : Number(v);
+  if (!Number.isFinite(n)) return 1;
+  const { min, max } = APPEARANCE_RANGE[key];
+  return Math.min(max, Math.max(min, n));
+};
+
+/**
  * Third-party integrations. All admin-editable, all blank by default — a blank
  * value loads no script and adds no tag, so a fresh install ships with zero
  * third parties. Verification fields accept either the bare code or the whole
@@ -753,6 +784,7 @@ export const shop = {
 
 export const seed = {
   site,
+  appearance,
   integrations,
   shop,
   nav,

@@ -1,7 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
+import type { CSSProperties } from "react";
 import ReactDOM from "react-dom";
 import { notFound } from "next/navigation";
-import { LOCALES, type Locale } from "@/content/seed";
+import { LOCALES, clampAppearance, type Locale } from "@/content/seed";
 import { getContent, getProjects } from "@/lib/content";
 import { img, heroSources } from "@/lib/media";
 import ScrubHero from "@/components/hero/ScrubHero";
@@ -32,6 +33,7 @@ export default async function Home({
 
   const [c, projectItems] = await Promise.all([getContent(), getProjects()]);
   const t = (v: Record<Locale, string>) => v[l] || v.en;
+  const heroScale = clampAppearance("heroScale", c.appearance.heroScale);
 
   /* The hero poster is painted by the client after hydration, so the preload
      scanner never sees it. Declaring it here makes it the LCP image the browser
@@ -52,12 +54,16 @@ export default async function Home({
         posterUrl={posterUrl}
         ctaHref="#book"
         scrollLabel={l === "bn" ? "স্ক্রল করুন" : "Scroll"}
+        heroScale={heroScale}
       />
 
       {/* The designed static hero. Only reduced-motion visitors get this
           instead of the scrub now, by the single gate in globals.css.
           It is a composition, not an apology. */}
-      <section className="static-hero relative min-h-[100svh]">
+      <section
+        className="static-hero relative min-h-[100svh]"
+        style={{ "--hero-scale": heroScale } as CSSProperties}
+      >
         <img
           src={img(c.staticHero.image, 1400)}
           alt=""
@@ -73,7 +79,10 @@ export default async function Home({
         />
         <div className="relative flex min-h-[100svh] flex-col justify-end px-5 pb-16 pt-28 sm:px-8">
           <p className="chip font-mono-label self-start">{t(c.staticHero.kicker)}</p>
-          <h1 className="font-display mt-6 max-w-[16ch] text-[clamp(2.4rem,9vw,4rem)]">
+          <h1
+            className="font-display mt-6 max-w-[16ch]"
+            style={{ fontSize: "calc(clamp(2.4rem, 9vw, 4rem) * var(--hero-scale, 1))" }}
+          >
             {t(c.staticHero.head)}
           </h1>
           <p className="sub-line mt-5 max-w-[38ch] leading-relaxed">

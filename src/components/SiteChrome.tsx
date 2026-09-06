@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { Locale, SiteContent } from "@/content/seed";
+import { clampAppearance } from "@/content/seed";
 import type { MenuItem } from "@/lib/cms";
 import FixedActions from "@/components/FixedActions";
 import CartButton from "@/components/shop/CartButton";
@@ -43,6 +44,7 @@ export default function SiteChrome({
   const otherPath = pathname.replace(/^\/(en|bn)/, `/${other}`) || `/${other}`;
   const shopOn = content.shop.enabled;
   const logo = content.site.logo;
+  const logoScale = clampAppearance("logoScale", content.appearance.logoScale);
   /* When the shop is off, every path into it disappears from the chrome. */
   const pointsAtShop = (href: string) => /^(\/(en|bn))?\/shop(\/|$|\?|#)/.test(href);
   const isShopLink = (href: string) => !shopOn && pointsAtShop(href);
@@ -198,7 +200,14 @@ export default function SiteChrome({
             prefetch={false}
           >
             {logo ? (
-              <img src={logo} alt="KBS" width={180} height={32} className="h-8 w-auto max-w-[180px] object-contain" />
+              <img
+                src={logo}
+                alt="KBS"
+                width={180}
+                height={32}
+                className="w-auto object-contain"
+                style={{ height: `calc(2rem * ${logoScale})`, maxWidth: `calc(180px * ${logoScale})` }}
+              />
             ) : (
               <>
                 <Mark />
@@ -257,6 +266,7 @@ export default function SiteChrome({
               phone={content.site.phone}
               accountHref={shopOn ? `/${locale}/account` : undefined}
               logo={logo}
+              logoScale={logoScale}
               labels={{
                 open: locale === "bn" ? "মেনু" : "Menu",
                 close: locale === "bn" ? "মেনু বন্ধ করুন" : "Close menu",
@@ -281,7 +291,14 @@ export default function SiteChrome({
           <div>
             <div className="flex items-center gap-2.5">
               {logo ? (
-                <img src={logo} alt="KBS" width={200} height={36} className="h-9 w-auto max-w-[200px] object-contain" />
+                <img
+                  src={logo}
+                  alt="KBS"
+                  width={200}
+                  height={36}
+                  className="w-auto object-contain"
+                  style={{ height: `calc(2.25rem * ${logoScale})`, maxWidth: `calc(200px * ${logoScale})` }}
+                />
               ) : (
                 <>
                   <Mark />

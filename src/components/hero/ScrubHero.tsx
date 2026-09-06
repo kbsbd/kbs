@@ -56,6 +56,8 @@ type Props = {
   posterUrl: string;
   ctaHref: string;
   scrollLabel: string;
+  /** Multiplier on the caption heading size. 1 = design default. */
+  heroScale?: number;
 };
 
 export default function ScrubHero({
@@ -65,6 +67,7 @@ export default function ScrubHero({
   posterUrl,
   ctaHref,
   scrollLabel,
+  heroScale = 1,
 }: Props) {
   const heroRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
@@ -423,7 +426,11 @@ export default function ScrubHero({
   }, [sources.h264.url, sources.h264.bytes, sources.vp9.url, sources.vp9.bytes, posterUrl]);
 
   return (
-    <div ref={heroRef} className="hero">
+    <div
+      ref={heroRef}
+      className="hero"
+      style={{ "--hero-scale": heroScale } as React.CSSProperties}
+    >
       <div ref={stageRef} className="stage">
         <div ref={posterRef} className="poster" aria-hidden="true">
           {/* Server-rendered so the first frame is a real, preload-discoverable
@@ -540,14 +547,20 @@ function Band({
         )}
 
         {band.entrance === "approach-depth" ? (
-          <h2 className="depth font-display text-[clamp(2.1rem,5.6vw,4.4rem)]">
+          <h2
+            className="depth font-display"
+            style={{ fontSize: "calc(clamp(2.1rem, 5.6vw, 4.4rem) * var(--hero-scale, 1))" }}
+          >
             <span className="soft" aria-hidden="true">
               {head}
             </span>
             <span className="sharp">{head}</span>
           </h2>
         ) : (
-          <h2 className="font-display text-[clamp(2.1rem,5.6vw,4.4rem)]">
+          <h2
+            className="font-display"
+            style={{ fontSize: "calc(clamp(2.1rem, 5.6vw, 4.4rem) * var(--hero-scale, 1))" }}
+          >
             <SplitText
               text={head}
               seed={index * 977 + 13}

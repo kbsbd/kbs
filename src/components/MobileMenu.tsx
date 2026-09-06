@@ -32,6 +32,7 @@ export default function MobileMenu({
   phone,
   accountHref,
   logo,
+  logoScale = 1,
   labels,
 }: {
   locale: Locale;
@@ -41,6 +42,7 @@ export default function MobileMenu({
   phone?: string;
   accountHref?: string;
   logo?: string;
+  logoScale?: number;
   labels: { open: string; close: string; account: string; call: string };
 }) {
   const [open, setOpen] = useState(false);
@@ -123,7 +125,14 @@ export default function MobileMenu({
         >
           <div className="flex items-center px-5 py-3.5 sm:px-8">
             {logo ? (
-              <img src={logo} alt="KBS" width={160} height={32} className="mr-auto h-8 w-auto max-w-[160px] object-contain" />
+              <img
+                src={logo}
+                alt="KBS"
+                width={160}
+                height={32}
+                className="mr-auto w-auto object-contain"
+                style={{ height: `calc(2rem * ${logoScale})`, maxWidth: `calc(160px * ${logoScale})` }}
+              />
             ) : (
               <span className="mr-auto font-display text-lg tracking-tight">KBS</span>
             )}

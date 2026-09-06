@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, useTransition } from "react";
 import type { EditableString } from "@/lib/editable";
 import { SITE_FIELDS, INTEGRATION_FIELDS } from "@/lib/editable";
+import { APPEARANCE_RANGE, clampAppearance } from "@/content/seed";
 import ImageUpload from "@/components/admin/ImageUpload";
 import ShopAdmin, {
   type AdminProduct,
@@ -68,6 +69,7 @@ type Props = {
   permissions: string[];
   groups: Record<string, EditableString[]>;
   site: Record<string, unknown>;
+  appearance: Record<string, unknown>;
   integrations: Record<string, unknown>;
   bookings: Booking[];
   projects: Project[];
@@ -131,6 +133,7 @@ export default function Dashboard({
   role,
   groups,
   site,
+  appearance,
   integrations,
   bookings,
   projects,
@@ -289,7 +292,9 @@ export default function Dashboard({
           )}
           {tab === "Pages" && <CmsAdmin {...cms} notify={setToast} />}
           {tab === "Media" && <MediaAdmin media={media} notify={setToast} />}
-          {tab === "Site details" && <SiteDetails site={site} groups={groups} notify={setToast} />}
+          {tab === "Site details" && (
+            <SiteDetails site={site} appearance={appearance} groups={groups} notify={setToast} />
+          )}
           {tab === "Text" && <TextEditor groups={groups} lists={lists} notify={setToast} />}
           {tab === "Projects" && <Projects rows={projects} notify={setToast} />}
           {tab === "Team" && <TeamSection notify={setToast} />}
@@ -587,15 +592,103 @@ function Bookings({ rows, notify }: { rows: Booking[]; notify: (s: string) => vo
 
 /* ------------------------------------------------------------------ */
 
+/** A slider + live preview + "Reset to default" for one appearance value. */
+function ScaleControl({
+  label,
+  hint,
+  rangeKey,
+  saved,
+  onSaved,
+  notify,
+  preview,
+}: {
+  label: string;
+  hint: string;
+  rangeKey: keyof typeof APPEARANCE_RANGE;
+  saved: number;
+  onSaved: (v: number) => void;
+  notify: (s: string) => void;
+  preview: (scale: number) => React.ReactNode;
+}) {
+  const { min, max, step } = APPEARANCE_RANGE[rangeKey];
+  const [v, setV] = useState(saved);
+  const [pending, start] = useTransition();
+  const dirty = Math.abs(v - saved) > 1e-6;
+  const isDefault = Math.abs(v - 1) < 1e-6;
+
+  const persist = (value: number) => {
+    const clamped = clampAppearance(rangeKey, value);
+    start(async () => {
+      const r = await saveContent([{ root: "appearance", path: rangeKey, value: clamped }]);
+      if (r.ok) {
+        onSaved(clamped);
+        notify(`${label} saved. The public site is already showing it.`);
+      } else notify(r.error);
+    });
+  };
+
+  return (
+    <div className="rounded-xl border border-[color:var(--panel-edge)] p-4">
+      <div className="flex flex-wrap items-center gap-3">
+        <label className="font-mono-label text-[color:var(--text-quiet)]">{label}</label>
+        <span className="text-sm tabular-nums">{Math.round(v * 100)}%</span>
+        <button
+          type="button"
+          className="btn btn-ghost ml-auto text-xs"
+          onClick={() => {
+            setV(1);
+            persist(1);
+          }}
+          disabled={pending || isDefault}
+        >
+          Reset to default
+        </button>
+        <button
+          type="button"
+          className="btn btn-primary text-xs"
+          onClick={() => persist(v)}
+          disabled={pending || !dirty}
+        >
+          {pending ? "Saving" : dirty ? "Save" : "Saved"}
+        </button>
+      </div>
+
+      <input
+        type="range"
+        className="mt-3 w-full accent-[color:var(--accent)]"
+        min={min}
+        max={max}
+        step={step}
+        value={v}
+        onChange={(e) => setV(Number(e.target.value))}
+      />
+      <p className="mt-1 text-xs text-[color:var(--text-quiet)]">{hint}</p>
+
+      <div className="mt-3 grid gap-1">
+        <span className="font-mono-label text-[10px] text-[color:var(--text-quiet)]">Preview</span>
+        <div className="flex min-h-[64px] items-center overflow-x-auto rounded-lg border border-[color:var(--panel-edge)] bg-[color:var(--canvas)] px-4 py-3">
+          {preview(v)}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function SiteDetails({
   site,
+  appearance,
   groups,
   notify,
 }: {
   site: Record<string, unknown>;
+  appearance: Record<string, unknown>;
   groups: Record<string, EditableString[]>;
   notify: (s: string) => void;
 }) {
+  const [scales, setScales] = useState(() => ({
+    logoScale: clampAppearance("logoScale", appearance.logoScale),
+    heroScale: clampAppearance("heroScale", appearance.heroScale),
+  }));
   const [values, setValues] = useState<Record<string, string>>(() =>
     Object.fromEntries(SITE_FIELDS.map((f) => [f.key, String(site[f.key] ?? "")]))
   );
@@ -650,7 +743,7 @@ function SiteDetails({
           label="Logo"
           variant="logo"
           value={logo}
-          hint="PNG with a transparent background, wide rather than tall (about 200×60px or larger). Shown ~32px tall in the header and ~36px in the footer. Leave blank to use the KBS wordmark."
+          hint="PNG with a transparent background, wide rather than tall (about 200×60px or larger). Shown about 32px tall in the header and 36px in the footer — fine-tune the size under “Header & hero size” below. Leave blank to use the KBS wordmark."
           onChange={(url) => {
             setLogo(url);
             saveOne("logo", url, url ? "Logo updated." : "Logo cleared.");
@@ -665,6 +758,58 @@ function SiteDetails({
             setFavicon(url);
             saveOne("favicon", url, url ? "Favicon updated — it may take a minute to refresh in the tab." : "Favicon cleared.");
           }}
+        />
+      </div>
+
+      <div className="space-y-4 border-t border-[color:var(--panel-edge)] pt-8">
+        <h3 className="font-display text-lg">Header &amp; hero size</h3>
+        <p className="text-sm text-[color:var(--text-secondary)]">
+          Drag a slider to preview, then Save. The change goes live on the site straight
+          away — refresh a site tab to see it in place.
+        </p>
+
+        <ScaleControl
+          label="Logo size"
+          hint="How tall the logo sits in the header and footer. 100% is the standard size."
+          rangeKey="logoScale"
+          saved={scales.logoScale}
+          onSaved={(v) => setScales((s) => ({ ...s, logoScale: v }))}
+          notify={notify}
+          preview={(scale) =>
+            logo ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={logo}
+                alt="Logo preview"
+                className="w-auto object-contain"
+                style={{ height: `calc(2rem * ${scale})`, maxWidth: `calc(180px * ${scale})` }}
+              />
+            ) : (
+              <span
+                className="font-display tracking-tight"
+                style={{ fontSize: `calc(1.125rem * ${scale})` }}
+              >
+                KBS
+              </span>
+            )
+          }
+        />
+
+        <ScaleControl
+          label="Hero heading size"
+          hint="The size of the big headings on the landing hero (both the scrolling video captions and the static hero). 100% is the standard size."
+          rangeKey="heroScale"
+          saved={scales.heroScale}
+          onSaved={(v) => setScales((s) => ({ ...s, heroScale: v }))}
+          notify={notify}
+          preview={(scale) => (
+            <span
+              className="font-display leading-tight"
+              style={{ fontSize: `calc(clamp(1.25rem, 3vw, 2rem) * ${scale})` }}
+            >
+              Every floor gets a garden.
+            </span>
+          )}
         />
       </div>
 

@@ -76,6 +76,7 @@ export default async function AdminPage({
         "servicesPage|sisterConcerns": content.servicesPage.sisterConcerns,
       }}
       site={content.site}
+      appearance={content.appearance}
       integrations={content.integrations}
       bookings={bookingsRes.data ?? []}
       projects={projectsRes.data ?? []}
