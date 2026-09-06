@@ -69,7 +69,9 @@ export const getPage = unstable_cache(
       return null;
     }
   },
-  ["cms-page"],
+  // suffix bumped when page content is migrated outside the admin, so a deploy
+  // doesn't keep serving the pre-migration blocks from the data cache
+  ["cms-page-v2"],
   { tags: [CMS_PAGES_TAG], revalidate: 3600 }
 );
 

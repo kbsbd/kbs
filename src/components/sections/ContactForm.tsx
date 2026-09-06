@@ -13,7 +13,15 @@ import { trackLead } from "@/components/Integrations";
 
 type State = "idle" | "sending" | "sent" | "error";
 
-export default function ContactForm({ c, l }: { c: SiteContent; l: Locale }) {
+export default function ContactForm({
+  c,
+  l,
+  initialTopic = "general",
+}: {
+  c: SiteContent;
+  l: Locale;
+  initialTopic?: "general" | "project" | "product";
+}) {
   const [state, setState] = useState<State>("idle");
   const t = (v: Record<Locale, string>) => v[l];
   const f = c.contact.fields;
@@ -106,7 +114,7 @@ export default function ContactForm({ c, l }: { c: SiteContent; l: Locale }) {
         <label htmlFor="topic" className={lbl}>
           {t(f.topicLabel)}
         </label>
-        <select id="topic" name="topic" defaultValue="general" className={`${field} mt-2`}>
+        <select id="topic" name="topic" defaultValue={initialTopic} className={`${field} mt-2`}>
           <option value="general">{t(f.topicGeneral)}</option>
           <option value="project">{t(f.topicProject)}</option>
           <option value="product">{t(f.topicProduct)}</option>

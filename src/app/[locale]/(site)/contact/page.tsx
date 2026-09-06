@@ -15,14 +15,21 @@ export const metadata: Metadata = {
   description: "Contact KBS / Kanchan Builders about a project, a product or a general enquiry.",
 };
 
+const TOPICS = ["general", "project", "product"] as const;
+type Topic = (typeof TOPICS)[number];
+
 export default async function ContactPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ topic?: string }>;
 }) {
   const { locale } = await params;
   if (!(LOCALES as readonly string[]).includes(locale)) notFound();
   const l = locale as Locale;
+  const { topic } = await searchParams;
+  const initialTopic: Topic = TOPICS.includes(topic as Topic) ? (topic as Topic) : "general";
   const c = await getContent();
   const ct = c.contact;
   const t = (v: Record<Locale, string>) => v[l] || v.en;
@@ -125,7 +132,7 @@ export default async function ContactPage({
             ) : null}
           </div>
 
-          <ContactForm c={c} l={l} />
+          <ContactForm c={c} l={l} initialTopic={initialTopic} />
         </div>
       </div>
     </div>

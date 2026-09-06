@@ -518,11 +518,15 @@ export const footer = {
 export const servicesPage = {
   kicker: bi("WHAT WE DO", "আমরা যা করি"),
   head: bi("Our services", "আমাদের সেবাসমূহ"),
+  /** The line under the hero heading. */
+  subhead: bi(
+    "Real estate development and complete water-supply solutions — sanitary, plumbing, pumps, tube wells and treatment plants — from one company.",
+    "রিয়েল এস্টেট ডেভেলপমেন্ট এবং সম্পূর্ণ ওয়াটার সাপ্লাই সমাধান — স্যানিটারি, প্লাম্বিং, পাম্প, নলকূপ ও ট্রিটমেন্ট প্ল্যান্ট — এক প্রতিষ্ঠান থেকে।"
+  ),
   /** Optional hero image at the top of the Services page; set on the Media tab. */
   heroImage: "",
-  /** The big call-to-action buttons. `position` places them: over the hero
-   *  image, right under the hero (before the intro text), or at the page foot.
-   *  `href` can be a page made on the Pages tab (/p/slug) or any link. */
+  /** The two call-to-action buttons in the middle of the hero. `href` can be a
+   *  page made on the Pages tab (/p/slug) or any link; `position` is unused. */
   ctas: [
     {
       id: "real-estate",
@@ -533,10 +537,8 @@ export const servicesPage = {
     },
     {
       id: "water-supply",
-      /* points at the contact page for now; the admin re-points it (to
-         /p/water-supply-solution or an outside site) from Text → Services. */
       label: bi("Water Supply Solution", "ওয়াটার সাপ্লাই সলিউশন"),
-      href: "/contact",
+      href: "/p/water-supply-solution",
       color: "#2f6f9f",
       position: "under-hero",
     },
