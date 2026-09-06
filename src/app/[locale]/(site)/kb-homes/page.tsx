@@ -33,7 +33,7 @@ export default async function KbHomesPage({
     .map((g) => ({ image: g.image, title: t(g.caption) }));
 
   return (
-    <div>
+    <div className="relative z-[2]">
       <PageHero
         image={k.gallery[0]?.image}
         kicker={t(k.kicker)}
@@ -41,7 +41,7 @@ export default async function KbHomesPage({
         subtitle={`${t(k.address)} — ${t(k.addressNote)}`}
       />
 
-      <div className="page-wrap py-14">
+      <div className="page-wrap pt-14">
         <div className="prose-block">{lead && <p>{t(lead)}</p>}</div>
 
         {more.length > 0 && (
@@ -67,14 +67,16 @@ export default async function KbHomesPage({
             </div>
           </details>
         )}
+      </div>
 
-        {galleryItems.length > 0 && (
-          <div className="mt-12">
-            <KbGallery items={galleryItems} label={t(k.head)} />
-          </div>
-        )}
+      {galleryItems.length > 0 && (
+        <div className="my-14">
+          <KbGallery items={galleryItems} label={t(k.head)} />
+        </div>
+      )}
 
-        <div className="mt-12">
+      <div className="page-wrap pb-14 pt-12">
+        <div>
           <h2 className="font-mono-label text-[color:var(--text-quiet)]">
             {l === "bn" ? "Highlights" : "Highlights"}
           </h2>

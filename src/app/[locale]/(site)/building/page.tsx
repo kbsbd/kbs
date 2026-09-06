@@ -55,7 +55,7 @@ export default async function BuildingDetail({
   const specsLabel = l === "bn" ? "মূল তথ্য" : "Key figures";
 
   return (
-    <div>
+    <div className="relative z-[2]">
       <JsonLd
         data={[
           {

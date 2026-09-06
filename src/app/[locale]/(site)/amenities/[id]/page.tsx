@@ -63,7 +63,7 @@ export default async function AmenityDetail({
   const cta = l === "bn" ? "সাইট ভিজিট বুক করুন" : "Book a site visit";
 
   return (
-    <div>
+    <div className="relative z-[2]">
       <JsonLd
         data={[
           {
