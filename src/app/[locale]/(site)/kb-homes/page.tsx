@@ -3,8 +3,8 @@ import { notFound } from "next/navigation";
 import { LOCALES, type Locale } from "@/content/seed";
 import { getContent } from "@/lib/content";
 import { resolveMapEmbed } from "@/lib/mapEmbed";
-import MediaSlot from "@/components/MediaSlot";
 import PageHero from "@/components/PageHero";
+import KbGallery from "@/components/KbGallery";
 
 export const revalidate = 600;
 
@@ -27,6 +27,11 @@ export default async function KbHomesPage({
   const t = (v: Record<Locale, string>) => v[l] || v.en;
   const mapSrc = await resolveMapEmbed(k.mapEmbed || c.site.mapEmbed);
 
+  const [lead, ...more] = k.intro;
+  const galleryItems = k.gallery
+    .filter((g) => g.image)
+    .map((g) => ({ image: g.image, title: t(g.caption) }));
+
   return (
     <div>
       <PageHero
@@ -37,11 +42,37 @@ export default async function KbHomesPage({
       />
 
       <div className="page-wrap py-14">
-        <div className="prose-block">
-          {k.intro.map((p, i) => (
-            <p key={i}>{t(p)}</p>
-          ))}
-        </div>
+        <div className="prose-block">{lead && <p>{t(lead)}</p>}</div>
+
+        {more.length > 0 && (
+          <details className="group mt-3">
+            <summary className="font-mono-label inline-flex cursor-pointer list-none items-center gap-2 text-[color:var(--accent)] [&::-webkit-details-marker]:hidden">
+              <span className="group-open:hidden">
+                {l === "bn" ? "সম্পূর্ণ বিবরণ পড়ুন" : "Read the full overview"}
+              </span>
+              <span className="hidden group-open:inline">
+                {l === "bn" ? "সংক্ষিপ্ত করুন" : "Show less"}
+              </span>
+              <span
+                aria-hidden="true"
+                className="transition-transform duration-300 group-open:rotate-180"
+              >
+                ↓
+              </span>
+            </summary>
+            <div className="prose-block mt-4">
+              {more.map((p, i) => (
+                <p key={i}>{t(p)}</p>
+              ))}
+            </div>
+          </details>
+        )}
+
+        {galleryItems.length > 0 && (
+          <div className="mt-12">
+            <KbGallery items={galleryItems} label={t(k.head)} />
+          </div>
+        )}
 
         <div className="mt-12">
           <h2 className="font-mono-label text-[color:var(--text-quiet)]">
@@ -62,21 +93,6 @@ export default async function KbHomesPage({
           </ul>
         </div>
 
-        {k.gallery.length > 1 && (
-          <div className="mt-12 grid gap-6 sm:grid-cols-2">
-            {k.gallery.slice(1).map((g) => (
-              <figure key={g.id}>
-                <MediaSlot name={g.image} alt={t(g.caption)} label="Gallery image" ratio="4 / 3" />
-                {t(g.caption) && (
-                  <figcaption className="mt-2 text-sm text-[color:var(--text-quiet)]">
-                    {t(g.caption)}
-                  </figcaption>
-                )}
-              </figure>
-            ))}
-          </div>
-        )}
-
         <div className="card mt-14">
           <h2 className="font-mono-label text-[color:var(--text-quiet)]">
             {t(c.contact.addressHead)}
@@ -89,7 +105,7 @@ export default async function KbHomesPage({
               title="Map"
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
-              className="mt-4 aspect-[16/9] w-full rounded-lg border border-[color:var(--panel-edge)]"
+              className="mt-4 aspect-[16/10] w-full rounded-lg border border-[color:var(--panel-edge)]"
             />
           ) : null}
           <div className="mt-6">
