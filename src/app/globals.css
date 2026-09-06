@@ -342,15 +342,17 @@ header[data-nav-over-hero="true"] button:not(.btn):hover {
   object-fit: cover;
 }
 
-/* 1. the global base scrim: no frame is ever raw behind the page */
+/* 1. the global base scrim. Kept as a whisper-thin edge vignette only — the
+   readable darkening behind caption text is the per-band scrim below, which the
+   admin controls with "Backdrop darkness". */
 .scrim {
   position: absolute;
   inset: 0;
   pointer-events: none;
   background: radial-gradient(
-    ellipse 120% 90% at 50% 45%,
-    rgba(10, 12, 20, 0) 35%,
-    rgba(10, 12, 20, 0.62) 100%
+    ellipse 130% 100% at 50% 45%,
+    rgba(10, 12, 20, 0) 62%,
+    rgba(10, 12, 20, 0.16) 100%
   );
 }
 
@@ -946,10 +948,9 @@ body.paused *::after {
 }
 
 .cta-fab-core {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--accent);
+  display: grid;
+  place-items: center;
+  color: var(--accent);
   transition: transform 0.25s ease;
 }
 
@@ -967,8 +968,9 @@ body.paused *::after {
   background: rgba(8, 10, 18, 0.9);
   transform: rotate(45deg);
 }
+/* keep the phone glyph upright while the dot's ring rotates to an X */
 .cta-fab[data-open="true"] .cta-fab-core {
-  transform: scale(0.7);
+  transform: rotate(-45deg) scale(0.82);
 }
 .cta-fab[data-open="true"] .cta-fab-pulse {
   animation: none;

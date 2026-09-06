@@ -292,7 +292,9 @@ export default function FixedActions({
         aria-controls="cta-panel"
         aria-label={open ? label.close : label.open}
       >
-        <span className="cta-fab-core" aria-hidden="true" />
+        <span className="cta-fab-core" aria-hidden="true">
+          <ChannelIcon name="phone" size={22} />
+        </span>
         <span className="cta-fab-pulse" aria-hidden="true" />
       </button>
     </div>

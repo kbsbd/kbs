@@ -111,16 +111,6 @@ export const CONTENT_LISTS: Record<string, ListSpec[]> = {
       blank: () => ({ id: rid(), q: emptyL(), a: emptyL() }),
     },
   ],
-  trust: [
-    {
-      root: "trust",
-      path: "items",
-      label: "Documents to ask for",
-      hint: "The checklist of papers a buyer should ask any developer for.",
-      shape: "scalar",
-      blank: () => emptyL(),
-    },
-  ],
   amenities: [
     {
       root: "amenities",

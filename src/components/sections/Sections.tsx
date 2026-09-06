@@ -58,39 +58,42 @@ export function Premise({ c, l }: { c: SiteContent; l: Locale }) {
   );
 }
 
-/* 2. The building. A wide image band, then a spec table underneath. */
+/* 2. The building. Image on the left, the heading and spec table on the right;
+   on a phone the info stacks under the image. */
 export function Building({ c, l }: { c: SiteContent; l: Locale }) {
   return (
     <section className="sec reveal" id="building">
       <Wrap>
-        <div className="part relative overflow-hidden rounded-2xl">
-          <img
-            src={img(c.building.image, 1920)}
-            alt=""
-            loading="lazy"
-            className="aspect-[21/9] w-full object-cover"
-          />
-        </div>
+        <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
+          <div className="part relative overflow-hidden rounded-2xl">
+            <img
+              src={img(c.building.image, 1400)}
+              alt=""
+              loading="lazy"
+              className="aspect-[4/3] w-full object-cover lg:aspect-[4/5]"
+            />
+          </div>
 
-        <div className="part mt-12 flex flex-wrap items-end justify-between gap-6">
           <div>
-            <Kicker>{pick(c.building.kicker, l)}</Kicker>
-            <h2 className="font-display mt-4 text-[clamp(1.9rem,3.6vw,3rem)]">
-              {pick(c.building.head, l)}
-            </h2>
+            <div className="part">
+              <Kicker>{pick(c.building.kicker, l)}</Kicker>
+              <h2 className="font-display mt-4 text-[clamp(1.9rem,3.6vw,3rem)]">
+                {pick(c.building.head, l)}
+              </h2>
+            </div>
+
+            <dl className="part mt-8 grid gap-px overflow-hidden rounded-2xl border border-[color:var(--panel-edge)] bg-[color:var(--panel-edge)] sm:grid-cols-2">
+              {c.building.specs.map((s) => (
+                <div key={s.id} className="bg-[color:var(--panel)] px-6 py-6">
+                  <dt className="font-mono-label text-[color:var(--text-quiet)]">
+                    {pick(s.label, l)}
+                  </dt>
+                  <dd className="font-display mt-2 text-xl">{pick(s.value, l)}</dd>
+                </div>
+              ))}
+            </dl>
           </div>
         </div>
-
-        <dl className="part mt-10 grid gap-px overflow-hidden rounded-2xl border border-[color:var(--panel-edge)] bg-[color:var(--panel-edge)] sm:grid-cols-2 lg:grid-cols-3">
-          {c.building.specs.map((s) => (
-            <div key={s.id} className="bg-[color:var(--panel)] px-7 py-8">
-              <dt className="font-mono-label text-[color:var(--text-quiet)]">
-                {pick(s.label, l)}
-              </dt>
-              <dd className="font-display mt-3 text-2xl">{pick(s.value, l)}</dd>
-            </div>
-          ))}
-        </dl>
       </Wrap>
     </section>
   );
@@ -201,46 +204,6 @@ export function Amenities({ c, l }: { c: SiteContent; l: Locale }) {
             </li>
           ))}
         </ul>
-      </Wrap>
-    </section>
-  );
-}
-
-/* 5. The trust section. No image, no cards. Big type and a list, because the
-   subject is a promise rather than a picture. */
-export function Trust({ c, l }: { c: SiteContent; l: Locale }) {
-  return (
-    <section className="sec reveal" id="trust">
-      <Wrap>
-        <div className="pulse relative overflow-hidden rounded-3xl border border-[color:var(--panel-edge)] bg-[color:var(--panel)] px-6 py-14 sm:px-12 lg:px-16 lg:py-20">
-          <div className="part">
-            <Kicker>{pick(c.trust.kicker, l)}</Kicker>
-          </div>
-          <h2 className="part font-display mt-5 max-w-[20ch] text-[clamp(1.9rem,4vw,3.3rem)]">
-            {pick(c.trust.head, l)}
-          </h2>
-
-          <ul className="part mt-12 grid gap-x-10 gap-y-4 sm:grid-cols-2">
-            {c.trust.items.map((item, i) => (
-              <li
-                key={i}
-                className="flex items-baseline gap-4 border-b border-[color:var(--panel-edge)] pb-4"
-              >
-                <span className="font-mono-label shrink-0 text-[color:var(--accent)]">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <span className="text-[color:var(--text-primary)]">{pick(item, l)}</span>
-              </li>
-            ))}
-          </ul>
-
-          <p className="part mt-12 max-w-[54ch] text-[clamp(1.05rem,1.5vw,1.3rem)] leading-relaxed">
-            {pick(c.trust.body, l)}
-          </p>
-          <p className="part mt-6 font-mono-label text-[color:var(--text-quiet)]">
-            {pick(c.trust.since, l)}
-          </p>
-        </div>
       </Wrap>
     </section>
   );

@@ -285,35 +285,6 @@ export const amenities = {
   ],
 };
 
-export const trust = {
-  kicker: { en: "BEFORE YOU BUY", bn: "কেনার আগে" },
-  head: {
-    en: "Ask any builder for these. Including us.",
-    bn: "যেকোনো ডেভেলপারের কাছে এগুলো চান। আমাদের কাছেও।",
-  },
-  items: [
-    { en: "Title deed", bn: "দলিল" },
-    { en: "Khatiyan", bn: "খতিয়ান" },
-    { en: "Mutation certificate", bn: "নামজারি" },
-    { en: "The approved building plan", bn: "অনুমোদিত নকশা" },
-    { en: "Utility NOCs", bn: "ইউটিলিটি ছাড়পত্র" },
-    { en: "The name of the structural engineer", bn: "স্ট্রাকচারাল ইঞ্জিনিয়ারের নাম" },
-    { en: "The soil test report", bn: "মাটি পরীক্ষার রিপোর্ট" },
-    {
-      en: "And the clause that says what happens if we hand over late",
-      bn: "আর হস্তান্তরে দেরি হলে কী হবে, সেই শর্তটি",
-    },
-  ],
-  body: {
-    en: "Ask for all of it, from us and from everyone else you are talking to. A builder who hesitates has told you something.",
-    bn: "আমাদের কাছে এবং আপনি যাদের সঙ্গে কথা বলছেন তাদের সবার কাছেই এগুলো চান। যে ডেভেলপার ইতস্তত করে, সে আপনাকে অনেক কিছু বলে দিল।",
-  },
-  since: {
-    en: "KBS has been building in this country since 1995.",
-    bn: "কেবিএস ১৯৯৫ সাল থেকে এই দেশে নির্মাণ করছে।",
-  },
-};
-
 export const faq = {
   kicker: { en: "QUESTIONS", bn: "প্রশ্ন" },
   head: { en: "The things people actually ask.", bn: "মানুষ আসলে যা জিজ্ঞেস করে।" },
@@ -794,7 +765,6 @@ export const seed = {
   building,
   balcony,
   amenities,
-  trust,
   faq,
   projects,
   book,

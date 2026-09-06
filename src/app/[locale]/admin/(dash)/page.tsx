@@ -66,7 +66,6 @@ export default async function AdminPage({
         "heroBands|": content.heroBands,
         "nav|links": content.nav.links,
         "faq|items": content.faq.items,
-        "trust|items": content.trust.items,
         "amenities|items": content.amenities.items,
         "amenities|listed": content.amenities.listed,
         "kbHomes|intro": content.kbHomes.intro,

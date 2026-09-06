@@ -13,7 +13,6 @@ import {
   Premise,
   Building,
   Amenities,
-  Trust,
   Faq,
   Projects,
 } from "@/components/sections/Sections";
@@ -100,7 +99,6 @@ export default async function Home({
       <Building c={c} l={l} />
       <BalconyHold c={c} l={l} />
       <Amenities c={c} l={l} />
-      <Trust c={c} l={l} />
       <Faq c={c} l={l} />
       <Projects c={c} l={l} items={projectItems} />
       <BookForm c={c} l={l} />
