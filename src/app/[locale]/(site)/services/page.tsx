@@ -9,6 +9,46 @@ import JsonLd from "@/components/JsonLd";
 
 export const revalidate = 600;
 
+type Cta = {
+  id: string;
+  label: Record<Locale, string>;
+  href: string;
+  color: string;
+  position: "hero" | "under-hero" | "bottom";
+};
+
+function CtaRow({
+  ctas,
+  at,
+  l,
+  className = "",
+}: {
+  ctas: Cta[];
+  at: Cta["position"];
+  l: Locale;
+  className?: string;
+}) {
+  const here = ctas.filter((x) => x.position === at && (x.label[l] || x.label.en) && x.href);
+  if (!here.length) return null;
+  return (
+    <div className={`flex flex-wrap gap-3 ${className}`}>
+      {here.map((cta) => (
+        <a
+          key={cta.id}
+          href={cta.href}
+          className="btn text-sm font-medium text-white"
+          style={{
+            backgroundColor: cta.color || "var(--accent)",
+            borderColor: cta.color || "var(--accent)",
+          }}
+        >
+          {cta.label[l] || cta.label.en}
+        </a>
+      ))}
+    </div>
+  );
+}
+
 export const metadata: Metadata = {
   title: "Services — KBS / Kanchan Builders",
   description:
@@ -56,16 +96,25 @@ export default async function ServicesPage({
         <h1 className="font-display mt-6 text-[clamp(2.2rem,6vw,3.6rem)]">{t(s.head)}</h1>
 
         {s.heroImage && (
-          <MediaSlot
-            name={s.heroImage}
-            alt={t(s.head)}
-            label="Services hero"
-            ratio="16 / 9"
-            width={1600}
-            priority
-            className="mt-8"
-          />
+          <div className="relative mt-8">
+            <MediaSlot
+              name={s.heroImage}
+              alt={t(s.head)}
+              label="Services hero"
+              ratio="16 / 9"
+              width={1600}
+              priority
+            />
+            <CtaRow
+              ctas={s.ctas}
+              at="hero"
+              l={l}
+              className="absolute inset-x-0 bottom-0 justify-center p-5"
+            />
+          </div>
         )}
+
+        <CtaRow ctas={s.ctas} at="under-hero" l={l} className="mt-8" />
 
         <div className="prose-block mt-8">
           {s.intro.map((p, i) => (
@@ -108,6 +157,8 @@ export default async function ServicesPage({
             </article>
           ))}
         </div>
+
+        <CtaRow ctas={s.ctas} at="bottom" l={l} className="mt-16" />
 
         <div className="mt-16 flex flex-wrap items-center gap-3">
           <a href={`/${l}/contact`} className="btn btn-primary">

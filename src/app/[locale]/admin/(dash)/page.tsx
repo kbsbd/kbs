@@ -70,6 +70,7 @@ export default async function AdminPage({
         "amenities|listed": content.amenities.listed,
         "kbHomes|intro": content.kbHomes.intro,
         "kbHomes|highlights": content.kbHomes.highlights,
+        "servicesPage|ctas": content.servicesPage.ctas,
         "servicesPage|intro": content.servicesPage.intro,
         "servicesPage|items": content.servicesPage.items,
         "servicesPage|sisterConcerns": content.servicesPage.sisterConcerns,

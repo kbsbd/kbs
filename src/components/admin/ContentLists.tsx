@@ -147,6 +147,26 @@ export const CONTENT_LISTS: Record<string, ListSpec[]> = {
     { root: "kbHomes", path: "highlights", label: "Highlights", shape: "scalar", blank: () => emptyL() },
   ],
   servicesPage: [
+    {
+      root: "servicesPage",
+      path: "ctas",
+      label: "Call-to-action buttons",
+      hint: "The big buttons on the Services page. “Opens” can be a page you built on the Pages tab (type /p/its-slug) or any link. Colour is a hex code like #5f7d1f.",
+      shape: "object",
+      summaryKey: "label",
+      fields: [
+        { key: "label", label: "Button text", type: "bi" },
+        { key: "href", label: "Opens (link)", type: "text", placeholder: "/p/real-estate-development" },
+        { key: "color", label: "Button colour (hex)", type: "text", placeholder: "#5f7d1f" },
+        {
+          key: "position",
+          label: "Where on the page",
+          type: "select",
+          options: ["hero", "under-hero", "bottom"],
+        },
+      ],
+      blank: () => ({ id: rid(), label: emptyL(), href: "", color: "#5f7d1f", position: "under-hero" }),
+    },
     { root: "servicesPage", path: "intro", label: "Intro paragraphs", shape: "scalar", blank: () => emptyL() },
     {
       root: "servicesPage",

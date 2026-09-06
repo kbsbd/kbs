@@ -503,6 +503,31 @@ export const servicesPage = {
   head: bi("Our services", "আমাদের সেবাসমূহ"),
   /** Optional hero image at the top of the Services page; set on the Media tab. */
   heroImage: "",
+  /** The big call-to-action buttons. `position` places them: over the hero
+   *  image, right under the hero (before the intro text), or at the page foot.
+   *  `href` can be a page made on the Pages tab (/p/slug) or any link. */
+  ctas: [
+    {
+      id: "real-estate",
+      label: bi("Real Estate Development", "রিয়েল এস্টেট ডেভেলপমেন্ট"),
+      href: "/p/real-estate-development",
+      color: "#5f7d1f",
+      position: "under-hero",
+    },
+    {
+      id: "water-supply",
+      label: bi("Water Supply Solution", "ওয়াটার সাপ্লাই সলিউশন"),
+      href: "/p/water-supply-solution",
+      color: "#2f6f9f",
+      position: "under-hero",
+    },
+  ] as Array<{
+    id: string;
+    label: L;
+    href: string;
+    color: string;
+    position: "hero" | "under-hero" | "bottom";
+  }>,
   intro: [
     bi(
       "Welcome to Kanchan Builders. We are one of the leading Sanitary & Plumbing systems solution providing companies in the Bangladeshi market. For the last 36 years we have worked in this field, for a green world and to every international standard.",
