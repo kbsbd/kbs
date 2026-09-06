@@ -115,6 +115,11 @@ export const SITE_FIELDS: Array<{ key: string; label: string; hint?: string; typ
     label: "Google Maps",
     hint: 'In Google Maps: Share → "Embed a map" → Copy HTML, and paste the whole thing here (or just the map link). Shows on Contact and KB Homes. Leave blank to hide the map.',
   },
+  {
+    key: "videoUrl",
+    label: "Homepage video (YouTube link)",
+    hint: "Paste a YouTube link — watch, share, Shorts, all work. It appears as a video on the landing page. Leave blank to hide that section.",
+  },
   { key: "founded", label: "Founded (year)", hint: 'Shown in the footer as "SINCE 1995"' },
 ];
 

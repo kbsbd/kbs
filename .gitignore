@@ -46,3 +46,9 @@ next-env.d.ts
 /media/
 /kbs-web-source.zip
 /dev.log
+
+# local reference material dropped in the repo root, not part of the app
+/Claude outputs/
+/patch-flowers/
+/correction needed.txt
+/*.docx

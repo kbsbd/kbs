@@ -7,7 +7,7 @@ import { getContent, getProjects } from "@/lib/content";
 import { img, heroSources } from "@/lib/media";
 import ScrubHero from "@/components/hero/ScrubHero";
 import StructuredData from "@/components/StructuredData";
-import BalconyHold from "@/components/sections/BalconyHold";
+import { VideoSection } from "@/components/sections/VideoSection";
 import BookForm from "@/components/sections/BookForm";
 import {
   Premise,
@@ -97,7 +97,7 @@ export default async function Home({
 
       <Premise c={c} l={l} />
       <Building c={c} l={l} />
-      <BalconyHold c={c} l={l} />
+      <VideoSection c={c} l={l} />
       <Amenities c={c} l={l} />
       <Faq c={c} l={l} />
       <Projects c={c} l={l} items={projectItems} />

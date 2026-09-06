@@ -215,15 +215,15 @@ export const building = {
   ],
 };
 
-export const balcony = {
-  kicker: { en: "PRESS AND HOLD", bn: "চেপে ধরে রাখুন" },
-  head: { en: "Let it grow.", bn: "বেড়ে উঠতে দিন।" },
+/** The landing-page video block. The YouTube link is set on the Site details
+ *  tab (site.videoUrl); a blank link hides the whole section. */
+export const video = {
+  kicker: { en: "WATCH", bn: "ভিডিও" },
+  head: { en: "See KB House in motion.", bn: "চলমান কেবি হাউস দেখুন।" },
   body: {
-    en: "Hold the button. This is what a planted terrace does to a balcony you would otherwise use for drying clothes.",
-    bn: "বোতামটি চেপে ধরুন। একটি সাধারণ বারান্দা, যেটা হয়তো কাপড় শুকাতেই ব্যবহার হতো, সবুজ হলে কেমন দাঁড়ায় দেখুন।",
+    en: "A short walk-through of the building and its planted terraces.",
+    bn: "ভবন ও এর সবুজ বারান্দাগুলোর একটি সংক্ষিপ্ত পরিদর্শন।",
   },
-  hold: { en: "Hold to grow", bn: "চেপে ধরুন" },
-  done: { en: "That is every floor.", bn: "প্রতিটি তলাতেই এমন।" },
 };
 
 export const amenities = {
@@ -423,6 +423,8 @@ export const site = {
     bn: "KB Homes, Faidabad, Dokhinkhan, Dhaka - 1230",
   },
   mapEmbed: "",
+  /** YouTube link for the landing-page video block. Blank hides the section. */
+  videoUrl: "",
   /** Footer social links. `platform` picks the icon; `label` is an optional
    *  override for the accessible name. Ships empty and the row hides itself. */
   socials: [] as Array<{ id: string; platform: string; label: string; href: string }>,
@@ -771,7 +773,7 @@ export const seed = {
   staticHero,
   premise,
   building,
-  balcony,
+  video,
   amenities,
   faq,
   projects,
