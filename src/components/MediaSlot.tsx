@@ -34,7 +34,9 @@ export default function MediaSlot({
         <img
           src={src}
           alt={alt}
-          className="h-full w-full object-cover"
+          /* object-contain: the frame keeps its shape so nothing shifts, but the
+             whole image shows inside it — no cropped edges. */
+          className="h-full w-full object-contain"
           loading={priority ? "eager" : "lazy"}
           fetchPriority={priority ? "high" : "auto"}
         />

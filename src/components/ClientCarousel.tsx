@@ -65,7 +65,7 @@ export default function ClientCarousel({ slides }: { slides: Slide[] }) {
                   alt={s.name}
                   width={1400}
                   height={788}
-                  className="h-full w-full object-cover"
+                  className="h-full w-full object-contain"
                   loading={i === 0 ? "eager" : "lazy"}
                   fetchPriority={i === 0 ? "high" : "auto"}
                 />
