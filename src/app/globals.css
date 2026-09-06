@@ -342,18 +342,11 @@ header[data-nav-over-hero="true"] button:not(.btn):hover {
   object-fit: cover;
 }
 
-/* 1. the global base scrim. Kept as a whisper-thin edge vignette only — the
-   readable darkening behind caption text is the per-band scrim below, which the
-   admin controls with "Backdrop darkness". */
+/* The global base scrim is gone by request — the hero video plays with no dark
+   overlay at all. The only darkening left is the per-band scrim behind caption
+   text, which the admin controls with "Backdrop darkness". */
 .scrim {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(
-    ellipse 130% 100% at 50% 45%,
-    rgba(10, 12, 20, 0) 62%,
-    rgba(10, 12, 20, 0.16) 100%
-  );
+  display: none;
 }
 
 /* the loading ring */

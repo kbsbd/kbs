@@ -45,6 +45,7 @@ export default function SiteChrome({
   const shopOn = content.shop.enabled;
   const logo = content.site.logo;
   const logoScale = clampAppearance("logoScale", content.appearance.logoScale);
+  const navScrim = clampAppearance("navScrim", content.appearance.navScrim);
   /* When the shop is off, every path into it disappears from the chrome. */
   const pointsAtShop = (href: string) => /^(\/(en|bn))?\/shop(\/|$|\?|#)/.test(href);
   const isShopLink = (href: string) => !shopOn && pointsAtShop(href);
@@ -197,17 +198,20 @@ export default function SiteChrome({
             : "border-b border-transparent"
         }`}
       >
-        {/* over live footage the nav needs its own scrim, or the links sit on
-            bright concrete. It fades out once the page has a solid background. */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 top-0 h-32 transition-opacity duration-500"
-          style={{
-            opacity: navSolid ? 0 : 1,
-            background:
-              "linear-gradient(180deg, rgba(7,16,26,.72) 0%, rgba(7,16,26,.38) 52%, transparent 100%)",
-          }}
-        />
+        {/* over live footage the nav can carry a scrim so the links don't sit on
+            bright concrete. Strength is the admin's "Header scrim" setting; at 0
+            it's fully see-through. It fades out once the page scrolls solid. */}
+        {navScrim > 0 && (
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 top-0 h-32 transition-opacity duration-500"
+            style={{
+              opacity: navSolid ? 0 : navScrim,
+              background:
+                "linear-gradient(180deg, rgba(7,16,26,.72) 0%, rgba(7,16,26,.38) 52%, transparent 100%)",
+            }}
+          />
+        )}
         <nav className="relative mx-auto flex max-w-[86rem] items-center gap-3 px-4 py-3 sm:gap-4 sm:px-8">
           <Link
             href={`/${locale}`}

@@ -443,13 +443,17 @@ export const appearance = {
   /** Hero heading size (scroll hero captions + the static hero), as a multiple
    *  of the design size. */
   heroScale: 1,
+  /** How dark the scrim behind the header is while it sits over the hero.
+   *  1 = the original scrim, 0 = no scrim at all (fully see-through). */
+  navScrim: 0.5,
 };
 
-/** Slider bounds, shared by the editor and the render path so a stored value
- *  can never blow the layout up. */
+/** Slider bounds + default, shared by the editor and the render path so a
+ *  stored value can never blow the layout up. */
 export const APPEARANCE_RANGE = {
-  logoScale: { min: 0.7, max: 2, step: 0.05 },
-  heroScale: { min: 0.75, max: 1.4, step: 0.05 },
+  logoScale: { min: 0.7, max: 2, step: 0.05, def: 1 },
+  heroScale: { min: 0.75, max: 1.4, step: 0.05, def: 1 },
+  navScrim: { min: 0, max: 1, step: 0.05, def: 0.5 },
 } as const;
 
 /** Clamp a stored/edited appearance value to its allowed range. */
@@ -457,9 +461,9 @@ export const clampAppearance = (
   key: keyof typeof APPEARANCE_RANGE,
   v: unknown
 ): number => {
+  const { min, max, def } = APPEARANCE_RANGE[key];
   const n = typeof v === "number" ? v : Number(v);
-  if (!Number.isFinite(n)) return 1;
-  const { min, max } = APPEARANCE_RANGE[key];
+  if (!Number.isFinite(n)) return def;
   return Math.min(max, Math.max(min, n));
 };
 
@@ -525,8 +529,10 @@ export const servicesPage = {
     },
     {
       id: "water-supply",
+      /* points at the contact page for now; the admin re-points it (to
+         /p/water-supply-solution or an outside site) from Text → Services. */
       label: bi("Water Supply Solution", "ওয়াটার সাপ্লাই সলিউশন"),
-      href: "/p/water-supply-solution",
+      href: "/contact",
       color: "#2f6f9f",
       position: "under-hero",
     },

@@ -625,11 +625,11 @@ function ScaleControl({
   notify: (s: string) => void;
   preview: (scale: number) => React.ReactNode;
 }) {
-  const { min, max, step } = APPEARANCE_RANGE[rangeKey];
+  const { min, max, step, def } = APPEARANCE_RANGE[rangeKey];
   const [v, setV] = useState(saved);
   const [pending, start] = useTransition();
   const dirty = Math.abs(v - saved) > 1e-6;
-  const isDefault = Math.abs(v - 1) < 1e-6;
+  const isDefault = Math.abs(v - def) < 1e-6;
 
   const persist = (value: number) => {
     const clamped = clampAppearance(rangeKey, value);
@@ -651,8 +651,8 @@ function ScaleControl({
           type="button"
           className="btn btn-ghost ml-auto text-xs"
           onClick={() => {
-            setV(1);
-            persist(1);
+            setV(def);
+            persist(def);
           }}
           disabled={pending || isDefault}
         >
@@ -705,6 +705,7 @@ function SiteDetails({
   const [scales, setScales] = useState(() => ({
     logoScale: clampAppearance("logoScale", appearance.logoScale),
     heroScale: clampAppearance("heroScale", appearance.heroScale),
+    navScrim: clampAppearance("navScrim", appearance.navScrim),
   }));
   const [values, setValues] = useState<Record<string, string>>(() =>
     Object.fromEntries(SITE_FIELDS.map((f) => [f.key, String(site[f.key] ?? "")]))
@@ -829,6 +830,36 @@ function SiteDetails({
             >
               Every floor gets a garden.
             </span>
+          )}
+        />
+
+        <ScaleControl
+          label="Header scrim over the hero"
+          hint="How dark the strip behind the header is while it floats over the hero image or video. 0% is fully see-through; the header still turns solid once the page scrolls."
+          rangeKey="navScrim"
+          saved={scales.navScrim}
+          onSaved={(v) => setScales((s) => ({ ...s, navScrim: v }))}
+          notify={notify}
+          preview={(scale) => (
+            <div
+              className="relative flex h-16 w-full max-w-[320px] items-start overflow-hidden rounded-md"
+              style={{
+                background:
+                  "linear-gradient(120deg, #6b8fb0 0%, #93a98d 55%, #c9c3a8 100%)",
+              }}
+            >
+              <div
+                className="pointer-events-none absolute inset-x-0 top-0 h-10"
+                style={{
+                  opacity: scale,
+                  background:
+                    "linear-gradient(180deg, rgba(7,16,26,.72) 0%, rgba(7,16,26,.38) 52%, transparent 100%)",
+                }}
+              />
+              <span className="relative z-10 px-3 py-2 text-xs font-medium text-white">
+                KBS · KB Homes · Services · Contact
+              </span>
+            </div>
           )}
         />
       </div>
