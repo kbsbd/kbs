@@ -4,6 +4,7 @@ import { LOCALES, type Locale } from "@/content/seed";
 import { getContent } from "@/lib/content";
 import { resolveMapEmbed } from "@/lib/mapEmbed";
 import MediaSlot from "@/components/MediaSlot";
+import PageHero from "@/components/PageHero";
 
 export const revalidate = 600;
 
@@ -27,25 +28,16 @@ export default async function KbHomesPage({
   const mapSrc = await resolveMapEmbed(k.mapEmbed || c.site.mapEmbed);
 
   return (
-    <div className="page">
-      <div className="page-wrap">
-        <p className="chip font-mono-label">{t(k.kicker)}</p>
-        <h1 className="font-display mt-6 text-[clamp(2.2rem,6vw,3.6rem)]">{t(k.head)}</h1>
-        <p className="page-lede mt-5">
-          {t(k.address)} — {t(k.addressNote)}
-        </p>
+    <div>
+      <PageHero
+        image={k.gallery[0]?.image}
+        kicker={t(k.kicker)}
+        title={t(k.head)}
+        subtitle={`${t(k.address)} — ${t(k.addressNote)}`}
+      />
 
-        <MediaSlot
-          name={k.gallery[0]?.image ?? ""}
-          alt={t(k.head)}
-          label="Hero image"
-          ratio="16 / 9"
-          className="mt-10"
-          width={1600}
-          priority
-        />
-
-        <div className="prose-block mt-10">
+      <div className="page-wrap py-14">
+        <div className="prose-block">
           {k.intro.map((p, i) => (
             <p key={i}>{t(p)}</p>
           ))}

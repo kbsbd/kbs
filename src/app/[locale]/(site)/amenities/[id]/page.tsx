@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -7,6 +6,7 @@ import { getContent } from "@/lib/content";
 import { img } from "@/lib/media";
 import { siteUrl } from "@/lib/site-url";
 import JsonLd from "@/components/JsonLd";
+import PageHero from "@/components/PageHero";
 
 /* Same ISR window as the landing page: these read the identical content, so an
    admin edit reaching one and not the other would be the confusing outcome. */
@@ -82,43 +82,12 @@ export default async function AmenityDetail({
         ]}
       />
 
-      {/* Full-bleed hero: the photo runs edge to edge and the heading and
-          sub-heading sit on top of it. */}
-      <header className="relative w-full overflow-hidden">
-        <div className="relative min-h-[64svh] w-full sm:min-h-[72svh]">
-          {item.image && (
-            <img
-              src={img(item.image, 2000)}
-              alt={t(item.title)}
-              className="absolute inset-0 h-full w-full object-cover"
-              fetchPriority="high"
-            />
-          )}
-          <div
-            className="absolute inset-0"
-            style={{
-              background:
-                "linear-gradient(180deg, rgba(7,16,26,.55) 0%, rgba(7,16,26,.18) 34%, rgba(7,16,26,.42) 66%, rgba(7,16,26,.9) 100%)",
-            }}
-          />
-          <div className="relative mx-auto flex min-h-[64svh] max-w-[72rem] flex-col justify-end px-[clamp(1.25rem,5vw,2.5rem)] pb-14 pt-32 sm:min-h-[72svh]">
-            <Link
-              href={`/${l}#amenities`}
-              className="font-mono-label text-white/80 transition-colors hover:text-white"
-            >
-              ← {back}
-            </Link>
-            <h1 className="font-display mt-4 max-w-[20ch] text-[clamp(2.2rem,6vw,3.6rem)] text-white">
-              {t(item.title)}
-            </h1>
-            {t(item.body) && (
-              <p className="mt-4 max-w-[52ch] text-[clamp(1.05rem,1.7vw,1.3rem)] leading-relaxed text-white/85">
-                {t(item.body)}
-              </p>
-            )}
-          </div>
-        </div>
-      </header>
+      <PageHero
+        image={item.image}
+        title={t(item.title)}
+        subtitle={t(item.body)}
+        back={{ href: `/${l}#amenities`, label: back }}
+      />
 
       <div className="page-wrap py-14">
         <Link href={`/${l}#book`} className="btn btn-primary">

@@ -6,6 +6,7 @@ import { siteUrl } from "@/lib/site-url";
 import MediaSlot from "@/components/MediaSlot";
 import ChannelIcon from "@/components/ChannelIcon";
 import JsonLd from "@/components/JsonLd";
+import PageHero from "@/components/PageHero";
 
 export const revalidate = 600;
 
@@ -92,32 +93,14 @@ export default async function ServicesPage({
   ];
 
   return (
-    <div className="page">
+    <div>
       <JsonLd data={ld} />
-      <div className="page-wrap">
-        <p className="chip font-mono-label">{t(s.kicker)}</p>
-        <h1 className="font-display mt-6 text-[clamp(2.2rem,6vw,3.6rem)]">{t(s.head)}</h1>
+      <PageHero image={s.heroImage} kicker={t(s.kicker)} title={t(s.head)}>
+        <CtaRow ctas={s.ctas} at="hero" l={l} />
+      </PageHero>
 
-        {s.heroImage && (
-          <div className="relative mt-8">
-            <MediaSlot
-              name={s.heroImage}
-              alt={t(s.head)}
-              label="Services hero"
-              ratio="16 / 9"
-              width={1600}
-              priority
-            />
-            <CtaRow
-              ctas={s.ctas}
-              at="hero"
-              l={l}
-              className="absolute inset-x-0 bottom-0 justify-center p-5"
-            />
-          </div>
-        )}
-
-        <CtaRow ctas={s.ctas} at="under-hero" l={l} className="mt-8" />
+      <div className="page-wrap py-14">
+        <CtaRow ctas={s.ctas} at="under-hero" l={l} />
 
         <div className="prose-block mt-8">
           {s.intro.map((p, i) => (

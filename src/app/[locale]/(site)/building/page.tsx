@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -7,6 +6,7 @@ import { getContent } from "@/lib/content";
 import { img } from "@/lib/media";
 import { siteUrl } from "@/lib/site-url";
 import JsonLd from "@/components/JsonLd";
+import PageHero from "@/components/PageHero";
 
 /* Same ISR window as the landing page: this reads the identical content, so an
    admin edit reaching one and not the other would be the confusing outcome. */
@@ -55,7 +55,7 @@ export default async function BuildingDetail({
   const specsLabel = l === "bn" ? "মূল তথ্য" : "Key figures";
 
   return (
-    <div className="page">
+    <div>
       <JsonLd
         data={[
           {
@@ -68,28 +68,16 @@ export default async function BuildingDetail({
         ]}
       />
 
-      <div className="page-wrap">
-        <Link
-          href={`/${l}#building`}
-          className="font-mono-label text-[color:var(--clay)] hover:underline"
-        >
-          ← {back}
-        </Link>
+      <PageHero
+        image={b.image}
+        kicker={t(b.kicker)}
+        title={t(b.head)}
+        subtitle={t(b.body)}
+        back={{ href: `/${l}#building`, label: back }}
+      />
 
-        <p className="font-mono-label mt-6 text-[color:var(--clay)]">{t(b.kicker)}</p>
-        <h1 className="font-display mt-3 max-w-[20ch] text-[clamp(2rem,5.5vw,3.2rem)]">
-          {t(b.head)}
-        </h1>
-
-        {b.image && (
-          <figure className="mt-8 overflow-hidden rounded-2xl bg-[color:var(--panel)]">
-            <img src={img(b.image, 1600)} alt={t(b.head)} className="w-full" />
-          </figure>
-        )}
-
-        <p className="page-lede mt-8 max-w-[62ch]">{t(b.body)}</p>
-
-        <h2 className="font-mono-label mt-14 text-[color:var(--text-quiet)]">
+      <div className="page-wrap py-14">
+        <h2 className="font-mono-label text-[color:var(--text-quiet)]">
           {specsLabel}
         </h2>
         <dl className="mt-4 grid gap-x-12 border-y border-[color:var(--panel-edge)] sm:grid-cols-2">
