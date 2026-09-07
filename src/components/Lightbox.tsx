@@ -58,6 +58,7 @@ export default function Lightbox({
   if (!mounted) return null;
   const cur = items[index];
   if (!cur) return null;
+  const src = img(cur.image, 2000);
 
   return createPortal(
     <div
@@ -88,15 +89,28 @@ export default function Lightbox({
         className="relative flex flex-1 items-center justify-center overflow-hidden px-4 sm:px-16"
         onClick={(e) => e.stopPropagation()}
       >
-        <img
-          key={cur.image}
-          src={img(cur.image, 2000)}
-          alt={cur.title || ""}
-          onClick={() => setZoomed((z) => !z)}
-          className={`max-h-full max-w-full select-none rounded-lg object-contain transition-transform duration-500 ${
-            zoomed ? "scale-[1.8] cursor-zoom-out" : "cursor-zoom-in"
-          }`}
-        />
+        {src ? (
+          <img
+            key={cur.image}
+            src={src}
+            alt={cur.title || ""}
+            onClick={() => setZoomed((z) => !z)}
+            className={`max-h-full max-w-full select-none rounded-lg object-contain transition-transform duration-500 ${
+              zoomed ? "scale-[1.8] cursor-zoom-out" : "cursor-zoom-in"
+            }`}
+          />
+        ) : (
+          <div className="max-h-full max-w-[46rem] overflow-y-auto rounded-2xl bg-white/5 p-8 text-center sm:p-12">
+            {cur.title && (
+              <h3 className="font-display text-2xl text-white sm:text-3xl">{cur.title}</h3>
+            )}
+            {cur.body && (
+              <p className="mx-auto mt-4 max-w-[54ch] leading-relaxed text-white/80">
+                {cur.body}
+              </p>
+            )}
+          </div>
+        )}
 
         {count > 1 && (
           <>
@@ -120,7 +134,7 @@ export default function Lightbox({
         )}
       </div>
 
-      {(cur.title || cur.body) && (
+      {src && (cur.title || cur.body) && (
         <div
           className="mx-auto w-full max-w-[64rem] px-6 pb-5 pt-4 text-center text-white"
           onClick={(e) => e.stopPropagation()}
@@ -157,11 +171,17 @@ export default function Lightbox({
                   : "border-white/25 opacity-50 hover:opacity-90"
               }`}
             >
-              <img
-                src={img(it.image, 200)}
-                alt=""
-                className="h-full w-full object-cover"
-              />
+              {img(it.image, 200) ? (
+                <img
+                  src={img(it.image, 200)}
+                  alt=""
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <span className="grid h-full w-full place-items-center px-1 text-center text-[9px] font-medium leading-tight text-white/70">
+                  {it.title || i + 1}
+                </span>
+              )}
             </button>
           ))}
         </div>

@@ -8,7 +8,16 @@ import { getPublishedSlugs } from "@/lib/cms";
 export const revalidate = 3600;
 
 /** "" is the locale home; the rest are the standalone pages. */
-const PATHS = ["", "/building", "/services", "/shop", "/kb-homes", "/clients", "/contact"];
+const PATHS = [
+  "",
+  "/building",
+  "/services",
+  "/real-estate-development",
+  "/shop",
+  "/kb-homes",
+  "/clients",
+  "/contact",
+];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = siteUrl();

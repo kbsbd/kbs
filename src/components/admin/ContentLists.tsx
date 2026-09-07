@@ -156,7 +156,7 @@ export const CONTENT_LISTS: Record<string, ListSpec[]> = {
       summaryKey: "label",
       fields: [
         { key: "label", label: "Button text", type: "bi" },
-        { key: "href", label: "Opens (link)", type: "text", placeholder: "/p/real-estate-development" },
+        { key: "href", label: "Opens (link)", type: "text", placeholder: "/real-estate-development" },
         { key: "color", label: "Button colour (hex)", type: "text", placeholder: "#5f7d1f" },
         {
           key: "position",

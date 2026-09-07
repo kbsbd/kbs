@@ -99,6 +99,7 @@ export default async function AdminPage({
           items: content.servicesPage.items,
           heroImage: content.servicesPage.heroImage,
         },
+        realEstatePage: { heroImage: content.realEstatePage.heroImage },
         kbHomes: { gallery: content.kbHomes.gallery },
         clientsPage: {
           logos: content.clientsPage.logos,

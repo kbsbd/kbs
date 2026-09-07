@@ -26,6 +26,7 @@ export type MediaContent = {
   building: { image: string };
   amenities: { items: Item[] };
   servicesPage: { items: Item[]; heroImage: string };
+  realEstatePage: { heroImage: string };
   kbHomes: { gallery: GalleryItem[] };
   clientsPage: { logos: Logo[]; projects: ClientProject[] };
 };
@@ -51,6 +52,7 @@ export default function MediaAdmin({
     "building.image": media.building.image,
   });
   const [servicesHero, setServicesHero] = useState(media.servicesPage.heroImage);
+  const [realEstateHero, setRealEstateHero] = useState(media.realEstatePage.heroImage);
 
   const [amenities, setAmenities] = useState<Item[]>(media.amenities.items);
   const [services, setServices] = useState<Item[]>(media.servicesPage.items);
@@ -130,12 +132,30 @@ export default function MediaAdmin({
         />
       </section>
 
-      {/* service card images */}
+      {/* real estate development page */}
+      <section className="space-y-4">
+        <h3 className="font-display text-lg">Real Estate Development page</h3>
+        <ImageUpload
+          label="Real Estate Development hero image"
+          value={realEstateHero}
+          hint="The full-width banner at the top of the Real Estate Development page. Leave blank for a plain header."
+          onChange={(url) => {
+            setRealEstateHero(url);
+            save(
+              [{ root: "realEstatePage", path: "heroImage", value: url }],
+              url ? "Real Estate hero image saved." : "Real Estate hero image removed."
+            );
+          }}
+        />
+      </section>
+
+      {/* service card images — shown as the click-to-open cards on the
+          Real Estate Development page */}
       <ItemGrid
-        title="Service images"
+        title="Real Estate Development — service card images"
         items={services}
         onChange={setServices}
-        onSave={(items) => save([{ root: "servicesPage", path: "items", value: items }], "Service images saved.")}
+        onSave={(items) => save([{ root: "servicesPage", path: "items", value: items }], "Service card images saved.")}
         pending={pending}
       />
 

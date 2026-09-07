@@ -39,7 +39,8 @@ ratings. Specifications shown as "to be confirmed" are genuinely not fixed.
 - [Home / KB Homes, English](${base}/en)
 - [Home / KB Homes, Bengali](${base}/bn)
 - [The building](${base}/en/building): KB House specs - floors, apartments, status, location
-- [Services](${base}/en/services): sanitary & plumbing consultancy and works, import & distribution, booster pumps, core hole cutting, deep tube wells, water-treatment plants, CPVC
+- [Services](${base}/en/services): overview and links to the two divisions
+- [Real Estate Development](${base}/en/real-estate-development): residential and mixed-use building development, plus sanitary & plumbing consultancy and works, import & distribution, booster pumps, core hole cutting, deep tube wells, water-treatment plants, CPVC
 - [KB Homes](${base}/en/kb-homes): the residential building in Faidabad, Dokhinkhan, Dhaka - 1230
 - [Clients](${base}/en/clients)
 - [Reach us](${base}/en/contact): contact form, phone and WhatsApp

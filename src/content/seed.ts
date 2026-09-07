@@ -531,7 +531,7 @@ export const servicesPage = {
     {
       id: "real-estate",
       label: bi("Real Estate Development", "রিয়েল এস্টেট ডেভেলপমেন্ট"),
-      href: "/p/real-estate-development",
+      href: "/real-estate-development",
       color: "#5f7d1f",
       position: "under-hero",
     },
@@ -662,6 +662,22 @@ export const servicesPage = {
       ),
     },
   ] as Array<{ id: string; image: string; title: L; body: L }>,
+};
+
+/** The Real Estate Development page. Its clickable service cards are the same
+ *  `servicesPage.items` list (edited from the one place in the dashboard); this
+ *  key only carries the page's own hero, heading and description. */
+export const realEstatePage = {
+  kicker: bi("REAL ESTATE DEVELOPMENT", "রিয়েল এস্টেট ডেভেলপমেন্ট"),
+  head: bi("Real Estate Development", "রিয়েল এস্টেট ডেভেলপমেন্ট"),
+  subhead: bi(
+    "Kanchan Builders develops residential and mixed-use buildings in Dhaka, designed around light, air and greenery on every floor. From land assessment and approved plans to structural engineering and handover, every stage is documented and shared with buyers — ask us for the full paperwork before you commit.",
+    "কাঞ্চন বিল্ডার্স ঢাকায় আবাসিক ও মিশ্র-ব্যবহারের ভবন নির্মাণ করে, যেখানে প্রতিটি তলায় আলো, বাতাস ও সবুজের ব্যবস্থা থাকে। জমি যাচাই ও অনুমোদিত নকশা থেকে শুরু করে স্ট্রাকচারাল ইঞ্জিনিয়ারিং ও হস্তান্তর পর্যন্ত প্রতিটি ধাপ নথিভুক্ত করা হয় এবং ক্রেতাদের সঙ্গে শেয়ার করা হয় — সিদ্ধান্ত নেওয়ার আগে সম্পূর্ণ কাগজপত্র চেয়ে নিন।"
+  ),
+  servicesHead: bi("The work we do", "আমরা যে কাজ করি"),
+  /** Optional hero image; set on the Media tab. */
+  heroImage: "",
+  cta: bi("Book a site visit", "সাইট ভিজিট বুক করুন"),
 };
 
 export const clientsPage = {
@@ -828,6 +844,7 @@ export const seed = {
   book,
   footer,
   servicesPage,
+  realEstatePage,
   clientsPage,
   kbHomes,
   contact,
