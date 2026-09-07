@@ -47,6 +47,21 @@ export type ListSpec = {
 };
 
 export const CONTENT_LISTS: Record<string, ListSpec[]> = {
+  building: [
+    {
+      root: "building",
+      path: "specs",
+      label: "Building figures",
+      hint: 'The rows in "KB HOMES, in numbers." — on the landing page and the full /building page. Label on the left, value on the right.',
+      shape: "object",
+      summaryKey: "label",
+      fields: [
+        { key: "label", label: "Label", type: "bi" },
+        { key: "value", label: "Value", type: "bi" },
+      ],
+      blank: () => ({ id: rid(), label: emptyL(), value: emptyL() }),
+    },
+  ],
   heroBands: [
     {
       root: "heroBands",

@@ -63,6 +63,7 @@ export default async function AdminPage({
       permissions={session.permissions}
       groups={editableStrings(content)}
       lists={{
+        "building|specs": content.building.specs,
         "heroBands|": content.heroBands,
         "nav|links": content.nav.links,
         "faq|items": content.faq.items,

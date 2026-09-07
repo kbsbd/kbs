@@ -90,6 +90,14 @@ export default function SiteChrome({
 
   const extraCols = footerGroups.length + footerColumns.length;
 
+  /* Next's App Router scroll-to-top is racy when leaving the home page — the
+     scrub hero is ~1000vh tall and unmounts a frame after the route commits, so
+     the destination can end up loaded mid-scroll with only its hero on screen.
+     Force the top on every path change (an anchor link keeps its own target). */
+  useEffect(() => {
+    if (!window.location.hash) window.scrollTo(0, 0);
+  }, [pathname]);
+
   /* section entrances, and retiring the stagger when they finish */
   useEffect(() => {
     const els = Array.from(document.querySelectorAll<HTMLElement>(".reveal"));
