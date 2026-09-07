@@ -1,9 +1,11 @@
 "use client";
 
 /* eslint-disable @next/next/no-img-element */
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import Link from "next/link";
 import { img } from "@/lib/media";
+import FancySlider, { type FancySliderHandle } from "@/components/FancySlider";
+import SliderArrows from "@/components/SliderArrows";
 
 export type FeaturedSlide = {
   id: string;
@@ -14,10 +16,9 @@ export type FeaturedSlide = {
 };
 
 /**
- * An endlessly scrolling strip of featured products. The track holds two copies
- * of the slides and translates by exactly half its width, so the loop is
- * seamless. It only animates once it is on screen and the visitor has not asked
- * for reduced motion; hovering or focusing a card pauses it.
+ * The featured-products strip — the shared FancySlider engine (autoplay, loop,
+ * swipe). A tap on a card follows its link; a deliberate horizontal drag pages
+ * the slider (click-first-drag).
  */
 export default function FeaturedCarousel({
   slides,
@@ -26,65 +27,71 @@ export default function FeaturedCarousel({
   slides: FeaturedSlide[];
   heading?: string;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [run, setRun] = useState(false);
-
-  useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const el = ref.current;
-    if (!el) return;
-    let timer = 0;
-    const io = new IntersectionObserver(
-      ([e]) => {
-        window.clearTimeout(timer);
-        if (!e.isIntersecting) return setRun(false);
-        /* let first paint settle before anything on the page starts moving —
-           keeps the strip out of the Speed Index measurement window */
-        timer = window.setTimeout(() => setRun(true), 2200);
-      },
-      { rootMargin: "120px" }
-    );
-    io.observe(el);
-    return () => {
-      window.clearTimeout(timer);
-      io.disconnect();
-    };
-  }, []);
-
+  const slider = useRef<FancySliderHandle>(null);
   if (slides.length === 0) return null;
-  const loop = slides.length < 4 ? [...slides, ...slides, ...slides, ...slides] : [...slides, ...slides];
 
   return (
     <section className="mt-12" aria-label={heading || "Featured products"}>
-      {heading && (
-        <h2 className="font-display text-[clamp(1.3rem,3vw,1.9rem)]">{heading}</h2>
-      )}
-      <div ref={ref} className="feat-marquee mt-5" data-run={run ? "true" : "false"}>
-        <ul className="feat-track">
-          {loop.map((s, i) => (
-            <li key={`${s.id}-${i}`} className="feat-card" aria-hidden={i >= slides.length}>
-              <Link href={s.href} tabIndex={i >= slides.length ? -1 : undefined}>
-                <span className="feat-media">
-                  {img(s.image) ? (
-                    <img
-                      src={img(s.image, 600)}
-                      alt={s.title}
-                      width={300}
-                      height={225}
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  ) : (
-                    <span className="media-slot-label font-mono-label">{s.title}</span>
-                  )}
-                </span>
-                <span className="feat-title">{s.title}</span>
-                {s.subtitle && <span className="feat-sub">{s.subtitle}</span>}
-              </Link>
-            </li>
-          ))}
-        </ul>
+      <div className="mb-5 flex items-end justify-between gap-6">
+        {heading && (
+          <h2 className="font-display text-[clamp(1.3rem,3vw,1.9rem)]">{heading}</h2>
+        )}
+        {slides.length > 1 && (
+          <SliderArrows
+            label="product"
+            onPrev={() => slider.current?.slidePrev()}
+            onNext={() => slider.current?.slideNext()}
+          />
+        )}
       </div>
+
+      <FancySlider
+        ref={slider}
+        ariaLabel={heading || "Featured products"}
+        clickFirstDrag
+        className="overflow-hidden"
+        options={{
+          spaceBetween: 16,
+          breakpoints: {
+            "0": { slidesPerView: 2 },
+            "768": { slidesPerView: 3 },
+            "1100": { slidesPerView: 4 },
+          },
+        }}
+      >
+        {slides.map((s) => (
+          <div key={s.id} className="py-2">
+            <Link
+              href={s.href}
+              className="group flex flex-col overflow-hidden rounded-2xl border border-[color:var(--panel-edge)] bg-[color-mix(in_srgb,var(--panel)_45%,transparent)] pb-3.5 transition-colors duration-300 hover:border-[color:var(--accent)]"
+            >
+              <span className="grid aspect-[4/3] place-items-center overflow-hidden bg-[color:var(--panel)]">
+                {img(s.image) ? (
+                  <img
+                    src={img(s.image, 600)}
+                    alt={s.title}
+                    width={300}
+                    height={225}
+                    loading="lazy"
+                    decoding="async"
+                    className="h-full w-full object-cover transition-transform duration-[900ms] ease-out group-hover:scale-105"
+                  />
+                ) : (
+                  <span className="media-slot-label font-mono-label">{s.title}</span>
+                )}
+              </span>
+              <span className="mt-2 px-3.5 text-sm font-semibold leading-tight">
+                {s.title}
+              </span>
+              {s.subtitle && (
+                <span className="mt-1 px-3.5 text-xs text-[color:var(--text-quiet)]">
+                  {s.subtitle}
+                </span>
+              )}
+            </Link>
+          </div>
+        ))}
+      </FancySlider>
     </section>
   );
 }

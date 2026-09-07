@@ -1252,80 +1252,86 @@ body.paused *::after {
   max-width: 44rem;
 }
 
-/* ---- featured marquee ---- */
-.feat-marquee {
-  overflow: hidden;
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
-  mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+/* ============================================================
+   FancySlider engine — the shared carousel (KB Homes gallery, Clients
+   projects, Shop featured). The component sets the per-slide flex-basis and
+   the track transform inline; these classes are the stable hooks it toggles.
+   ============================================================ */
+.fslide {
+  position: relative;
 }
-.feat-track {
+.fslide__track {
   display: flex;
-  gap: 1rem;
-  width: max-content;
-  padding: 0;
-  margin: 0;
-  list-style: none;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  box-sizing: border-box;
+  will-change: transform;
 }
-.feat-marquee[data-run="true"] .feat-track {
-  animation: feat-scroll 45s linear infinite;
+.fslide__track > * {
+  min-width: 0;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  transition: opacity 0.3s var(--ease-out);
 }
-.feat-marquee:hover .feat-track,
-.feat-marquee:focus-within .feat-track {
-  animation-play-state: paused;
+.fslide:not(.fslide--fade) .fslide__track > *:not(.is-visible):not(.is-active) {
+  opacity: 0.5;
+  pointer-events: none;
 }
-@keyframes feat-scroll {
-  to {
-    transform: translateX(-50%);
-  }
-}
-.feat-card {
-  flex: 0 0 auto;
-  width: clamp(180px, 44vw, 236px);
-}
-.feat-card a {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  border: 1px solid var(--panel-edge);
-  border-radius: 14px;
-  overflow: hidden;
-  background: color-mix(in srgb, var(--panel) 45%, transparent);
-  transition: border-color 0.25s var(--ease-out);
-  padding-bottom: 0.9rem;
-}
-.feat-card a:hover {
-  border-color: var(--accent);
-}
-.feat-media {
+
+.fslide--fade > .fslide__track {
+  position: relative;
   display: block;
-  aspect-ratio: 4 / 3;
-  background: var(--panel);
-  display: grid;
-  place-items: center;
-  overflow: hidden;
+  transform: none !important;
 }
-.feat-media img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.fslide--fade > .fslide__track > * {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  margin-right: 0 !important;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity var(--fslide-speed, 900ms) ease,
+    visibility var(--fslide-speed, 900ms) ease;
 }
-.feat-title {
-  padding: 0 0.9rem;
-  font-weight: 600;
-  font-size: 0.92rem;
-  line-height: 1.3;
+.fslide--fade > .fslide__track > *:first-child {
+  position: relative;
 }
-.feat-sub {
-  padding: 0 0.9rem;
-  font-size: 0.8rem;
-  color: var(--text-quiet);
+.fslide--fade > .fslide__track > .is-active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
+
+.fslide--draggable {
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.fslide--draggable.is-dragging,
+.fslide--draggable.is-dragging * {
+  cursor: grabbing !important;
+}
+.fslide--draggable img,
+.fslide--click-first img {
+  -webkit-user-drag: none;
+  user-select: none;
+}
+.fslide--click-first {
+  touch-action: pan-y;
+}
+.fslide--click-first a,
+.fslide--click-first button,
+.fslide--click-first [role="button"] {
+  cursor: pointer;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .feat-marquee {
-    overflow-x: auto;
-  }
-  .feat-marquee .feat-track {
-    animation: none;
+  .fslide__track,
+  .fslide--fade > .fslide__track > * {
+    transition-duration: 1ms !important;
   }
 }
 

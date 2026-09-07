@@ -1,0 +1,266 @@
+/* TestimonialSlider styles — global classes, self-contained.
+   Import once, after FancySlider.css.
+
+   Tunable via CSS custom properties (set on .fts or any ancestor):
+     --fts-bg            section background            (default: #1c1c1c)
+     --fts-text          card / title text             (default: #ffffff)
+     --fts-muted         role / meta text              (default: #d9d9d9)
+     --fts-accent        role text + arrow accents     (default: #d9d9d9)
+     --fts-star          star rating colour            (default: #e2b93b)
+     --fts-card-bg       quote-card background         (default: transparent)
+     --fts-card-border   card border                   (default: rgba(255,255,255,.2))
+     --fts-radius        card corner radius            (default: 10px)
+     --fts-pad           card padding                  (default: 15px)
+     --fts-space         vertical section padding      (default: clamp(60px,8vw,120px))
+     --fts-bleed         right-edge bleed (px, <=1400) (default: 0)
+*/
+
+.fts {
+  --fts-bg: #1c1c1c;
+  --fts-text: #ffffff;
+  --fts-muted: #d9d9d9;
+  --fts-accent: #d9d9d9;
+  --fts-star: #e2b93b;
+  --fts-card-bg: transparent;
+  --fts-card-border: rgba(255, 255, 255, 0.2);
+  --fts-radius: 10px;
+  --fts-pad: 15px;
+  --fts-space: clamp(60px, 8vw, 120px);
+
+  background: var(--fts-bg);
+  padding-block: var(--fts-space);
+  overflow: hidden;
+}
+
+.fts__inner {
+  width: min(1320px, 100% - 2 * clamp(16px, 5vw, 48px));
+  margin-inline: auto;
+}
+
+/* ---- heading row ---- */
+.fts__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: clamp(28px, 4vw, 44px);
+}
+
+.fts__eyebrow {
+  display: block;
+  color: var(--fts-accent);
+  font-size: 14px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.fts__title {
+  color: var(--fts-text);
+  font-weight: 300;
+  font-size: clamp(28px, 4vw, 48px);
+  line-height: 1.15;
+  margin: 0;
+}
+
+/* ---- arrows: theme's .slider-arrow.style6 ---- */
+.fts__arrows {
+  display: inline-flex;
+  gap: 8px;
+  flex: none;
+}
+
+.fts__arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 55px;
+  height: 55px;
+  padding: 0;
+  border: 1px solid var(--fts-text);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--fts-text);
+  cursor: pointer;
+  transition: cubic-bezier(0.075, 0.82, 0.165, 1) 0.7s;
+}
+
+.fts__arrow:hover {
+  background: var(--fts-text);
+  color: #111;
+}
+
+.fts__arrow:focus-visible {
+  outline: 2px solid var(--fts-text);
+  outline-offset: 3px;
+}
+
+@media (max-width: 767px) {
+  .fts__arrow {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* ---- slider + slides ---- */
+.fts__slider {
+  overflow: visible; /* let the bleed show */
+}
+
+@media (min-width: 1400px) {
+  .fts__slider {
+    margin-right: var(--fts-bleed, 0);
+  }
+}
+
+.fts__slide {
+  height: auto;
+  display: flex;
+}
+
+/* quote cards share the row's height; image cards keep their own aspect */
+.fts__slide:has(.fts__card--image) {
+  align-self: flex-start;
+}
+
+.fts__card {
+  flex: 1;
+  border: 1px solid var(--fts-card-border);
+  border-radius: var(--fts-radius);
+  padding: var(--fts-pad);
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---- image card ---- */
+.fts__card--image {
+  padding: var(--fts-pad);
+}
+
+.fts__media {
+  display: block;
+  position: relative;
+  width: 100%;
+  border: 0;
+  padding: 0;
+  background: none;
+  border-radius: calc(var(--fts-radius) - 4px);
+  overflow: hidden;
+  line-height: 0;
+}
+
+.fts__media--btn {
+  cursor: pointer;
+}
+
+.fts__media img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.fts__zoom {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.fts__media--btn:hover .fts__zoom,
+.fts__media--btn:focus-visible .fts__zoom {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ---- quote card ---- */
+.fts__card--quote {
+  gap: 4px;
+  padding: clamp(24px, 3vw, 30px);
+}
+
+.fts__stars {
+  display: inline-flex;
+  gap: 4px;
+  color: var(--fts-star);
+}
+
+.fts__text {
+  color: var(--fts-text);
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 1.6;
+  margin: 10px 0 30px;
+}
+
+@media (max-width: 991px) {
+  .fts__text {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 575px) {
+  .fts__text {
+    font-size: 16px;
+  }
+}
+
+.fts__person {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: auto;
+}
+
+.fts__avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex: none;
+}
+
+.fts__avatar--initial {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--fts-accent);
+  color: #1c1c1c;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.fts__person-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.fts__name {
+  color: var(--fts-text);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.fts__role {
+  color: var(--fts-accent);
+  font-size: 16px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fts__arrow,
+  .fts__zoom {
+    transition-duration: 1ms !important;
+  }
+}
