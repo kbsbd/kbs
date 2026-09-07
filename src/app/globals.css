@@ -299,14 +299,16 @@ html[lang="bn"] .font-mono-label {
    dark footage in both themes — so its links and icon buttons are pinned light
    here instead of following --text-secondary. With the scrim now optional, a
    text-shadow carries legibility over a bright frame. The "Book a visit" button
-   keeps its own colours. */
-header[data-nav-over-hero="true"] a:not(.btn),
-header[data-nav-over-hero="true"] button:not(.btn) {
+   keeps its own colours. The open mobile menu ([data-mobile-menu]) is an opaque
+   themed surface, not "over the hero" — it is excluded so its links follow the
+   theme and keep their contrast in light mode. */
+header[data-nav-over-hero="true"] a:not(.btn):not([data-mobile-menu] *),
+header[data-nav-over-hero="true"] button:not(.btn):not([data-mobile-menu] *) {
   color: #eef1f4;
   text-shadow: 0 1px 3px rgba(5, 8, 14, 0.72), 0 2px 10px rgba(5, 8, 14, 0.5);
 }
-header[data-nav-over-hero="true"] a:not(.btn):hover,
-header[data-nav-over-hero="true"] button:not(.btn):hover {
+header[data-nav-over-hero="true"] a:not(.btn):not([data-mobile-menu] *):hover,
+header[data-nav-over-hero="true"] button:not(.btn):not([data-mobile-menu] *):hover {
   color: #ffffff;
 }
 

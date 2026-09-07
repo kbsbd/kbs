@@ -104,6 +104,7 @@ export default function MobileMenu({
       </button>
 
       <div
+        data-mobile-menu
         className={`fixed inset-0 z-[60] lg:hidden ${open ? "" : "pointer-events-none"}`}
         inert={!open}
       >
@@ -152,7 +153,7 @@ export default function MobileMenu({
                 <a
                   href={link(it.href)}
                   onClick={() => setOpen(false)}
-                  className="group flex min-h-[56px] items-center justify-between border-b border-[color:var(--panel-edge)] py-3 text-[1.15rem] last:border-0"
+                  className="group flex min-h-[56px] items-center justify-between border-b border-[color:var(--panel-edge)] py-3 text-[1.15rem] text-[color:var(--text-primary)] last:border-0"
                 >
                   {it.label}
                   <ArrowIcon className="h-5 w-5 text-[color:var(--text-quiet)] transition-transform duration-300 group-hover:translate-x-1" />
