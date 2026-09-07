@@ -16,11 +16,6 @@ export const metadata: Metadata = {
     "Real estate development and complete water-supply solutions: sanitary & plumbing, import & distribution, booster pumps, deep tube wells and water treatment plants.",
 };
 
-/** A translucent frosted button that sits on top of the hero photo, in the same
- *  spirit as the see-through header. */
-const GLASS =
-  "inline-flex items-center justify-center gap-2 rounded-full border border-white/30 bg-white/10 px-6 py-3.5 text-sm font-medium text-white backdrop-blur-md transition-all duration-300 hover:border-white/60 hover:bg-white/20";
-
 export default async function ServicesPage({
   params,
 }: {
@@ -86,10 +81,10 @@ export default async function ServicesPage({
               )}
             </div>
 
-            {/* centre: the two big glass CTAs */}
+            {/* centre / lower: the two big glass CTAs */}
             <div className="flex flex-wrap justify-center gap-4">
               {s.ctas
-                .filter((cta) => (t(cta.label) && cta.href))
+                .filter((cta) => t(cta.label) && cta.href)
                 .map((cta) => (
                   <a
                     key={cta.id}
@@ -106,35 +101,40 @@ export default async function ServicesPage({
                   </a>
                 ))}
             </div>
-
-            {/* bottom: inquiry (left) · call (centre) · whatsapp (right) */}
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <a href={`/${l}/contact?topic=project`} className={GLASS}>
-                {t(c.contact.fields.topicProject)}
-              </a>
-
-              {phone && (
-                <a href={`tel:${phone.replace(/\s/g, "")}`} className={GLASS}>
-                  <ChannelIcon name="phone" size={18} />
-                  {phone}
-                </a>
-              )}
-
-              {whatsapp && (
-                <a
-                  href={`https://wa.me/${whatsapp.replace(/[^\d]/g, "")}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={GLASS}
-                >
-                  <ChannelIcon name="whatsapp" size={18} />
-                  {l === "bn" ? "হোয়াটসঅ্যাপ" : "WhatsApp"}
-                </a>
-              )}
-            </div>
           </div>
         </div>
       </section>
+
+      {/* under the hero: inquiry (left) · call (centre) · whatsapp (right) */}
+      <div className="page-wrap py-12">
+        <div className="mx-auto flex max-w-[52rem] flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <a href={`/${l}/contact?topic=project`} className="btn btn-primary">
+            {t(c.contact.fields.topicProject)}
+          </a>
+
+          {phone && (
+            <a href={`tel:${phone.replace(/\s/g, "")}`} className="btn btn-ghost">
+              <ChannelIcon name="phone" size={16} />
+              {phone}
+            </a>
+          )}
+
+          {whatsapp && (
+            <a
+              href={`https://wa.me/${whatsapp.replace(/[^\d]/g, "")}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-ghost"
+              style={{ borderColor: "#25D366" }}
+            >
+              <span style={{ color: "#25D366" }}>
+                <ChannelIcon name="whatsapp" size={16} />
+              </span>
+              {whatsapp}
+            </a>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
