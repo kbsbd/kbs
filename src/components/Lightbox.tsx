@@ -33,8 +33,21 @@ export default function Lightbox({
   const startX = useRef<number | null>(null);
   const count = items.length;
 
+  // The thumbnail rail measures its own width so the strip can slide sideways
+  // and keep the active thumbnail centred (Fancybox-style).
+  const railRef = useRef<HTMLDivElement>(null);
+  const [railW, setRailW] = useState(0);
+
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setMounted(true), []);
+
+  useEffect(() => {
+    const el = railRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([e]) => setRailW(e.contentRect.width));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [mounted]);
 
   const select = useCallback(
     (next: number) => {
@@ -202,39 +215,56 @@ export default function Lightbox({
         </div>
       )}
 
-      {count > 1 && (
-        <div
-          className="flex justify-center gap-2 overflow-x-auto px-4 pb-5"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {items.map((it, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => select(i)}
-              aria-label={`Image ${i + 1}`}
-              aria-current={i === index}
-              className={`h-14 w-20 shrink-0 overflow-hidden rounded-md border-2 bg-white/10 transition ${
-                i === index
-                  ? "border-white"
-                  : "border-white/25 opacity-50 hover:opacity-90"
-              }`}
+      {count > 1 && (() => {
+        const THUMB = 80; // w-20
+        const GAP = 8; // gap-2
+        const STEP = THUMB + GAP;
+        const trackW = count * THUMB + (count - 1) * GAP;
+        const centred = railW / 2 - (index * STEP + THUMB / 2);
+        const offset =
+          !railW || trackW <= railW
+            ? (railW - trackW) / 2
+            : Math.max(railW - trackW, Math.min(0, centred));
+        return (
+          <div
+            ref={railRef}
+            className="overflow-hidden px-4 pb-5"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div
+              className="flex gap-2 transition-transform duration-[450ms] ease-out"
+              style={{ transform: `translateX(${offset}px)` }}
             >
-              {img(it.image, 200) ? (
-                <img
-                  src={img(it.image, 200)}
-                  alt=""
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <span className="grid h-full w-full place-items-center px-1 text-center text-[9px] font-medium leading-tight text-white/70">
-                  {it.title || i + 1}
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
-      )}
+              {items.map((it, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => select(i)}
+                  aria-label={`Image ${i + 1}`}
+                  aria-current={i === index}
+                  className={`h-14 w-20 shrink-0 overflow-hidden rounded-md border-2 bg-white/10 transition-[border-color,opacity,transform] duration-300 ${
+                    i === index
+                      ? "border-white"
+                      : "border-white/25 opacity-45 hover:opacity-90"
+                  }`}
+                >
+                  {img(it.image, 200) ? (
+                    <img
+                      src={img(it.image, 200)}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <span className="grid h-full w-full place-items-center px-1 text-center text-[9px] font-medium leading-tight text-white/70">
+                      {it.title || i + 1}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
     </div>,
     document.body
   );
