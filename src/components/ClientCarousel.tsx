@@ -36,14 +36,14 @@ export default function ClientCarousel({ slides }: { slides: Slide[] }) {
       >
         {slides.map((s, i) => (
           <figure key={s.id} className="relative">
-            <div className="media-slot aspect-[16/10] w-full sm:aspect-[16/9]">
+            <div className="grid aspect-[16/10] w-full place-items-center overflow-hidden bg-[color:var(--panel)] sm:aspect-[16/9]">
               {img(s.image) ? (
                 <img
                   src={img(s.image, 1400)}
                   alt={s.name}
                   width={1400}
                   height={788}
-                  className="h-full w-full object-contain"
+                  className="h-full w-full object-cover"
                   loading={i === 0 ? "eager" : "lazy"}
                 />
               ) : (

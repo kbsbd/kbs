@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { LOCALES, type Locale } from "@/content/seed";
 import { getContent } from "@/lib/content";
 import { img } from "@/lib/media";
+import PageHero from "@/components/PageHero";
 import ClientCarousel from "@/components/ClientCarousel";
 
 export const revalidate = 600;
@@ -27,14 +28,17 @@ export default async function ClientsPage({
   const t = (v: Record<Locale, string>) => v[l] || v.en;
 
   return (
-    <div className="page">
-      <div className="page-wrap">
-        <p className="chip font-mono-label">{t(p.kicker)}</p>
-        <h1 className="font-display mt-6 text-[clamp(2.2rem,6vw,3.6rem)]">{t(p.head)}</h1>
-        <p className="page-lede mt-5">{t(p.body)}</p>
+    <div className="relative z-[2]">
+      <PageHero
+        image={p.heroImage}
+        kicker={t(p.kicker)}
+        title={t(p.head)}
+        subtitle={t(p.body)}
+      />
 
+      <div className="page-wrap pt-14 pb-[clamp(4rem,10vh,7rem)]">
         {p.projects.length > 0 && (
-          <section className="mt-12">
+          <section>
             <h2 className="font-display text-[clamp(1.4rem,3.5vw,2rem)]">{t(p.projectsHead)}</h2>
             <div className="mt-6">
               <ClientCarousel slides={p.projects} />

@@ -28,7 +28,7 @@ export type MediaContent = {
   servicesPage: { items: Item[]; heroImage: string };
   realEstatePage: { heroImage: string };
   kbHomes: { gallery: GalleryItem[] };
-  clientsPage: { logos: Logo[]; projects: ClientProject[] };
+  clientsPage: { heroImage: string; logos: Logo[]; projects: ClientProject[] };
 };
 
 const lbl = "font-mono-label text-[color:var(--text-quiet)]";
@@ -53,6 +53,7 @@ export default function MediaAdmin({
   });
   const [servicesHero, setServicesHero] = useState(media.servicesPage.heroImage);
   const [realEstateHero, setRealEstateHero] = useState(media.realEstatePage.heroImage);
+  const [clientsHero, setClientsHero] = useState(media.clientsPage.heroImage);
 
   const [amenities, setAmenities] = useState<Item[]>(media.amenities.items);
   const [services, setServices] = useState<Item[]>(media.servicesPage.items);
@@ -202,6 +203,23 @@ export default function MediaAdmin({
         >
           Save gallery
         </button>
+      </section>
+
+      {/* clients page hero */}
+      <section className="space-y-4">
+        <h3 className="font-display text-lg">Clients page</h3>
+        <ImageUpload
+          label="Clients page hero image"
+          value={clientsHero}
+          hint="The full-width banner at the top of the Clients page, with the heading and intro over it. Leave blank for a plain header."
+          onChange={(url) => {
+            setClientsHero(url);
+            save(
+              [{ root: "clientsPage", path: "heroImage", value: url }],
+              url ? "Clients hero image saved." : "Clients hero image removed."
+            );
+          }}
+        />
       </section>
 
       {/* client logos */}

@@ -103,6 +103,7 @@ export default async function AdminPage({
         realEstatePage: { heroImage: content.realEstatePage.heroImage },
         kbHomes: { gallery: content.kbHomes.gallery },
         clientsPage: {
+          heroImage: content.clientsPage.heroImage,
           logos: content.clientsPage.logos,
           projects: content.clientsPage.projects ?? [],
         },

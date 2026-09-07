@@ -683,6 +683,8 @@ export const realEstatePage = {
 export const clientsPage = {
   kicker: bi("SELECTED WORK", "নির্বাচিত কাজ"),
   head: bi("Clients we have worked with", "যাদের সঙ্গে আমরা কাজ করেছি"),
+  /** Optional full-width hero image; set on the Media tab. Leave blank for a plain header. */
+  heroImage: "",
   body: bi(
     "A selection of the developers, institutions and industrial clients we have delivered sanitary, plumbing and water-treatment work for over the last 36 years.",
     "গত ৩৬ বছরে যেসব ডেভেলপার, প্রতিষ্ঠান ও শিল্প গ্রাহকের জন্য আমরা স্যানিটারি, প্লাম্বিং ও পানি পরিশোধনের কাজ করেছি তার একটি নির্বাচিত তালিকা।"
