@@ -22,56 +22,60 @@ export default function ClientCarousel({ slides }: { slides: Slide[] }) {
 
   return (
     <div>
-      {slides.length > 1 && (
-        <div className="mb-4 flex justify-end">
+      <div className="relative">
+        {slides.length > 1 && (
           <SliderArrows
+            split
+            tone="light"
             label="project"
             onPrev={() => slider.current?.slidePrev()}
             onNext={() => slider.current?.slideNext()}
           />
-        </div>
-      )}
+        )}
 
-      <FancySlider
-        ref={slider}
-        ariaLabel="Client projects"
-        className="overflow-hidden rounded-2xl border border-[color:var(--panel-edge)] bg-[color:var(--panel)]"
-        options={{ effect: "fade", speed: 700, autoplay: { delay: 5000 } }}
-      >
-        {slides.map((s, i) => (
-          <figure key={s.id} className="group relative">
-            <button
-              type="button"
-              onClick={() => {
-                setIndex(i);
-                setOpen(true);
-              }}
-              aria-label={s.name ? `Open ${s.name}` : `Open project ${i + 1}`}
-              className="block w-full cursor-zoom-in"
-            >
-              <div className="grid aspect-[16/10] w-full place-items-center overflow-hidden bg-[color:var(--panel)] sm:aspect-[16/9]">
-                {img(s.image) ? (
-                  <img
-                    src={img(s.image, 1400)}
-                    alt={s.name}
-                    width={1400}
-                    height={788}
-                    className="h-full w-full object-cover transition-transform duration-[900ms] ease-out group-hover:scale-105"
-                    loading={i === 0 ? "eager" : "lazy"}
-                  />
-                ) : (
-                  <span className="media-slot-label font-mono-label">{s.name || "Project"}</span>
-                )}
-              </div>
-            </button>
-            {s.name && (
-              <figcaption className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-5 py-4 text-sm font-medium text-white">
-                {s.name}
-              </figcaption>
-            )}
-          </figure>
-        ))}
-      </FancySlider>
+        <FancySlider
+          ref={slider}
+          ariaLabel="Client projects"
+          className="overflow-hidden rounded-2xl border border-[color:var(--panel-edge)] bg-[color:var(--panel)]"
+          options={{ effect: "fade", speed: 700, autoplay: { delay: 5000 } }}
+        >
+          {slides.map((s, i) => (
+            <figure key={s.id} className="group relative">
+              <button
+                type="button"
+                onClick={() => {
+                  setIndex(i);
+                  setOpen(true);
+                }}
+                aria-label={s.name ? `Open ${s.name}` : `Open project ${i + 1}`}
+                className="block w-full cursor-zoom-in"
+              >
+                <div className="grid aspect-[16/10] w-full place-items-center overflow-hidden bg-[color:var(--panel)] sm:aspect-[16/9]">
+                  {img(s.image) ? (
+                    <img
+                      src={img(s.image, 1400)}
+                      alt={s.name}
+                      width={1400}
+                      height={788}
+                      className="h-full w-full object-cover transition-transform duration-[900ms] ease-out group-hover:scale-105"
+                      loading={i === 0 ? "eager" : "lazy"}
+                    />
+                  ) : (
+                    <span className="media-slot-label font-mono-label">
+                      {s.name || "Project"}
+                    </span>
+                  )}
+                </div>
+              </button>
+              {s.name && (
+                <figcaption className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-5 py-4 text-sm font-medium text-white">
+                  {s.name}
+                </figcaption>
+              )}
+            </figure>
+          ))}
+        </FancySlider>
+      </div>
 
       {open && (
         <Lightbox
