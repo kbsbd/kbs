@@ -98,9 +98,16 @@ export default function SiteChrome({
     if (!window.location.hash) window.scrollTo(0, 0);
   }, [pathname]);
 
-  /* section entrances, and retiring the stagger when they finish */
+  /* Section entrances, and retiring the stagger when they finish.
+     Keyed on `pathname`, not `children`: on a client-side navigation the
+     (site) layout stays mounted and its `children` prop is referentially
+     stable (it is the router segment slot, not the page element), so an
+     effect keyed on `[children]` never re-runs. The observer would then stay
+     bound to the previous page's now-removed sections and the sections on
+     the page you navigate to would never reveal — only a full reload fixed
+     it. Re-binding on every path change keeps the observer on the current
+     page's `.reveal` blocks. */
   useEffect(() => {
-    const els = Array.from(document.querySelectorAll<HTMLElement>(".reveal"));
     const io = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {
@@ -113,9 +120,19 @@ export default function SiteChrome({
       },
       { rootMargin: "0px 0px -12% 0px", threshold: 0.08 }
     );
-    els.forEach((el) => io.observe(el));
-    return () => io.disconnect();
-  }, [children]);
+    const bind = () => {
+      document
+        .querySelectorAll<HTMLElement>(".reveal:not(.in)")
+        .forEach((el) => io.observe(el));
+    };
+    bind();
+    /* the new route's DOM can commit a frame after this effect */
+    const raf = requestAnimationFrame(bind);
+    return () => {
+      cancelAnimationFrame(raf);
+      io.disconnect();
+    };
+  }, [pathname]);
 
   /* the living line draws with page progress and lights its leaves */
   useEffect(() => {
