@@ -216,51 +216,83 @@ export default function Lightbox({
       )}
 
       {count > 1 && (() => {
-        const THUMB = 80; // w-20
-        const GAP = 8; // gap-2
-        const STEP = THUMB + GAP;
-        const trackW = count * THUMB + (count - 1) * GAP;
-        const centred = railW / 2 - (index * STEP + THUMB / 2);
-        const offset =
-          !railW || trackW <= railW
-            ? (railW - trackW) / 2
-            : Math.max(railW - trackW, Math.min(0, centred));
+        /* Fancybox 5 "modern" thumbnail rail — the btibd.com testimonial
+           lightbox. Every thumb keeps a fixed narrow 46px clip-slot; the
+           active thumb's 96px button is revealed by an animated clip-path
+           while its neighbours translate ±45px aside, and the track
+           translates so the active thumb stays centred (no clamp — gaps at
+           the ends, exactly like Fancybox). Values from @fancyapps/ui@5:
+           width 96 · clip 46 · height 72 · gap 4 · radius 2 · outline #ededed. */
+        const TW = 96;
+        const TC = 46;
+        const TG = 4;
+        const SHIFT = (TW - TC) / 2 + 16 + 4; // 45  ((TW-TC)/2 + extraGap + gap)
+        const STEP = TC + TG;
+        const trackW = count * TC + (count - 1) * TG;
+        const offset = railW ? railW / 2 - (index * STEP + TC / 2) : 0;
         return (
           <div
             ref={railRef}
-            className="overflow-hidden px-4 pb-5"
+            className="overflow-hidden px-1 pb-4 pt-2"
             onClick={(e) => e.stopPropagation()}
           >
             <div
-              className="flex gap-2 transition-transform duration-[450ms] ease-out"
-              style={{ transform: `translateX(${offset}px)` }}
+              className="flex"
+              style={{
+                gap: TG,
+                width: trackW,
+                transform: `translateX(${offset}px)`,
+                transition: "transform 0.33s ease",
+              }}
             >
-              {items.map((it, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => select(i)}
-                  aria-label={`Image ${i + 1}`}
-                  aria-current={i === index}
-                  className={`h-14 w-20 shrink-0 overflow-hidden rounded-md border-2 bg-white/10 transition-[border-color,opacity,transform] duration-300 ${
-                    i === index
-                      ? "border-white"
-                      : "border-white/25 opacity-45 hover:opacity-90"
-                  }`}
-                >
-                  {img(it.image, 200) ? (
-                    <img
-                      src={img(it.image, 200)}
-                      alt=""
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <span className="grid h-full w-full place-items-center px-1 text-center text-[9px] font-medium leading-tight text-white/70">
-                      {it.title || i + 1}
-                    </span>
-                  )}
-                </button>
-              ))}
+              {items.map((it, i) => {
+                const active = i === index;
+                const shift = active ? 0 : i < index ? -SHIFT : SHIFT;
+                const thumb = img(it.image, 200);
+                return (
+                  <span
+                    key={i}
+                    className="relative shrink-0"
+                    style={{
+                      width: TC,
+                      height: TW * 0.75,
+                      transform: `translateX(${shift}px)`,
+                      transition: "transform 0.33s ease",
+                    }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => select(i)}
+                      aria-label={`Image ${i + 1}`}
+                      aria-current={active}
+                      className="absolute left-1/2 top-0 h-full overflow-hidden rounded-[2px] bg-white/10"
+                      style={{
+                        width: TW,
+                        marginLeft: -TW / 2,
+                        clipPath: `inset(0 ${active ? 0 : (TW - TC) / 2}px round 2px)`,
+                        transition: "clip-path 0.33s ease",
+                      }}
+                    >
+                      {thumb ? (
+                        <img
+                          src={thumb}
+                          alt=""
+                          draggable={false}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <span className="grid h-full w-full place-items-center px-1 text-center text-[9px] font-medium leading-tight text-white/70">
+                          {it.title || i + 1}
+                        </span>
+                      )}
+                      <span
+                        aria-hidden
+                        className="pointer-events-none absolute inset-0 rounded-[2px] border-2 border-[#ededed]"
+                      />
+                    </button>
+                  </span>
+                );
+              })}
             </div>
           </div>
         );
