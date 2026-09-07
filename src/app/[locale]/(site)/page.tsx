@@ -34,11 +34,19 @@ export default async function Home({
   const t = (v: Record<Locale, string>) => v[l] || v.en;
   const heroScale = clampAppearance("heroScale", c.appearance.heroScale);
 
-  /* The hero poster is painted by the client after hydration, so the preload
-     scanner never sees it. Declaring it here makes it the LCP image the browser
-     fetches first, in parallel with the JS bundle rather than after it. */
+  /* The hero poster is the LCP. Preload it (and as a responsive set, so a
+     phone fetches ~half the bytes of the desktop crop) ahead of the JS
+     bundle rather than after it. */
   const posterUrl = img("hero-poster", 1600);
-  ReactDOM.preload(posterUrl, { as: "image", fetchPriority: "high" });
+  const posterSrcSet = [640, 960, 1280, 1600, 2000]
+    .map((w) => `${img("hero-poster", w)} ${w}w`)
+    .join(", ");
+  ReactDOM.preload(posterUrl, {
+    as: "image",
+    fetchPriority: "high",
+    imageSrcSet: posterSrcSet,
+    imageSizes: "100vw",
+  });
 
   return (
     <>
@@ -51,14 +59,17 @@ export default async function Home({
           vp9: { url: heroSources.vp9.url(), bytes: heroSources.vp9.bytes },
         }}
         posterUrl={posterUrl}
+        posterSrcSet={posterSrcSet}
         ctaHref="#book"
         scrollLabel={l === "bn" ? "স্ক্রল করুন" : "Scroll"}
         heroScale={heroScale}
       />
 
       {/* The designed static hero. Only reduced-motion visitors get this
-          instead of the scrub now, by the single gate in globals.css.
-          It is a composition, not an apology. */}
+          instead of the scrub now, by the single gate in globals.css — for
+          everyone else the section is display:none, so the image is left
+          lazy and low priority and never competes with the scrub poster
+          (the real LCP) for bandwidth. */}
       <section
         className="static-hero relative min-h-[100svh]"
         style={{ "--hero-scale": heroScale } as CSSProperties}
@@ -67,7 +78,8 @@ export default async function Home({
           src={img(c.staticHero.image, 1400)}
           alt=""
           className="absolute inset-0 h-full w-full object-cover"
-          fetchPriority="high"
+          loading="lazy"
+          fetchPriority="low"
         />
         <div
           className="absolute inset-0"

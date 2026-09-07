@@ -44,6 +44,10 @@ const displayBn = Anek_Bangla({
   weight: "700",
   variable: "--font-display-bn",
   display: "swap",
+  /* Bengali glyphs only render on /bn, and `swap` already covers that. Never
+     spend a render-blocking preload on it — it was being preloaded on every
+     English page too. */
+  preload: false,
 });
 
 const bodyBn = Hind_Siliguri({
@@ -51,6 +55,7 @@ const bodyBn = Hind_Siliguri({
   weight: ["400", "500", "600"],
   variable: "--font-body-bn",
   display: "swap",
+  preload: false,
 });
 
 export async function generateStaticParams() {

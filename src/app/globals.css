@@ -693,9 +693,12 @@ header[data-nav-over-hero="true"] button:not(.btn):not([data-mobile-menu] *):hov
 .reveal.in .part:nth-child(6) {
   transition-delay: 450ms;
 }
-/* retire the stagger once the entrance is done, at matching specificity,
-   so later hovers never lag by the delay */
+/* Once the entrance is done (a JS timer 1.4s after `.in`), pin the final
+   state and drop the stagger — later hovers never lag by the delay, and a
+   section can't be left frozen part-way through the transition. */
 .reveal.in.done .part:nth-child(n) {
+  opacity: 1;
+  transform: none;
   transition-delay: 0ms;
 }
 

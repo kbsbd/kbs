@@ -54,6 +54,8 @@ type Props = {
   /** H.264 primary, VP9 fallback. Chosen by canPlayType before any bytes move. */
   sources: { h264: Source; vp9: Source };
   posterUrl: string;
+  /** responsive candidates for the poster, so a phone fetches a smaller crop */
+  posterSrcSet?: string;
   ctaHref: string;
   scrollLabel: string;
   /** Multiplier on the caption heading size. 1 = design default. */
@@ -65,6 +67,7 @@ export default function ScrubHero({
   locale,
   sources,
   posterUrl,
+  posterSrcSet,
   ctaHref,
   scrollLabel,
   heroScale = 1,
@@ -299,40 +302,49 @@ export default function ScrubHero({
       }
     }
 
-    /* the poster wins the bandwidth race by design */
+    /* The footage is only ever seen while scrubbing, so it is not fetched on
+       load at all. It is armed here and the multi-MB download starts the first
+       time the visitor moves the page — a scroll, wheel, swipe or a scroll
+       key. A visitor who never scrolls never pays for it (the poster is the
+       whole hero at rest), and it stays off the LCP / main-thread critical
+       path. A long fallback still covers a completely motionless session. */
     let started = false;
-    let posterTimer = 0;
+    let footageFallback = 0;
+    const footageEvents = [
+      "scroll",
+      "wheel",
+      "touchstart",
+      "keydown",
+    ] as const;
+
     function startBlobFetch() {
       if (started) return;
       started = true;
-      /* The poster is the LCP. Hold the multi-MB footage back until the main
-         thread is idle — past hydration and first paint — so it never delays
-         that. requestIdleCallback's own 3s timeout is the hard cap. */
-      let kicked = false;
-      const kick = () => {
-        if (kicked) return;
-        kicked = true;
-        loadHeroBlob();
-      };
-      const ric = (window as typeof window & {
-        requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => void;
-      }).requestIdleCallback;
-      if (ric) ric(kick, { timeout: 3000 });
-      else window.setTimeout(kick, 1200);
+      disarmFootage();
+      const kick = () => loadHeroBlob();
+      const ric = (
+        window as typeof window & {
+          requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => void;
+        }
+      ).requestIdleCallback;
+      if (ric) ric(kick, { timeout: 1500 });
+      else window.setTimeout(kick, 300);
+    }
+
+    function disarmFootage() {
+      footageEvents.forEach((t) =>
+        window.removeEventListener(t, startBlobFetch)
+      );
+      window.clearTimeout(footageFallback);
     }
 
     function initHeroOnce() {
       if (initialised) return;
       initialised = true;
-      // the poster itself is server-rendered as <img class="poster-img">, so it
-      // is already on screen here; we only need to know when it has decoded
-      // before letting the footage start.
-      const img = new Image();
-      img.onload = startBlobFetch;
-      img.onerror = startBlobFetch;
-      img.src = posterUrl;
-      // don't let a slow poster hold the footage back for long
-      posterTimer = window.setTimeout(startBlobFetch, 1500);
+      footageEvents.forEach((t) =>
+        window.addEventListener(t, startBlobFetch, { passive: true })
+      );
+      footageFallback = window.setTimeout(startBlobFetch, 15000);
     }
 
     /* ---------- reduced motion: pin and unpin, both directions ---------- */
@@ -420,7 +432,7 @@ export default function ScrubHero({
       video.removeEventListener("seeked", onSeeked);
       video.removeEventListener("error", onVideoError);
       aborter?.abort();
-      window.clearTimeout(posterTimer);
+      disarmFootage();
       if (blobUrl) URL.revokeObjectURL(blobUrl);
     };
   }, [sources.h264.url, sources.h264.bytes, sources.vp9.url, sources.vp9.bytes, posterUrl]);
@@ -439,6 +451,8 @@ export default function ScrubHero({
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={posterUrl}
+            srcSet={posterSrcSet}
+            sizes={posterSrcSet ? "100vw" : undefined}
             alt=""
             className="poster-img"
             fetchPriority="high"
