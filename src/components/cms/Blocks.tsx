@@ -3,6 +3,13 @@ import type { Locale } from "@/content/seed";
 import type { Block } from "@/lib/cms";
 import { cmsPick } from "@/lib/cms";
 
+/* A site-internal href ("/contact", "#book") gets the active locale prefix; an
+   already-localised path or an external URL passes through untouched. */
+const localeHref = (href: string, l: Locale) =>
+  (href.startsWith("/") || href.startsWith("#")) && !/^\/(en|bn)(\/|$|#)/.test(href)
+    ? `/${l}${href}`
+    : href;
+
 /** Renders one CMS page's block list. Deliberately small set of block types. */
 export default function Blocks({ blocks, l }: { blocks: Block[]; l: Locale }) {
   return (
@@ -49,7 +56,7 @@ export default function Blocks({ blocks, l }: { blocks: Block[]; l: Locale }) {
         if (b.type === "button") {
           return (
             <div key={i}>
-              <a href={b.href} className="btn btn-primary">
+              <a href={localeHref(b.href, l)} className="btn btn-primary">
                 {cmsPick(b, l, "label")}
               </a>
             </div>
