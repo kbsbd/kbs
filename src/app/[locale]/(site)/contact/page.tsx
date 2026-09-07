@@ -62,7 +62,8 @@ export default async function ContactPage({
           <p className="page-lede mt-5">{t(ct.body)}</p>
         </header>
 
-        <div className="mt-12 grid items-start gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-8">
+        <div className="mt-12 grid items-stretch gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-8">
+          <div className="flex flex-col gap-6">
           <aside className="card divide-y divide-[color:var(--panel-edge)]">
             <div className="pb-6">
               <h2 className="font-mono-label text-[color:var(--text-quiet)]">
@@ -124,18 +125,19 @@ export default async function ContactPage({
             )}
           </aside>
 
+          {mapSrc ? (
+            <iframe
+              src={mapSrc}
+              title="Map"
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              className="aspect-[4/3] w-full rounded-2xl border border-[color:var(--panel-edge)] sm:aspect-[16/10] lg:aspect-auto lg:min-h-[240px] lg:flex-1"
+            />
+          ) : null}
+          </div>
+
           <ContactForm c={c} l={l} initialTopic={initialTopic} />
         </div>
-
-        {mapSrc ? (
-          <iframe
-            src={mapSrc}
-            title="Map"
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-            className="mt-6 aspect-[4/3] w-full rounded-2xl border border-[color:var(--panel-edge)] sm:aspect-[21/9] lg:mt-8"
-          />
-        ) : null}
       </div>
     </div>
   );
