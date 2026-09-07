@@ -56,13 +56,15 @@ export default async function ContactPage({
     <div className="page">
       <JsonLd data={ld} />
       <div className="page-wrap">
-        <p className="chip font-mono-label">{t(ct.kicker)}</p>
-        <h1 className="font-display mt-6 text-[clamp(2.2rem,6vw,3.6rem)]">{t(ct.head)}</h1>
-        <p className="page-lede mt-5">{t(ct.body)}</p>
+        <header className="max-w-[46rem]">
+          <p className="chip font-mono-label">{t(ct.kicker)}</p>
+          <h1 className="font-display mt-6 text-[clamp(2.2rem,6vw,3.6rem)]">{t(ct.head)}</h1>
+          <p className="page-lede mt-5">{t(ct.body)}</p>
+        </header>
 
-        <div className="mt-12 grid gap-10 lg:grid-cols-[1fr_1.1fr]">
-          <div className="space-y-8">
-            <div>
+        <div className="mt-12 grid items-start gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-8">
+          <aside className="card divide-y divide-[color:var(--panel-edge)]">
+            <div className="pb-6">
               <h2 className="font-mono-label text-[color:var(--text-quiet)]">
                 {t(ct.addressHead)}
               </h2>
@@ -71,14 +73,14 @@ export default async function ContactPage({
               </p>
             </div>
 
-            <div>
+            <div className="py-6">
               <h2 className="font-mono-label text-[color:var(--text-quiet)]">
                 {t(ct.emailHead)}
               </h2>
               <p className="mt-3">
                 <a
                   href={`mailto:${c.site.email}`}
-                  className="transition-colors duration-300 hover:text-[color:var(--accent)]"
+                  className="break-all transition-colors duration-300 hover:text-[color:var(--accent)]"
                 >
                   {c.site.email}
                 </a>
@@ -86,7 +88,7 @@ export default async function ContactPage({
             </div>
 
             {c.site.phone && (
-              <div>
+              <div className="py-6">
                 <h2 className="font-mono-label text-[color:var(--text-quiet)]">
                   {t(ct.phoneHead)}
                 </h2>
@@ -103,7 +105,7 @@ export default async function ContactPage({
             )}
 
             {c.site.whatsapp && (
-              <div>
+              <div className="pt-6">
                 <h2 className="font-mono-label text-[color:var(--text-quiet)]">
                   {t(ct.whatsappHead)}
                 </h2>
@@ -120,20 +122,20 @@ export default async function ContactPage({
                 </p>
               </div>
             )}
-
-            {mapSrc ? (
-              <iframe
-                src={mapSrc}
-                title="Map"
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                className="aspect-[16/10] w-full rounded-lg border border-[color:var(--panel-edge)]"
-              />
-            ) : null}
-          </div>
+          </aside>
 
           <ContactForm c={c} l={l} initialTopic={initialTopic} />
         </div>
+
+        {mapSrc ? (
+          <iframe
+            src={mapSrc}
+            title="Map"
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            className="mt-6 aspect-[4/3] w-full rounded-2xl border border-[color:var(--panel-edge)] sm:aspect-[21/9] lg:mt-8"
+          />
+        ) : null}
       </div>
     </div>
   );
