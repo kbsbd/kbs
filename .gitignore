@@ -47,6 +47,12 @@ next-env.d.ts
 /kbs-web-source.zip
 /dev.log
 
+# source masters kept locally for re-exports. The hero render is 2560x1440 and
+# ~450 MB; only its web derivatives ship, and those live on Cloudinary.
+/*.mp4
+/*.mov
+/*.webm
+
 # local reference material dropped in the repo root, not part of the app
 /Claude outputs/
 /patch-flowers/

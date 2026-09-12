@@ -34,18 +34,31 @@ export default async function Home({
   const t = (v: Record<Locale, string>) => v[l] || v.en;
   const heroScale = clampAppearance("heroScale", c.appearance.heroScale);
 
-  /* The hero poster is the LCP. Preload it (and as a responsive set, so a
-     phone fetches ~half the bytes of the desktop crop) ahead of the JS
-     bundle rather than after it. */
-  const posterUrl = img("hero-poster", 1600);
-  const posterSrcSet = [640, 960, 1280, 1600, 2000]
-    .map((w) => `${img("hero-poster", w)} ${w}w`)
-    .join(", ");
-  ReactDOM.preload(posterUrl, {
+  /* The two frames a visitor actually stops on — the first frame of the scrub
+     and the frame it settles on — are served as stills straight from the
+     2560x1440 master, not as video frames. `HERO_STILL_SIZES`: the stills are
+     16:9 and object-fit:cover a full viewport, so on a portrait phone the
+     rendered width is driven by the viewport HEIGHT (h * 16/9 = 177.8vh), not
+     its width. Plain "100vw" understates that by ~4x on a phone and is what
+     made the hero look soft. */
+  const HERO_WIDTHS = [960, 1280, 1600, 1920, 2560];
+  const HERO_STILL_SIZES = "max(100vw, 177.8vh)";
+  const heroStill = (name: string) => ({
+    url: img(name, 1920, "auto:good"),
+    srcSet: HERO_WIDTHS.map((w) => `${img(name, w, "auto:good")} ${w}w`).join(", "),
+  });
+
+  const poster = heroStill("hero-poster");
+  const ending = heroStill("hero-ending");
+
+  /* The poster is the LCP — preload it ahead of the JS bundle. The ending
+     still is not preloaded: it is only needed once the scrub has run its
+     course, so it stays lazy and off the critical path. */
+  ReactDOM.preload(poster.url, {
     as: "image",
     fetchPriority: "high",
-    imageSrcSet: posterSrcSet,
-    imageSizes: "100vw",
+    imageSrcSet: poster.srcSet,
+    imageSizes: HERO_STILL_SIZES,
   });
 
   return (
@@ -58,8 +71,11 @@ export default async function Home({
           h264: { url: heroSources.h264.url(), bytes: heroSources.h264.bytes },
           vp9: { url: heroSources.vp9.url(), bytes: heroSources.vp9.bytes },
         }}
-        posterUrl={posterUrl}
-        posterSrcSet={posterSrcSet}
+        posterUrl={poster.url}
+        posterSrcSet={poster.srcSet}
+        endingUrl={ending.url}
+        endingSrcSet={ending.srcSet}
+        stillSizes={HERO_STILL_SIZES}
         ctaHref="#book"
         scrollLabel={l === "bn" ? "স্ক্রল করুন" : "Scroll"}
         heroScale={heroScale}

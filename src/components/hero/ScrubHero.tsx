@@ -56,6 +56,11 @@ type Props = {
   posterUrl: string;
   /** responsive candidates for the poster, so a phone fetches a smaller crop */
   posterSrcSet?: string;
+  /** the frame the scrub settles on, as a full-resolution still */
+  endingUrl?: string;
+  endingSrcSet?: string;
+  /** `sizes` for both stills — they cover the viewport, so height drives it */
+  stillSizes?: string;
   ctaHref: string;
   scrollLabel: string;
   /** Multiplier on the caption heading size. 1 = design default. */
@@ -68,6 +73,9 @@ export default function ScrubHero({
   sources,
   posterUrl,
   posterSrcSet,
+  endingUrl,
+  endingSrcSet,
+  stillSizes,
   ctaHref,
   scrollLabel,
   heroScale = 1,
@@ -76,6 +84,7 @@ export default function ScrubHero({
   const stageRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const posterRef = useRef<HTMLDivElement>(null);
+  const endingRef = useRef<HTMLImageElement>(null);
   const ringRef = useRef<SVGCircleElement>(null);
   const ringWrapRef = useRef<SVGSVGElement>(null);
   const cueRef = useRef<HTMLDivElement>(null);
@@ -168,8 +177,27 @@ export default function ScrubHero({
     video.addEventListener("seeked", onSeeked);
     video.addEventListener("error", onVideoError);
 
+    /* ---------- the settle frame, as a full-resolution still ----------
+       The footage holds its last frame from VIDEO_ENDS_AT to the end of the
+       hero. That held frame is the second image a visitor actually stops and
+       looks at, and a compressed video frame is not good enough for it — so
+       the master's own last frame is cross-faded in over the plateau. The
+       composition is identical; it just resolves. Delta-gated like the
+       captions, and the <img> is lazy so it costs nothing until it is near. */
+    let endingOp = -1;
+    function updateEnding(p: number) {
+      const el = endingRef.current;
+      if (!el) return;
+      const op = smoothstep(p, VIDEO_ENDS_AT + 0.02, 0.98);
+      if (Math.abs(op - endingOp) <= 0.004) return;
+      endingOp = op;
+      el.style.opacity = String(op);
+      el.style.visibility = op < 0.004 ? "hidden" : "visible";
+    }
+
     /* ---------- captions: delta-gated writes only ---------- */
     function updateCaptions(p: number) {
+      updateEnding(p);
       for (let i = 0; i < bandEls.length; i++) {
         const el = bandEls[i];
         const a = Number(el.dataset.from);
@@ -452,13 +480,13 @@ export default function ScrubHero({
           <img
             src={posterUrl}
             srcSet={posterSrcSet}
-            sizes={posterSrcSet ? "100vw" : undefined}
+            sizes={posterSrcSet ? stillSizes : undefined}
             alt=""
             className="poster-img"
             fetchPriority="high"
             decoding="async"
-            width={1600}
-            height={2000}
+            width={2560}
+            height={1440}
           />
         </div>
 
@@ -471,6 +499,28 @@ export default function ScrubHero({
           aria-hidden="true"
           tabIndex={-1}
         />
+
+        {/* The frame the scrub settles on, at full resolution. Sits above the
+            footage and below the captions, and is faded in by updateEnding()
+            over the plateau where the video is already holding this exact
+            frame. Lazy — it is a screen-height away from the fold. */}
+        {endingUrl && (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            ref={endingRef}
+            src={endingUrl}
+            srcSet={endingSrcSet}
+            sizes={endingSrcSet ? stillSizes : undefined}
+            alt=""
+            className="ending-img"
+            loading="lazy"
+            fetchPriority="low"
+            decoding="async"
+            width={2560}
+            height={1440}
+            aria-hidden="true"
+          />
+        )}
 
         <div className="scrim" aria-hidden="true" />
 

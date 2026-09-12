@@ -10,12 +10,20 @@
 const CLOUD = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ?? "";
 const FOLDER = process.env.NEXT_PUBLIC_CLOUDINARY_FOLDER ?? "kbs";
 
-/** A still image. `name` is the bare file stem, e.g. "pool-deck". */
-export function img(name: string, width = 1920): string {
+/**
+ * A still image. `name` is the bare file stem, e.g. "pool-deck".
+ *
+ * `quality` maps to Cloudinary's q_ parameter. The default `auto` is right for
+ * everything in a card or a grid. The two hero stills — the first and last
+ * frames of the scrub, which are full-bleed and the only images a visitor
+ * actually stops and looks at — pass "auto:good" so they are not softened by
+ * the aggressive default. `c_limit` never enlarges past the stored original.
+ */
+export function img(name: string, width = 1920, quality = "auto"): string {
   if (!name) return "";
   if (name.startsWith("http")) return name;
   if (!CLOUD) return `/media/${name}.jpg`;
-  return `https://res.cloudinary.com/${CLOUD}/image/upload/f_auto,q_auto,w_${width}/${FOLDER}/${name}`;
+  return `https://res.cloudinary.com/${CLOUD}/image/upload/f_auto,q_${quality},c_limit,w_${width}/${FOLDER}/${name}`;
 }
 
 /**

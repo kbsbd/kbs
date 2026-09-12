@@ -346,6 +346,18 @@ header[data-nav-over-hero="true"] button:not(.btn):not([data-mobile-menu] *):hov
   object-fit: cover;
 }
 
+/* the settle frame, at full resolution — opacity is driven by the scrub */
+.ending-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
 /* The global base scrim is gone by request — the hero video plays with no dark
    overlay at all. The only darkening left is the per-band scrim behind caption
    text, which the admin controls with "Backdrop darkness". */
