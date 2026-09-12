@@ -33,10 +33,21 @@ export default function Lightbox({
   const startX = useRef<number | null>(null);
   const count = items.length;
 
-  // The thumbnail rail measures its own width so the strip can slide sideways
-  // and keep the active thumbnail centred (Fancybox-style).
+  /* The thumbnail rail measures its own width so the strip can slide sideways
+     and keep the active thumbnail centred (Fancybox-style).
+
+     It is measured in a ref callback, which runs as the node is attached —
+     before the first paint. Measuring only from the ResizeObserver (which
+     lands a frame or two later) meant the strip painted at translateX(0)
+     with its transition already armed, so every open animated the whole rail
+     in from the left. The observer stays on for genuine resizes. */
   const railRef = useRef<HTMLDivElement>(null);
   const [railW, setRailW] = useState(0);
+
+  const measureRail = useCallback((el: HTMLDivElement | null) => {
+    railRef.current = el;
+    if (el) setRailW(el.clientWidth);
+  }, []);
 
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setMounted(true), []);
@@ -44,7 +55,7 @@ export default function Lightbox({
   useEffect(() => {
     const el = railRef.current;
     if (!el) return;
-    const ro = new ResizeObserver(([e]) => setRailW(e.contentRect.width));
+    const ro = new ResizeObserver(() => setRailW(el.clientWidth));
     ro.observe(el);
     return () => ro.disconnect();
   }, [mounted]);
@@ -230,9 +241,16 @@ export default function Lightbox({
         const STEP = TC + TG;
         const trackW = count * TC + (count - 1) * TG;
         const offset = railW ? railW / 2 - (index * STEP + TC / 2) : 0;
+        /* One easing and one duration for all three moving layers — the track
+           slide, the neighbours' shift and the active thumb's clip — so they
+           read as a single motion instead of three that drift apart. Nothing
+           animates until the rail has been measured, or the first paint would
+           animate from the uncentred 0 position. */
+        const EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
+        const MOVE = railW ? `340ms ${EASE}` : "0s";
         return (
           <div
-            ref={railRef}
+            ref={measureRail}
             className="overflow-hidden px-1 pb-4 pt-2"
             onClick={(e) => e.stopPropagation()}
           >
@@ -241,8 +259,9 @@ export default function Lightbox({
               style={{
                 gap: TG,
                 width: trackW,
-                transform: `translateX(${offset}px)`,
-                transition: "transform 0.33s ease",
+                transform: `translate3d(${offset}px,0,0)`,
+                transition: `transform ${MOVE}`,
+                willChange: "transform",
               }}
             >
               {items.map((it, i) => {
@@ -256,8 +275,9 @@ export default function Lightbox({
                     style={{
                       width: TC,
                       height: TW * 0.75,
-                      transform: `translateX(${shift}px)`,
-                      transition: "transform 0.33s ease",
+                      transform: `translate3d(${shift}px,0,0)`,
+                      transition: `transform ${MOVE}`,
+                      willChange: "transform",
                     }}
                   >
                     <button
@@ -270,7 +290,7 @@ export default function Lightbox({
                         width: TW,
                         marginLeft: -TW / 2,
                         clipPath: `inset(0 ${active ? 0 : (TW - TC) / 2}px round 2px)`,
-                        transition: "clip-path 0.33s ease",
+                        transition: `clip-path ${MOVE}`,
                       }}
                     >
                       {thumb ? (

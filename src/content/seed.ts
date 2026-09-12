@@ -296,6 +296,9 @@ export const amenities = {
 };
 
 export const faq = {
+  /** Admin switch, on the Content tab's Faq section. Off hides the section on
+      the landing page and drops the FAQPage node from the structured data. */
+  enabled: true,
   kicker: { en: "QUESTIONS", bn: "প্রশ্ন" },
   head: { en: "The things people actually ask.", bn: "মানুষ আসলে যা জিজ্ঞেস করে।" },
   items: [

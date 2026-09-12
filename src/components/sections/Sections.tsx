@@ -291,6 +291,9 @@ export function Amenities({ c, l }: { c: SiteContent; l: Locale }) {
 /* 6. FAQ. A quiet two-column read, using the details element so it works with
    no JavaScript at all. */
 export function Faq({ c, l }: { c: SiteContent; l: Locale }) {
+  /* Admin can hide the whole section from Content › Faq. Older override rows
+     predate the flag, so only an explicit false hides it. */
+  if (c.faq.enabled === false) return null;
   return (
     <section className="sec reveal" id="faq">
       <Wrap>

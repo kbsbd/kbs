@@ -62,6 +62,7 @@ export default async function AdminPage({
       role={session.role}
       permissions={session.permissions}
       groups={editableStrings(content)}
+      sectionFlags={{ faq: content.faq.enabled !== false }}
       lists={{
         "building|specs": content.building.specs,
         "heroBands|": content.heroBands,

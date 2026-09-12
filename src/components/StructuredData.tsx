@@ -40,7 +40,13 @@ export default function StructuredData({ c, l }: { c: SiteContent; l: Locale }) 
     })),
   };
 
-  const graph = { "@context": "https://schema.org", "@graph": [project, faq] };
+  /* Hiding the section has to take its markup with it — an FAQPage node for
+     questions that are not on the page is exactly what rich-result validation
+     flags. */
+  const graph = {
+    "@context": "https://schema.org",
+    "@graph": c.faq.enabled === false ? [project] : [project, faq],
+  };
 
   return (
     <script

@@ -91,6 +91,9 @@ type Props = {
   cms: { pages: AdminPage[]; menu: AdminMenuItem[] };
   media: MediaContent;
   lists: Record<string, Array<Record<string, unknown> | { en: string; bn: string }>>;
+  /** Landing-page sections that can be published or hidden, keyed by the
+      content root they live under. Rendered as a switch on the Text tab. */
+  sectionFlags: Record<string, boolean>;
 };
 
 const TABS = [
@@ -148,6 +151,7 @@ export default function Dashboard({
   cms,
   media,
   lists,
+  sectionFlags,
   permissions,
 }: Props) {
   const isAdmin = role === "admin";
@@ -307,7 +311,13 @@ export default function Dashboard({
             />
           )}
           {tab === "Text" && (
-            <TextEditor groups={groups} lists={lists} pages={cms.pages} notify={setToast} />
+            <TextEditor
+              groups={groups}
+              lists={lists}
+              pages={cms.pages}
+              sectionFlags={sectionFlags}
+              notify={setToast}
+            />
           )}
           {tab === "Projects" && (
             <Projects rows={projects} pages={cms.pages} notify={setToast} />
@@ -1199,15 +1209,23 @@ function TeamSection({ notify }: { notify: (s: string) => void }) {
 
 /* ------------------------------------------------------------------ */
 
+/* Sections the client can take off the landing page without losing the words
+   in them. The label is what the switch reads next to. */
+const SECTION_VISIBILITY: Record<string, string> = {
+  faq: "Show the FAQ section on the landing page",
+};
+
 function TextEditor({
   groups,
   lists,
   pages,
+  sectionFlags,
   notify,
 }: {
   groups: Record<string, EditableString[]>;
   lists: Props["lists"];
   pages: AdminPage[];
+  sectionFlags: Record<string, boolean>;
   notify: (s: string) => void;
 }) {
   /* only published pages can be a card's destination: linking a card at a draft
@@ -1226,6 +1244,10 @@ function TextEditor({
   const [open, setOpen] = useState(sections[0] ?? "");
   const [edited, setEdited] = useState<Record<string, { en: string; bn: string }>>({});
   const [pending, start] = useTransition();
+  /* Visibility saves on its own, the moment it is switched — it is one click
+     with an immediately visible effect, not a draft to batch with the copy. */
+  const [visible, setVisible] = useState(sectionFlags);
+  const [flagPending, startFlag] = useTransition();
 
   const key = (s: EditableString) => `${s.root}|${s.path}`;
   const dirty = Object.keys(edited).length;
@@ -1256,6 +1278,19 @@ function TextEditor({
     });
   }
 
+  function setSectionVisible(root: string, on: boolean) {
+    const before = visible[root] !== false;
+    setVisible((v) => ({ ...v, [root]: on }));
+    startFlag(async () => {
+      const r = await saveContent([{ root, path: "enabled", value: on }]);
+      if (r.ok) notify(on ? "Section is live on the landing page." : "Section hidden.");
+      else {
+        setVisible((v) => ({ ...v, [root]: before }));
+        notify(r.error);
+      }
+    });
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-3">
@@ -1282,6 +1317,26 @@ function TextEditor({
           </button>
         ))}
       </div>
+
+      {SECTION_VISIBILITY[open] && (
+        <label className="flex max-w-3xl items-start gap-3 rounded-xl border border-[color:var(--panel-edge)] px-4 py-3.5 text-sm">
+          <input
+            type="checkbox"
+            className="mt-0.5"
+            checked={visible[open] !== false}
+            disabled={flagPending}
+            onChange={(e) => setSectionVisible(open, e.target.checked)}
+          />
+          <span>
+            <span className="font-medium">{SECTION_VISIBILITY[open]}</span>
+            <span className="mt-0.5 block text-[color:var(--text-quiet)]">
+              {visible[open] !== false
+                ? "Visitors can see it now. Switching this off hides the section — the words below are kept."
+                : "Hidden from visitors. Switch it back on to publish it again."}
+            </span>
+          </span>
+        </label>
+      )}
 
       <div className="max-w-3xl space-y-5">
         {scalarFields.map((s) => (
